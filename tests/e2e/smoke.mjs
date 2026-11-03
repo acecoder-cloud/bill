@@ -51,6 +51,14 @@ await step("signed-out visitor is sent to /login", async () => {
   await page.screenshot({ path: `${OUT}/01-login.png` });
 });
 
+await step("login page has a Create an account button next to Sign in", async () => {
+  await page.getByRole("link", { name: "Create an account" }).click();
+  await page.waitForURL(/\/signup/);
+  await page.getByText("New accounts are added by the admin").waitFor(); // mock: sign-up closed
+  await page.getByRole("link", { name: "Back to sign in" }).click();
+  await page.waitForURL(/\/login/);
+});
+
 await step("wrong password shows a friendly error", async () => {
   await page.getByLabel("Email").fill("admin@test.com");
   await page.getByLabel("Password").fill("nope");

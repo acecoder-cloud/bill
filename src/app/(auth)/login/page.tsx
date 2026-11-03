@@ -64,15 +64,16 @@ function LoginForm() {
           Sign in
         </Button>
       </form>
-      <div className="flex justify-between text-sm">
-        <Link href="/forgot-password" className="min-h-10 py-2 font-medium text-brand-700">
+      <Link
+        href="/signup"
+        className="flex min-h-12 w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-4 font-semibold text-brand-800 active:bg-slate-100"
+      >
+        Create an account
+      </Link>
+      <div className="text-center text-sm">
+        <Link href="/forgot-password" className="inline-block min-h-10 py-2 font-medium text-brand-700">
           Forgot password?
         </Link>
-        {signupOpen && (
-          <Link href="/signup" className="min-h-10 py-2 font-medium text-brand-700">
-            Create account
-          </Link>
-        )}
       </div>
     </Card>
   );

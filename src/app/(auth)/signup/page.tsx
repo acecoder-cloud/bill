@@ -51,7 +51,9 @@ export default function SignupPage() {
   if (!open)
     return (
       <Card className="space-y-4">
-        <InfoBox tone="warn">Sign-up is closed. Ask your admin to add your account.</InfoBox>
+        <InfoBox tone="warn">
+          New accounts are added by the admin. Ask your admin to add you, or to turn on <b>Anyone can create an account</b> in Admin settings.
+        </InfoBox>
         <Link href="/login" className="block text-center font-semibold text-brand-700">
           Back to sign in
         </Link>
@@ -71,7 +73,7 @@ export default function SignupPage() {
 
   return (
     <Card className="space-y-4">
-      <InfoBox>The first account becomes the <b>admin</b>. After that, the admin adds everyone else.</InfoBox>
+      <InfoBox>If this is the first account, it becomes the <b>admin</b>. Otherwise you&apos;ll join as a regular user.</InfoBox>
       <form onSubmit={onSubmit} className="space-y-4">
         <Field label="Your name" autoComplete="name" required value={name} onChange={(e) => setName(e.target.value)} />
         <Field label="Email" type="email" autoComplete="email" inputMode="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
