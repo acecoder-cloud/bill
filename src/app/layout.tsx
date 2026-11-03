@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 import { PwaSetup } from "@/components/pwa";
+import { SetupNeeded } from "@/components/setup-needed";
+import { missingSettings } from "@/lib/setup";
 
 export const metadata: Metadata = {
   title: { default: "Pharmacy Bill Log", template: "%s · Pharmacy Bill Log" },
@@ -26,10 +28,11 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  const missing = missingSettings();
   return (
     <html lang="en">
       <body className="min-h-dvh antialiased">
-        {children}
+        {missing.length > 0 ? <SetupNeeded missing={missing} /> : children}
         <PwaSetup />
       </body>
     </html>
