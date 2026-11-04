@@ -270,6 +270,11 @@ tfoot td { font-weight: 800; background: var(--surface-2); border-bottom: 0; }
 .copy-row { display: flex; gap: 8px; }
 .copy-row .inp { flex: 1; font-size: .8rem; }
 details.small ul { margin: 6px 0; padding-left: 18px; }
+.perm-table td.c, .perm-table th.c { text-align: center; width: 76px; }
+.perm-table tr.grp td { background: var(--surface-2); font-size: .75rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding-block: 6px; }
+.perm-table td.wrap { min-width: 11rem; }
+.perm-box { width: 22px; height: 22px; accent-color: var(--brand); }
+.editor-pill { background: var(--warn-bg); color: var(--warn-ink); }
 .audit { display: flex; flex-direction: column; gap: 8px; }
 .audit details { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
 .audit summary { padding: 10px 12px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
@@ -378,9 +383,9 @@ const S = {
 };
 const ARTIFACT_URL = "https://claude.ai/artifact/PLL9E65FCXCSJUfCC6g6eN";
 const ROLES = {
-  admin: { label: "Admin", desc: "Logs bills, edits and deletes any bill, manages the team" },
-  staff: { label: "Staff", desc: "Logs bills, edits and marks paid only their own" },
-  viewer: { label: "Viewer", desc: "Sees bills, summary and reports; can't change anything" },
+  admin: { label: "Admin" },
+  staff: { label: "Staff" },
+  viewer: { label: "Viewer" },
 };
 /** The viewer's role in the app. Until an admin adds anyone to the team, roles follow the Share menu. */
 function myRole() {
@@ -389,9 +394,48 @@ function myRole() {
   if (!S.team.size) return S.isAdmin ? "admin" : S.canWrite ? "staff" : "viewer";
   return "none";
 }
-/** Admin in the app: needs Editor access in the Share menu AND the Admin role (once a team exists). */
-function appAdmin() { return S.isAdmin && myRole() === "admin"; }
-function canLog() { return S.canWrite && (myRole() === "admin" || myRole() === "staff"); }
+/* What each role may do. "editor" marks permissions that also need Editor access in the Share menu. */
+const PERMS = [
+  { k: "log", label: "Log new bills", group: "Bills" },
+  { k: "view_all", label: "See everyone's bills (otherwise only their own)", group: "Bills" },
+  { k: "edit_own", label: "Edit their own bills", group: "Bills" },
+  { k: "edit_all", label: "Edit anyone's bills", group: "Bills", editor: true },
+  { k: "delete_own", label: "Delete their own bills", group: "Bills" },
+  { k: "delete_all", label: "Delete anyone's bills", group: "Bills", editor: true },
+  { k: "pay_own", label: "Mark their own bills Paid / Unpaid", group: "Payments" },
+  { k: "pay_all", label: "Mark anyone's bills Paid / Unpaid", group: "Payments", editor: true },
+  { k: "summary", label: "Open Summary", group: "Screens" },
+  { k: "reports", label: "Open Reports and save files", group: "Screens" },
+  { k: "admin", label: "Open Admin (team, roles, activity log)", group: "Screens", editor: true },
+];
+const DEFAULT_PERMS = {
+  admin: Object.fromEntries(PERMS.map((p) => [p.k, true])),
+  staff: { log: true, view_all: true, edit_own: true, edit_all: false, delete_own: true, delete_all: false, pay_own: true, pay_all: false, summary: true, reports: true, admin: false },
+  viewer: { log: false, view_all: true, edit_own: false, edit_all: false, delete_own: false, delete_all: false, pay_own: false, pay_all: false, summary: true, reports: true, admin: false },
+};
+function rolePerms(role) {
+  const saved = S.rolePerms?.[role];
+  const base = DEFAULT_PERMS[role] || {};
+  const out = { ...base, ...(saved && typeof saved === "object" ? saved : {}) };
+  if (role === "admin") out.admin = true; // admins can always reach the role settings
+  return out;
+}
+/** May the current viewer do `perm`? The owner can do everything. */
+function allowed(perm) {
+  if (S.me?.isOwner) return true;
+  const role = myRole(); if (role === "none") return false;
+  return !!rolePerms(role)[perm];
+}
+function roleSummary(role) {
+  const p = rolePerms(role); const on = PERMS.filter((x) => p[x.k]).map((x) => x.label.replace(/ \(otherwise.*\)/, "").toLowerCase());
+  return on.length ? on.join(", ").replace(/^./, (c) => c.toUpperCase()) + "." : "Nothing yet. Tick permissions below.";
+}
+/** Admin in the app: needs Editor access in the Share menu AND the "Open Admin" permission. */
+function appAdmin() { return S.isAdmin && allowed("admin"); }
+function canLog() { return S.canWrite && allowed("log"); }
+function mayEditBill(b) { return b.owner === S.uid ? S.canWrite && allowed("edit_own") : S.isAdmin && allowed("edit_all"); }
+function mayDeleteBill(b) { return b.owner === S.uid ? S.canWrite && allowed("delete_own") : S.isAdmin && allowed("delete_all"); }
+function mayPayBill(b) { return b.owner === S.uid ? S.canWrite && allowed("pay_own") : S.isAdmin && allowed("pay_all"); }
 const PEOPLE_WATCH_LIMIT = 50;
 
 /* ---------------- capabilities ---------------- */
@@ -420,9 +464,14 @@ function startWatching() {
   const { db } = S.caps;
   const slow = setTimeout(() => { if (S.dbState === "loading") { S.dbState = "slow"; render(); } }, 10000);
   watchPerson(S.uid);
+  db.doc("settings/roles").onSnapshot((snap) => {
+    S.rolePerms = snap.exists ? snap.data().perms || null : null; renderTabs(); renderWho();
+    if (!S.editor && !tabAllowed(S.tab)) { location.hash = "home"; return; }
+    scheduleRender();
+  }, () => {});
   db.collection("team").onSnapshot((snap) => {
     S.team = new Map(snap.docs.map((d) => [d.id, d.data()])); renderTabs(); renderWho();
-    if (S.tab === "admin" && !appAdmin()) { location.hash = "home"; return; }
+    if (!S.editor && !tabAllowed(S.tab)) { location.hash = "home"; return; }
     scheduleRender();
   }, () => {});
   if (S.isAdmin) db.collection("people").onSnapshot((snap) => { S.people = new Map(snap.docs.map((d) => [d.id, d.data()])); if (S.tab === "admin") scheduleRender(); }, () => {});
@@ -461,8 +510,8 @@ function scheduleRender() {
 }
 
 function allBills() {
-  const out = [];
-  for (const list of S.bills.values()) out.push(...list);
+  const out = []; const all = allowed("view_all");
+  for (const [uid, list] of S.bills) if (all || uid === S.uid) out.push(...list);
   return out.sort((a, b) => (b.bill_date || "").localeCompare(a.bill_date || "") || (b.logged_at || "").localeCompare(a.logged_at || ""));
 }
 const isPaid = (b) => b.payment_status === "paid";
@@ -495,10 +544,11 @@ function syncOnline() { $("#offline").hidden = navigator.onLine; }
 const TABS = [
   { id: "home", label: "Home", icon: '<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>' },
   { id: "bills", label: "Bills", icon: '<path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 7h6M9 11h6M9 15h4"/>' },
-  { id: "summary", label: "Summary", icon: '<path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18"/>' },
-  { id: "reports", label: "Reports", icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/>' },
+  { id: "summary", label: "Summary", perm: "summary", icon: '<path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18"/>' },
+  { id: "reports", label: "Reports", perm: "reports", icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/>' },
   { id: "admin", label: "Admin", admin: true, icon: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>' },
 ];
+function tabAllowed(id) { const t = TABS.find((x) => x.id === id); if (!t) return false; if (t.admin) return appAdmin(); return !t.perm || S.dbState === "none" || allowed(t.perm); }
 function tabFromHash() { const h = location.hash.replace("#", ""); return TABS.some((t) => t.id === h) ? h : "home"; }
 function onHash() {
   const t = tabFromHash();
@@ -506,7 +556,7 @@ function onHash() {
   S.editor = null; S.tab = t; renderTabs(); render(); window.scrollTo(0, 0);
 }
 function renderTabs() {
-  $("#tabs").innerHTML = TABS.filter((t) => !t.admin || appAdmin()).map((t) => `
+  $("#tabs").innerHTML = TABS.filter((t) => tabAllowed(t.id)).map((t) => `
     <a href="#${t.id}" ${S.tab === t.id && !S.editor ? 'aria-current="page"' : ""}>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${t.icon}</svg>${t.label}</a>`).join("");
 }
@@ -525,6 +575,7 @@ function render() {
   if (S.dbState === "none") { main.innerHTML = signedOutView(); return; }
   if (S.dbState === "error") { main.innerHTML = `<div class="note bad">The bill log couldn't be loaded${S.dbError === "revoked" ? " because your access changed" : ""}. Reload the page to try again.</div>`; return; }
   const views = { home: homeView, bills: billsView, summary: summaryView, reports: reportsView, admin: adminView };
+  if (!tabAllowed(S.tab)) { main.innerHTML = `<div class="note warn">Your role doesn't include this screen. Ask an admin if you need it.</div>`; return; }
   main.innerHTML = (S.dbState === "slow" ? `<div class="note warn">The bill log is taking a while to load. Check your connection; it will appear as soon as it arrives.</div>` : "") + (views[S.tab] || homeView)();
   paintNames(main);
   if (S.tab === "admin") paintAdmin();
@@ -559,7 +610,7 @@ function homeView() {
     <button class="btn btn-ghost" data-act="gallery">Upload a bill</button>
     <button class="btn btn-ghost" data-act="manual">Enter manually</button>
   </div>` : !S.canWrite ? `<div class="note warn">Your access is view only. To log bills, ask the owner to invite you in the <b>Share</b> menu: <b>Contributor</b> if you're in their organization, otherwise <b>Editor</b> (with "Anyone with the link" turned off).</div>`
-    : myRole() === "viewer" ? `<div class="note">Your role is <b>Viewer</b>: you can see bills, the summary and reports. Ask an admin if you need to log bills.</div>`
+    : myRole() !== "none" ? `<div class="note">Your role is <b>${ROLES[myRole()].label}</b>, which doesn't include logging bills. Ask an admin if you need to.</div>`
     : `<div class="note warn">You're not on the team yet. Ask an admin to add you in the Admin tab, then reopen this page.</div>`}
   <section class="card">
     <div class="row-between"><h2>Your recent bills</h2><a class="btn-link" href="#bills">See all</a></div>
@@ -821,7 +872,7 @@ function teamSection(stats) {
     ${ta ? `<div class="add-panel">
       <div class="row-between"><b>Add a user</b><button class="btn-link" data-act="team-close">Close</button></div>
       <label class="field"><span>Role for the new user</span>${roleSelect("", ta.role, 'id="team-new-role"', "team-new-role")}</label>
-      <p class="small muted" id="team-role-desc">${esc(ROLES[ta.role].desc)}</p>
+      <p class="small muted" id="team-role-desc">${esc(roleSummary(ta.role))}</p>
       <div class="small muted" style="font-weight:600">Opened this page, not on the team yet</div>
       ${notOnTeam.length ? `<div class="people">${notOnTeam.map(candidateRow).join("")}</div>` : `<p class="small muted">Nobody else yet. People appear here after they open the page with Editor or Contributor access.</p>`}
       <label class="field"><span>Search colleagues in your organization by name</span><input class="inp" type="search" id="team-q" data-act="team-q" placeholder="Type a name" autocomplete="off" value="${esc(ta.q)}"></label>
@@ -846,11 +897,33 @@ function teamSection(stats) {
       <div class="member-actions">${roleSelect(uid, m.role, self ? "disabled" : "")}${self ? "" : `<button class="btn-link" data-act="team-label" data-member="${esc(uid)}">Edit name</button><button class="btn-link danger-text" data-act="team-remove" data-member="${esc(uid)}">Remove</button>`}</div>
       <div class="confirm-slot" data-confirm="${esc(uid)}"></div>
     </div>`; }).join("")}</div>` : ""}
-    <details class="small"><summary class="muted">What each role can do</summary>
-      <ul>${Object.values(ROLES).map((r) => `<li><b>${r.label}</b>: ${esc(r.desc)}</li>`).join("")}</ul>
-      <p class="muted">People not on the team can't log bills once the team has at least one member. claude.ai access itself (who can open this page) is set in the Share menu.</p>
-    </details>
+  </section>
+  ${rolesSection()}`;
+}
+function rolesSection() {
+  const groups = [...new Set(PERMS.map((p) => p.group))];
+  const roles = Object.keys(ROLES);
+  return `<section class="card" id="roles">
+    <div class="row-between"><h2>What each role can do</h2><button class="btn-link" data-act="roles-reset">Reset to defaults</button></div>
+    <p class="small muted">Tick a box to allow it. Changes apply to everyone straight away. As the owner you can always do everything.</p>
+    <div class="tbl-wrap"><table class="perm-table">
+      <thead><tr><th>Permission</th>${roles.map((r) => `<th class="c">${ROLES[r].label}</th>`).join("")}</tr></thead>
+      <tbody>${groups.map((g) => `<tr class="grp"><td colspan="${roles.length + 1}">${g}</td></tr>${PERMS.filter((p) => p.group === g).map((p) => `<tr>
+        <td class="wrap">${esc(p.label)}${p.editor ? ' <span class="pill editor-pill" title="Also needs Editor access in the Share menu">Editor</span>' : ""}</td>
+        ${roles.map((r) => { const locked = r === "admin" && p.k === "admin"; return `<td class="c"><input type="checkbox" class="perm-box" data-act="perm" data-role="${r}" data-perm="${p.k}" ${rolePerms(r)[p.k] ? "checked" : ""} ${locked ? "disabled" : ""} aria-label="${esc(ROLES[r].label)}: ${esc(p.label)}"></td>`; }).join("")}
+      </tr>`).join("")}`).join("")}</tbody>
+    </table></div>
+    <p class="small muted"><span class="pill editor-pill">Editor</span> These also need the person to have <b>Editor</b> access in the Share menu, because claude.ai only lets Editors change other people's bills and the team. Hiding everyone's bills or a screen is done by the app; the data itself stays readable to anyone with access to the page.</p>
   </section>`;
+}
+async function savePerms(next, okText) {
+  const before = S.rolePerms; S.rolePerms = next; render();
+  try {
+    await S.caps.db.doc("settings/roles").set({ perms: next, updated_at: new Date().toISOString(), updated_by: S.uid });
+    writeAudit("roles.update", null, "roles", before ? { perms: before } : null, { perms: next });
+    flash(okText);
+  } catch (e) { S.rolePerms = before; flash(dbErrorText(e).replace("save this bill", "change role settings")); }
+  render();
 }
 function candidateRow(uid) {
   const seen = S.people.get(uid)?.last_seen;
@@ -897,9 +970,9 @@ function paintAdmin() {
   const team = $("#team"); if (team) paintNames(team).then(() => showLabelBoxes(team));
   const a = S.audit; const box = $("#audit-list"); if (!box || !a?.rows) return;
   if (!a.rows.length) { box.innerHTML = `<p class="muted">No activity yet.</p>`; return; }
-  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed" };
+  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed", "roles.update": "Role permissions changed" };
   box.innerHTML = a.rows.map((r, i) => `<details><summary><b>${esc(label[r.action] || r.action)}</b>
-    <span class="small muted">by <span data-uid="${esc(r.actor)}"></span> · ${esc(fmtDT(r.at))} · ${r.action.startsWith("team.") ? `<span data-uid="${esc((r.after || r.before || {}).member || "")}"></span>${r.after?.role ? " → " + esc(ROLES[r.after.role]?.label || r.after.role) : ""}` : `bill ${(r.after || r.before || {}).bill_no ? "No. " + esc((r.after || r.before).bill_no) + " of " : "of "}${esc(fmtDate((r.after || r.before || {}).bill_date))}`}</span></summary>
+    <span class="small muted">by <span data-uid="${esc(r.actor)}"></span> · ${esc(fmtDT(r.at))} · ${r.action === "roles.update" ? "Admin / Staff / Viewer permissions" : r.action.startsWith("team.") ? `<span data-uid="${esc((r.after || r.before || {}).member || "")}"></span>${r.after?.role ? " → " + esc(ROLES[r.after.role]?.label || r.after.role) : ""}` : `bill ${(r.after || r.before || {}).bill_no ? "No. " + esc((r.after || r.before).bill_no) + " of " : "of "}${esc(fmtDate((r.after || r.before || {}).bill_date))}`}</span></summary>
     <div class="pair"><div><div class="small muted">Before</div><pre data-json="b${i}"></pre></div><div><div class="small muted">After</div><pre data-json="a${i}"></pre></div></div></details>`).join("");
   a.rows.forEach((r, i) => {
     $(`[data-json="b${i}"]`, box).textContent = r.before ? JSON.stringify(r.before, null, 2) : "—";
@@ -931,8 +1004,8 @@ function openNew(file) {
 function openBill(owner, id) {
   const b = (S.bills.get(owner) || []).find((x) => x.id === id);
   if (!b) return;
-  const canEdit = appAdmin() || (owner === S.uid && canLog());
-  S.editor = { mode: "edit", owner, id, bill: b, phase: "edit", date: b.bill_date, billNo: b.bill_no || "", paid: isPaid(b), rows: itemRows(b.items).length ? itemRows(b.items) : [emptyRow(1)], imageId: b.image_id || null, previewUrl: null, notice: canEdit ? null : { tone: "", text: "You can view this bill. Only the person who logged it, or an admin, can change it." }, canEdit, dirty: false, problems: [] };
+  const canEdit = mayEditBill(b); const canDelete = mayDeleteBill(b); const canPay = mayPayBill(b);
+  S.editor = { mode: "edit", owner, id, bill: b, phase: "edit", date: b.bill_date, billNo: b.bill_no || "", paid: isPaid(b), rows: itemRows(b.items).length ? itemRows(b.items) : [emptyRow(1)], imageId: b.image_id || null, previewUrl: null, notice: canEdit ? null : { tone: "", text: canPay ? "You can view this bill and change its payment status. Your role doesn't allow editing it." : "You can view this bill. Your role doesn't allow changing it." }, canEdit, canDelete, canPay, dirty: false, problems: [] };
   renderTabs(); render(); window.scrollTo(0, 0);
 }
 function closeEditor() { if (S.editor?.previewUrl) URL.revokeObjectURL(S.editor.previewUrl); S.editor = null; renderTabs(); render(); }
@@ -1063,6 +1136,8 @@ function renderEditor() {
     return;
   }
   const ro = ed.mode === "edit" && !ed.canEdit;
+  const payRo = ed.mode === "new" ? !allowed("pay_own") : !ed.canPay;
+  const payOnly = ro && !payRo;
   const hasPhoto = ed.imageId || ed.previewUrl;
   const photoSrc = ed.previewUrl || (ed.imageId ? "/_blob/" + ed.imageId : "");
   main.innerHTML = `
@@ -1082,8 +1157,8 @@ function renderEditor() {
   <div class="card pay-row">
     <span class="field-lbl">Payment status</span>
     <div class="seg" role="group" aria-label="Payment status">
-      <button data-act="ed-pay" data-v="unpaid" aria-pressed="${!ed.paid}" ${ro ? "disabled" : ""}>Unpaid</button>
-      <button data-act="ed-pay" data-v="paid" aria-pressed="${ed.paid}" ${ro ? "disabled" : ""}>Paid</button>
+      <button data-act="ed-pay" data-v="unpaid" aria-pressed="${!ed.paid}" ${payRo ? "disabled" : ""}>Unpaid</button>
+      <button data-act="ed-pay" data-v="paid" aria-pressed="${ed.paid}" ${payRo ? "disabled" : ""}>Paid</button>
     </div>
     ${ed.mode === "edit" && isPaid(ed.bill) && ed.bill.paid_at ? `<span class="small muted">Marked paid ${esc(fmtDT(ed.bill.paid_at))} by <span data-uid="${esc(ed.bill.paid_by || "")}"></span></span>` : ""}
   </div>
@@ -1095,9 +1170,9 @@ function renderEditor() {
   <div id="problems"></div>
   <div class="foot">
     <div class="sum"><span class="small muted" id="ed-count"></span><b class="num" id="ed-total"></b></div>
-    ${ro ? "" : `<button class="btn btn-primary" data-act="submit" id="submit">${ed.mode === "new" ? "Submit" : "Save changes"}</button>`}
+    ${ro ? (payOnly ? `<button class="btn btn-primary" data-act="save-pay" id="submit">Save payment</button>` : "") : `<button class="btn btn-primary" data-act="submit" id="submit">${ed.mode === "new" ? "Submit" : "Save changes"}</button>`}
   </div>
-  ${ed.mode === "edit" && ed.canEdit ? `<div id="del-slot"><button class="btn btn-danger btn-block" data-act="del-bill">Delete bill</button></div>` : ""}`;
+  ${ed.mode === "edit" && ed.canDelete ? `<div id="del-slot"><button class="btn btn-danger btn-block" data-act="del-bill">Delete bill</button></div>` : ""}`;
   updateEditorBits();
   paintNames(main);
 }
@@ -1197,7 +1272,7 @@ function payFields(prev, paid, now) {
   if (paid) return prev && isPaid(prev) ? { payment_status: "paid", paid_at: prev.paid_at || now, paid_by: prev.paid_by || S.uid } : { payment_status: "paid", paid_at: now, paid_by: S.uid };
   return { payment_status: "unpaid", paid_at: null, paid_by: null };
 }
-function canChange(b) { return appAdmin() || (b.owner === S.uid && canLog()); }
+function canChange(b) { return mayPayBill(b); }
 /** Quick Paid / Unpaid toggle from the Bills list. */
 async function markPaid(owner, id, paid, btn) {
   const b = (S.bills.get(owner) || []).find((x) => x.id === id); if (!b || !canChange(b)) return;
@@ -1298,6 +1373,7 @@ document.addEventListener("click", (e) => {
     case "rep-format": rep().format = t.dataset.v; rep().msg = null; render(); break;
     case "rep-save": saveReport(); break;
     case "audit-load": loadAudit(); break;
+    case "roles-reset": savePerms(JSON.parse(JSON.stringify(DEFAULT_PERMS)), "Role permissions reset to defaults."); break;
     case "team-open": S.teamAdd = { role: "staff", q: "", results: [] }; render(); $("#team-q")?.focus(); break;
     case "team-close": S.teamAdd = null; render(); break;
     case "team-add": t.disabled = true; addMember(t.dataset.member); break;
@@ -1347,6 +1423,7 @@ document.addEventListener("click", (e) => {
     case "submit": submit(false); break;
     case "submit-force": submit(true); break;
     case "submit-dup": submit("dup"); break;
+    case "save-pay": t.disabled = true; markPaid(ed.owner, ed.id, ed.paid, t).then(() => { S.editor = null; renderTabs(); render(); }); break;
     case "ed-pay": ed.paid = t.dataset.v === "paid"; ed.dirty = true; t.parentElement.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === t))); break;
     case "mark-paid": markPaid(t.dataset.owner, t.dataset.id, t.dataset.v === "paid", t); break;
     case "del-bill": {
@@ -1380,7 +1457,14 @@ document.addEventListener("change", (e) => {
   if (act === "sf-date") { S.summary.from = $("#sf-from").value; S.summary.to = $("#sf-to").value; render(); }
   if (act === "rf-date") { rep().from = $("#rf-from").value; rep().to = $("#rf-to").value; rep().rows = null; render(); }
   if (act === "rep-item") render();
-  if (act === "team-new-role" && S.teamAdd) { S.teamAdd.role = t.value; $("#team-role-desc").textContent = ROLES[t.value].desc; return; }
+  if (act === "team-new-role" && S.teamAdd) { S.teamAdd.role = t.value; $("#team-role-desc").textContent = roleSummary(t.value); return; }
+  if (act === "perm") {
+    const next = Object.fromEntries(Object.keys(ROLES).map((r) => [r, rolePerms(r)]));
+    next[t.dataset.role][t.dataset.perm] = t.checked;
+    const perm = PERMS.find((p) => p.k === t.dataset.perm);
+    savePerms(next, `${ROLES[t.dataset.role].label}: ${t.checked ? "can" : "can't"} ${perm.label.replace(/ \(otherwise.*\)/, "").replace(/^./, (c) => c.toLowerCase())}.`);
+    return;
+  }
   if (act === "team-role") {
     const uid = t.dataset.member; const before = S.team.get(uid); const role = t.value;
     teamWrite(async () => { await S.caps.db.doc(`team/${uid}`).update({ role }); writeAudit("team.role", null, uid, { member: uid, role: before?.role }, { member: uid, role }); }, `${nameOf(uid)} is now ${ROLES[role].label}.`);
