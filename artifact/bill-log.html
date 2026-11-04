@@ -124,6 +124,7 @@ p { margin: 0; }
 }
 .bill:active { background: var(--surface-2); }
 .bill .d { font-weight: 700; font-size: 1.05rem; }
+.billno-tag { font-size: .8rem; font-weight: 600; color: var(--muted); margin-left: 4px; }
 .bill .t { font-weight: 600; font-size: 1.05rem; text-align: right; }
 .bill .m { color: var(--muted); font-size: .85rem; grid-column: 1 / -1; display: flex; gap: 6px; flex-wrap: wrap; }
 .pill { font-size: .72rem; font-weight: 700; padding: 1px 7px; border-radius: 99px; background: var(--brand-soft); color: var(--brand); }
@@ -159,7 +160,9 @@ tfoot td { font-weight: 800; background: var(--surface-2); border-bottom: 0; }
 
 /* Editor */
 .card.ed-top { flex-direction: row; gap: 12px; align-items: flex-end; }
-.ed-top .field { flex: 1; }
+.ed-fields { flex: 1; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 10px; }
+.ed-top .billno { min-height: 52px; font-size: 1.1rem; font-weight: 700; font-family: var(--font-num); }
+@media (max-width: 420px) { .ed-fields { grid-template-columns: 1fr; } }
 .ed-top .date { min-height: 52px; font-size: 1.1rem; font-weight: 700; }
 .thumb { width: 64px; height: 64px; flex: none; border-radius: 12px; border: 1px solid var(--line); overflow: hidden; padding: 0; background: var(--surface-2); cursor: pointer; }
 .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -260,6 +263,9 @@ tfoot td { font-weight: 800; background: var(--surface-2); border-bottom: 0; }
 
 .offline { position: fixed; left: 0; right: 0; top: env(safe-area-inset-top, 0px); z-index: 40; background: var(--warn-line); color: #2b1d00; text-align: center; font-weight: 700; font-size: .9rem; padding: 7px 16px; }
 .confirm { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.confirm > span { flex: 1 1 100%; }
+.confirm .btn { flex: 1 1 auto; }
+#problems, #del-slot, #discard-slot { scroll-margin-bottom: 170px; scroll-margin-top: 80px; }
 @media (prefers-reduced-motion: reduce) { .spin { animation-duration: 3s; } }
 </style>
 
@@ -325,7 +331,7 @@ const S = {
   avatars: {},
   editor: null,       // open editor state
   viewer: null,
-  filters: { scope: "all", from: "", to: "" },
+  filters: { scope: "all", from: "", to: "", q: "" },
   summary: { q: "", from: "", to: "", sort: "bill_date", dir: -1 },
   report: null,
   audit: null,
@@ -474,7 +480,7 @@ function billCard(b) {
   const items = b.items || [];
   const mm = items.filter((i) => hasMismatch(i.qty, i.rate, i.total_amount)).length;
   return `<button class="bill" data-act="open" data-owner="${esc(b.owner)}" data-id="${esc(b.id)}">
-    <span class="d">${esc(fmtDate(b.bill_date))}</span><span class="t num">₹ ${money(billTotal(b))}</span>
+    <span class="d">${esc(fmtDate(b.bill_date))}${b.bill_no ? ` <span class="billno-tag num">No. ${esc(b.bill_no)}</span>` : ""}</span><span class="t num">₹ ${money(billTotal(b))}</span>
     <span class="m">${items.length} item${items.length === 1 ? "" : "s"}${b.image_id ? ' · <span class="pill">Photo</span>' : ""}${mm ? ` <span class="pill warn">${mm} to check</span>` : ""}
       <span>· by <span data-uid="${esc(b.owner)}"></span> · ${esc(fmtDT(b.logged_at))}</span></span>
   </button>`;
@@ -483,7 +489,8 @@ function billCard(b) {
 /* ---------------- bills list ---------------- */
 function filteredBills() {
   const f = S.filters;
-  return allBills().filter((b) => (f.scope === "mine" ? b.owner === S.uid : true) && (!f.from || b.bill_date >= f.from) && (!f.to || b.bill_date <= f.to));
+  const q = normNo(f.q);
+  return allBills().filter((b) => (f.scope === "mine" ? b.owner === S.uid : true) && (!f.from || b.bill_date >= f.from) && (!f.to || b.bill_date <= f.to) && (!q || normNo(b.bill_no).includes(q)));
 }
 function billsView() {
   const list = filteredBills(); const f = S.filters;
@@ -494,12 +501,13 @@ function billsView() {
       <button data-act="scope" data-v="all" aria-pressed="${f.scope === "all"}">All bills</button>
       <button data-act="scope" data-v="mine" aria-pressed="${f.scope === "mine"}">My bills</button>
     </div>
+    <label class="field"><span>Find by Bill No.</span><input class="inp" type="search" id="bf-q" placeholder="e.g. 4471" value="${esc(f.q)}" data-act="bf-q" autocomplete="off"></label>
     ${datesFields("bf", f.from, f.to, "Bill date")}
   </div>
   ${S.watchCapHit ? `<div class="note warn">Showing bills from the first ${PEOPLE_WATCH_LIMIT} people only.</div>` : ""}
   ${S.dbState === "loading" ? `<div class="card"><div class="row-between"><span class="spin"></span><span class="muted">Loading bills…</span></div></div>`
     : list.length ? `<p class="muted small">${list.length} bill${list.length === 1 ? "" : "s"} · <span class="num">₹ ${money(sum(list.map(billTotal)))}</span></p><div class="bills">${list.map(billCard).join("")}</div>`
-    : `<div class="card"><p class="muted">${f.from || f.to || f.scope === "mine" ? "No bills match these filters." : "No bills have been logged yet."}</p></div>`}`;
+    : `<div class="card"><p class="muted">${f.from || f.to || f.q || f.scope === "mine" ? "No bills match these filters." : "No bills have been logged yet."}</p></div>`}`;
 }
 function datesFields(prefix, from, to, label) {
   return `<fieldset style="border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:4px"><legend class="small muted" style="font-weight:600;margin-bottom:4px">${esc(label)}</legend>
@@ -512,11 +520,11 @@ function datesFields(prefix, from, to, label) {
 /* ---------------- summary ---------------- */
 function entries() {
   const out = [];
-  for (const b of allBills()) (b.items || []).forEach((it, i) => out.push({ key: b.owner + "/" + b.id + "/" + i, owner: b.owner, bill_id: b.id, bill_date: b.bill_date, logged_at: b.logged_at, ...it }));
+  for (const b of allBills()) (b.items || []).forEach((it, i) => out.push({ key: b.owner + "/" + b.id + "/" + i, owner: b.owner, bill_id: b.id, bill_no: b.bill_no || "", bill_date: b.bill_date, logged_at: b.logged_at, ...it }));
   return out;
 }
 const SUM_COLS = [
-  { k: "bill_date", label: "Bill date" }, { k: "serial_no", label: "S.No.", n: 1 }, { k: "item_name", label: "Item name" },
+  { k: "bill_date", label: "Bill date" }, { k: "bill_no", label: "Bill No." }, { k: "serial_no", label: "S.No.", n: 1 }, { k: "item_name", label: "Item name" },
   { k: "qty", label: "Qty.", n: 1 }, { k: "rate", label: "Rate", n: 1 }, { k: "total_amount", label: "Tot. Amt.", n: 1 },
   { k: "logged_at", label: "Logged at" }, { k: "logged_by", label: "Logged by" },
 ];
@@ -545,16 +553,17 @@ function summaryView() {
     <thead><tr>${SUM_COLS.map((c) => `<th class="${c.n ? "r" : ""}"><button data-act="sort" data-k="${c.k}" aria-sort="${s.sort === c.k ? (s.dir === 1 ? "ascending" : "descending") : "none"}">${c.label} <span aria-hidden="true">${s.sort === c.k ? (s.dir === 1 ? "▲" : "▼") : "↕"}</span></button></th>`).join("")}</tr></thead>
     <tbody>${rows.map((r) => { const bad = hasMismatch(r.qty, r.rate, r.total_amount); return `<tr class="${bad ? "mm" : ""}">
       <td><button class="link" data-act="open" data-owner="${esc(r.owner)}" data-id="${esc(r.bill_id)}">${esc(fmtDate(r.bill_date))}</button></td>
-      <td class="r num">${esc(r.serial_no ?? "")}</td><td class="wrap">${esc(r.item_name)}</td>
+      <td class="num">${esc(r.bill_no)}</td><td class="r num">${esc(r.serial_no ?? "")}</td><td class="wrap">${esc(r.item_name)}</td>
       <td class="r num">${qtyFmt(r.qty)}</td><td class="r num">${money(r.rate)}</td><td class="r num"${bad ? ' title="Qty × Rate does not match"' : ""}><b>${money(r.total_amount)}</b></td>
       <td>${esc(fmtDT(r.logged_at))}</td><td data-uid="${esc(r.owner)}"></td></tr>`; }).join("")}</tbody>
-    <tfoot><tr><td colspan="5">Grand total</td><td class="r num">${money(total)}</td><td colspan="2"></td></tr></tfoot>
+    <tfoot><tr><td colspan="6">Grand total</td><td class="r num">${money(total)}</td><td colspan="2"></td></tr></tfoot>
   </table></div>` : `<div class="card"><p class="muted">${S.dbState === "loading" ? "Loading…" : "No items match. Try clearing the search or dates."}</p></div>`}`;
 }
 
 /* ---------------- reports ---------------- */
 const REP_COLS = [
   { k: "bill_date", label: "Bill date", text: (e) => fmtDate(e.bill_date), raw: (e) => e.bill_date },
+  { k: "bill_no", label: "Bill No.", text: (e) => e.bill_no || "", raw: (e) => e.bill_no || "" },
   { k: "serial_no", label: "Serial no.", n: 1, text: (e) => String(e.serial_no ?? ""), raw: (e) => e.serial_no ?? null },
   { k: "item_name", label: "Item name", text: (e) => e.item_name || "", raw: (e) => e.item_name || "" },
   { k: "qty", label: "Qty.", n: 1, text: (e) => qtyFmt(e.qty), raw: (e) => e.qty ?? null },
@@ -566,7 +575,7 @@ const REP_COLS = [
 function rep() {
   if (!S.report) {
     let cols = REP_COLS.map((c) => c.k);
-    try { const saved = JSON.parse(localStorage.getItem("pbl-cols") || "null"); if (Array.isArray(saved) && saved.length) cols = saved; } catch {}
+    try { const saved = JSON.parse(localStorage.getItem("pbl-cols") || "null"); if (Array.isArray(saved) && saved.length) cols = saved.includes("bill_no") || localStorage.getItem("pbl-cols-v2") ? saved : ["bill_date", "bill_no", ...saved.filter((k) => k !== "bill_date")]; localStorage.setItem("pbl-cols-v2", "1"); } catch {}
     S.report = { cols: new Set(cols), field: "bill_date", from: "", to: "", item: "", rows: null, format: "pdf", busy: false, msg: null };
   }
   return S.report;
@@ -648,7 +657,7 @@ async function buildReport(format) {
     const aoa = [cols.map((c) => c.label), ...rows.map((e) => cols.map((c) => { const v = c.raw(e); return c.k === "bill_date" && v ? new Date(v + "T00:00:00") : v; }))];
     if (hasTotal) aoa.push(cols.map((c, i) => (c.k === "total_amount" ? total : i === 0 ? "Grand total" : null)));
     const ws = window.XLSX.utils.aoa_to_sheet(aoa, { cellDates: true, dateNF: "dd-mmm-yyyy" });
-    ws["!cols"] = cols.map((c) => ({ wch: { item_name: 36, logged_at: 20, logged_by: 18 }[c.k] || 12 }));
+    ws["!cols"] = cols.map((c) => ({ wch: { item_name: 36, logged_at: 20, logged_by: 18, bill_no: 14 }[c.k] || 12 }));
     const wb = window.XLSX.utils.book_new(); window.XLSX.utils.book_append_sheet(wb, ws, "Bills");
     return { filename, data: new Blob([window.XLSX.write(wb, { type: "array", bookType: "xlsx" })]) };
   }
@@ -703,7 +712,7 @@ function paintAdmin() {
   if (!a.rows.length) { box.innerHTML = `<p class="muted">No activity yet.</p>`; return; }
   const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted" };
   box.innerHTML = a.rows.map((r, i) => `<details><summary><b>${esc(label[r.action] || r.action)}</b>
-    <span class="small muted">by <span data-uid="${esc(r.actor)}"></span> · ${esc(fmtDT(r.at))} · bill of ${esc(fmtDate((r.after || r.before || {}).bill_date))}</span></summary>
+    <span class="small muted">by <span data-uid="${esc(r.actor)}"></span> · ${esc(fmtDT(r.at))} · bill ${(r.after || r.before || {}).bill_no ? "No. " + esc((r.after || r.before).bill_no) + " of " : "of "}${esc(fmtDate((r.after || r.before || {}).bill_date))}</span></summary>
     <div class="pair"><div><div class="small muted">Before</div><pre data-json="b${i}"></pre></div><div><div class="small muted">After</div><pre data-json="a${i}"></pre></div></div></details>`).join("");
   a.rows.forEach((r, i) => {
     $(`[data-json="b${i}"]`, box).textContent = r.before ? JSON.stringify(r.before, null, 2) : "—";
@@ -728,7 +737,7 @@ const emptyRow = (n) => ({ key: newKey(), serial_no: String(n), item_name: "", q
 
 function openNew(file) {
   if (!S.canWrite) return;
-  S.editor = { mode: "new", phase: file ? "working" : "edit", step: "compress", date: todayISO(), rows: [emptyRow(1)], imageId: null, previewUrl: null, notice: null, dirty: false, problems: [] };
+  S.editor = { mode: "new", phase: file ? "working" : "edit", step: "compress", date: todayISO(), billNo: "", rows: [emptyRow(1)], imageId: null, previewUrl: null, notice: null, dirty: false, problems: [] };
   renderTabs(); render(); window.scrollTo(0, 0);
   if (file) processFile(file);
 }
@@ -736,7 +745,7 @@ function openBill(owner, id) {
   const b = (S.bills.get(owner) || []).find((x) => x.id === id);
   if (!b) return;
   const canEdit = S.isAdmin || (owner === S.uid && S.canWrite);
-  S.editor = { mode: "edit", owner, id, bill: b, phase: "edit", date: b.bill_date, rows: itemRows(b.items).length ? itemRows(b.items) : [emptyRow(1)], imageId: b.image_id || null, previewUrl: null, notice: canEdit ? null : { tone: "", text: "You can view this bill. Only the person who logged it, or an admin, can change it." }, canEdit, dirty: false, problems: [] };
+  S.editor = { mode: "edit", owner, id, bill: b, phase: "edit", date: b.bill_date, billNo: b.bill_no || "", rows: itemRows(b.items).length ? itemRows(b.items) : [emptyRow(1)], imageId: b.image_id || null, previewUrl: null, notice: canEdit ? null : { tone: "", text: "You can view this bill. Only the person who logged it, or an admin, can change it." }, canEdit, dirty: false, problems: [] };
   renderTabs(); render(); window.scrollTo(0, 0);
 }
 function closeEditor() { if (S.editor?.previewUrl) URL.revokeObjectURL(S.editor.previewUrl); S.editor = null; renderTabs(); render(); }
@@ -758,10 +767,11 @@ Extract every purchased line item, top to bottom, exactly as printed:
 - serial_no: the S.No./Sr. printed on the line (null if none).
 - item_name: the product name as printed, with strength/pack (e.g. "Dolo 650 Tab 15's"). Leave out batch no., expiry, HSN and MRP.
 - qty: quantity billed (number). rate: per-unit rate charged (number, no symbols or commas). total_amount: that line's amount (number).
+- bill_no: the bill / invoice / cash memo number exactly as printed (e.g. "4471" or "CM/2026/0193"). null if not visible.
 - bill_date: the bill date as YYYY-MM-DD. Indian bills write dates day-first (03/11/26 = 2026-11-03). null if not visible.
 Copy numbers exactly as printed; do not fix totals to match qty × rate. Use null for anything you cannot read with confidence.
 Skip subtotal, discount, GST/tax summary, round-off and grand-total lines. If the image is not a bill, set is_bill to false and return no items.
-Reply with only this JSON: {"is_bill": true, "bill_date": "2026-11-02", "items": [{"serial_no": 1, "item_name": "Dolo 650 Tab 15's", "qty": 2, "rate": 30.5, "total_amount": 61}]}`;
+Reply with only this JSON: {"is_bill": true, "bill_no": "4471", "bill_date": "2026-11-02", "items": [{"serial_no": 1, "item_name": "Dolo 650 Tab 15's", "qty": 2, "rate": 30.5, "total_amount": 61}]}`;
 
 function normalizeExtraction(raw) {
   const o = raw && typeof raw === "object" ? raw : {};
@@ -771,7 +781,8 @@ function normalizeExtraction(raw) {
     item_name: typeof r.item_name === "string" ? r.item_name.trim() : "",
     qty: parseNum(r.qty), rate: parseNum(r.rate), total_amount: parseNum(r.total_amount),
   })).filter((r) => r.item_name || r.qty != null || r.rate != null || r.total_amount != null);
-  return { is_bill: o.is_bill !== false, bill_date: date, items };
+  const billNo = typeof o.bill_no === "string" || typeof o.bill_no === "number" ? String(o.bill_no).trim().slice(0, 60) : "";
+  return { is_bill: o.is_bill !== false, bill_no: billNo, bill_date: date, items };
 }
 function sampleErrorText(e) {
   switch (e?.code) {
@@ -813,7 +824,7 @@ async function processFile(file) {
   finishExtract(ed, x, { tone: x.bill_date ? "ok" : "warn", text: (x.bill_date ? `Read ${x.items.length} item${x.items.length === 1 ? "" : "s"}. Check every value against the photo before submitting.` : `Read ${x.items.length} item${x.items.length === 1 ? "" : "s"}, but no date was found. Set the bill date.`) + photoNote });
 }
 function finishExtract(ed, x, notice) {
-  if (x) { ed.rows = itemRows(x.items); if (x.bill_date) ed.date = x.bill_date; }
+  if (x) { ed.rows = itemRows(x.items); if (x.bill_date) ed.date = x.bill_date; if (x.bill_no) ed.billNo = x.bill_no; }
   ed.notice = notice; ed.phase = "edit"; ed.dirty = true; renderEditor();
 }
 
@@ -843,7 +854,10 @@ function renderEditor() {
   ${ed.mode === "edit" ? `<p class="small muted">Logged by <b data-uid="${esc(ed.owner)}"></b> · ${esc(fmtDT(ed.bill.logged_at))}${ed.bill.updated_at && ed.bill.updated_at !== ed.bill.logged_at ? ` · edited ${esc(fmtDT(ed.bill.updated_at))}` : ""}</p>` : ""}
   <div id="discard-slot"></div>
   <div class="card ed-top">
-    <label class="field"><span>Bill date</span><input class="inp date" type="date" id="ed-date" value="${esc(ed.date)}" ${ro ? "disabled" : ""}></label>
+    <div class="ed-fields">
+      <label class="field"><span>Bill No.</span><input class="inp billno" id="ed-billno" value="${esc(ed.billNo)}" placeholder="e.g. 4471" autocomplete="off" ${ro ? "disabled" : ""}></label>
+      <label class="field"><span>Bill date</span><input class="inp date" type="date" id="ed-date" value="${esc(ed.date)}" ${ro ? "disabled" : ""}></label>
+    </div>
     ${hasPhoto ? `<button class="thumb" data-act="photo" aria-label="View bill photo"><img src="${esc(photoSrc)}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'small muted',textContent:'No photo'}))"></button>` : ""}
   </div>
   ${ed.notice ? `<div class="note ${ed.notice.tone}">${esc(ed.notice.text)}</div>` : ""}
@@ -917,10 +931,15 @@ async function submit(force) {
   const ed = S.editor; const v = validate(ed);
   ed.problems = v.keys; updateEditorBits();
   const box = $("#problems");
-  if (v.problems.length) { box.innerHTML = `<div class="note bad"><b>Please fix:</b><br>${v.problems.map(esc).join("<br>")}</div>`; return; }
+  if (v.problems.length) { showProblems(`<div class="note bad"><b>Please fix:</b><br>${v.problems.map(esc).join("<br>")}</div>`); return; }
+  const dup = duplicateOf(ed);
+  if (dup && force !== "dup" && force !== true) {
+    showProblems(`<div class="note warn confirm"><span>Bill No. <b>${esc(ed.billNo.trim())}</b> is already logged: ${esc(fmtDate(dup.bill_date))}, ₹ ${money(billTotal(dup))}, by <span data-uid="${esc(dup.owner)}"></span>.</span><button class="btn btn-primary" data-act="submit-dup">Save anyway</button><button class="btn btn-ghost" data-act="dismiss">Check again</button></div>`);
+    return;
+  }
   const mm = ed.rows.filter(rowMismatch).length;
-  if (mm && !force) {
-    box.innerHTML = `<div class="note warn confirm"><span style="flex:1">${mm} row${mm === 1 ? "" : "s"} still ha${mm === 1 ? "s" : "ve"} Qty × Rate different from Tot. Amt.</span><button class="btn btn-primary" data-act="submit-force">Save anyway</button><button class="btn btn-ghost" data-act="dismiss">Check again</button></div>`;
+  if (mm && force !== true) {
+    showProblems(`<div class="note warn confirm"><span>${mm} row${mm === 1 ? "" : "s"} still ha${mm === 1 ? "s" : "ve"} Qty × Rate different from Tot. Amt.</span><button class="btn btn-primary" data-act="submit-force">Save anyway</button><button class="btn btn-ghost" data-act="dismiss">Check again</button></div>`);
     return;
   }
   box.innerHTML = "";
@@ -930,10 +949,10 @@ async function submit(force) {
     let owner, id, before = null, body;
     if (ed.mode === "new") {
       owner = S.uid; id = newId();
-      body = { bill_date: ed.date, items: v.items, image_id: ed.imageId || null, logged_by: S.uid, logged_at: now, updated_at: now, updated_by: S.uid };
+      body = { bill_no: ed.billNo.trim(), bill_date: ed.date, items: v.items, image_id: ed.imageId || null, logged_by: S.uid, logged_at: now, updated_at: now, updated_by: S.uid };
     } else {
       owner = ed.owner; id = ed.id; before = stripBill(ed.bill);
-      body = { ...stripBill(ed.bill), bill_date: ed.date, items: v.items, updated_at: now, updated_by: S.uid };
+      body = { ...stripBill(ed.bill), bill_no: ed.billNo.trim(), bill_date: ed.date, items: v.items, updated_at: now, updated_by: S.uid };
     }
     await db.doc(`bills/${owner}/list/${id}`).set(body);          // bill and all its items in one write
     if (ed.mode === "new") await db.doc(`bills/${owner}`).set({ updated_at: now });
@@ -947,6 +966,12 @@ async function submit(force) {
     box.innerHTML = `<div class="note bad">${esc(dbErrorText(e))}</div>`;
   }
 }
+function normNo(v) { return String(v || "").trim().toLowerCase().replace(/\s+/g, ""); }
+function duplicateOf(ed) {
+  const no = normNo(ed.billNo); if (!no) return null;
+  return allBills().find((b) => normNo(b.bill_no) === no && !(ed.mode === "edit" && b.owner === ed.owner && b.id === ed.id)) || null;
+}
+function showProblems(html) { const box = $("#problems"); box.innerHTML = html; if (html) box.scrollIntoView({ block: "end", behavior: "smooth" }); paintNames(box); }
 function stripBill(b) { const { id, owner, ...rest } = b; return rest; }
 function dbErrorText(e) {
   switch (e?.code) {
@@ -981,7 +1006,7 @@ render = function () { _render(); if (flashMsg && !S.editor) $("#main").insertAd
 
 function askDiscard(onYes) {
   const slot = $("#discard-slot"); if (!slot) { onYes(); return; }
-  slot.innerHTML = `<div class="note warn confirm"><span style="flex:1">Discard this bill? Your changes will be lost.</span><button class="btn btn-danger" data-act="discard-yes">Discard</button><button class="btn btn-ghost" data-act="dismiss">Keep editing</button></div>`;
+  slot.innerHTML = `<div class="note warn confirm"><span>Discard this bill? Your changes will be lost.</span><button class="btn btn-danger" data-act="discard-yes">Discard</button><button class="btn btn-ghost" data-act="dismiss">Keep editing</button></div>`;
   slot._onYes = onYes; slot.scrollIntoView({ block: "center" });
 }
 
@@ -1048,9 +1073,10 @@ document.addEventListener("click", (e) => {
     }
     case "submit": submit(false); break;
     case "submit-force": submit(true); break;
+    case "submit-dup": submit("dup"); break;
     case "del-bill": {
       const slot = $("#del-slot");
-      slot.innerHTML = `<div class="note bad confirm"><span style="flex:1">Delete this bill and all its items? This can't be undone.</span><button class="btn btn-danger" data-act="del-yes">Delete</button><button class="btn btn-ghost" data-act="del-no">Keep</button></div>`; break;
+      slot.innerHTML = `<div class="note bad confirm"><span>Delete this bill and all its items? This can't be undone.</span><button class="btn btn-danger" data-act="del-yes">Delete</button><button class="btn btn-ghost" data-act="del-no">Keep</button></div>`; slot.scrollIntoView({ block: "end", behavior: "smooth" }); break;
     }
     case "del-yes": deleteBill(); break;
     case "del-no": $("#del-slot").innerHTML = `<button class="btn btn-danger btn-block" data-act="del-bill">Delete bill</button>`; break;
@@ -1065,9 +1091,11 @@ document.addEventListener("input", (e) => {
   const t = e.target; const ed = S.editor;
   if (ed && t.dataset.f) { const key = t.closest(".irow").dataset.key; const r = ed.rows.find((x) => x.key === key); r[t.dataset.f] = t.value; ed.dirty = true; updateEditorBits(); return; }
   if (ed && t.id === "ed-date") { ed.date = t.value; ed.dirty = true; return; }
+  if (ed && t.id === "ed-billno") { ed.billNo = t.value; ed.dirty = true; return; }
   const act = t.dataset.act;
   if (act === "sum-q") { S.summary.q = t.value; clearTimeout(t._d); t._d = setTimeout(() => { const pos = t.selectionStart; render(); const n = $("#sum-q"); n.focus(); n.setSelectionRange(pos, pos); }, 250); }
   if (act === "rep-item") { rep().item = t.value; rep().rows = null; }
+  if (act === "bf-q") { S.filters.q = t.value; clearTimeout(t._d); t._d = setTimeout(() => { const pos = t.selectionStart; render(); const n = $("#bf-q"); n.focus(); n.setSelectionRange(pos, pos); }, 250); }
 });
 document.addEventListener("change", (e) => {
   const t = e.target; const act = t.dataset.act;
