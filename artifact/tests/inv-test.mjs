@@ -32,17 +32,18 @@ await step("Inventory tab is in the main navigation and the 89-item register loa
   const products = (await log()).filter((x) => x[0] === "set" && x[1].startsWith("inventory/products/items/"));
   assert.equal(products.length, 89);
   const gauze = products.find((x) => x[2].name === "Gauze Pack")[2];
-  assert.deepEqual([gauze.sno, gauze.category, gauze.unit, gauze.min_level, gauze.monthly_use, gauze.expiry, gauze.status], [16, "Consumables", "Pack", 2, 4, "2026-11-12", "active"]);
+  assert.deepEqual([gauze.sno, gauze.category, gauze.unit, gauze.min_level, gauze.monthly_use, gauze.expected_delivery, gauze.status], [16, "Consumables", "Pack", 2, 4, "2026-11-12", "active"]);
   const month = (await log()).find((x) => x[0] === "set" && x[1] === "inventory/months/list/2026-11")[2];
   assert.deepEqual(month.counts.p088, { 1: 0.25, 2: 0.25, 3: 0.25 });     // Micropore: 4 Nov not recorded
   assert.deepEqual(month.counts.p041, { 1: 5.5, 2: 5, 3: 5, 4: 5 });
   assert.equal(month.counts.p018, undefined);                              // Himalaya: no counts
   await page.screenshot({ path: DIR + "i1-list.png", fullPage: false });
 });
-await step("expiry warnings, stopped items and low stock show correctly", async () => {
-  for (const n of ["Gauze Pack", "Gloves Box", "Syringe 50ml", "Micropore"]) {
+await step("ordered items show their expected delivery; stopped items and low stock show correctly", async () => {
+  for (const [n, d] of [["Gauze Pack", "12 Nov 2026"], ["Gloves Box", "6 Nov 2026"], ["Syringe 50ml", "11 Nov 2026"], ["Micropore", "5 Nov 2026"]]) {
     const card = page.locator(".inv-card", { hasText: n }).first();
-    assert.match(await card.innerText(), /Expires in \d+ day/, n);
+    assert.match(await card.innerText(), new RegExp("On order · expected " + d), n);
+    assert.doesNotMatch(await card.innerText(), /Expir/i, n);
   }
   assert.match(await page.locator(".inv-card", { hasText: "Gloves Box" }).innerText(), /Low stock/);
   assert.match(await page.locator(".inv-card", { hasText: "Gauze Pack" }).innerText(), /Low stock/);  // 2 <= min 2
@@ -64,15 +65,15 @@ await step("search, category, low-only, expiring filter and sort", async () => {
   await page.locator("#inv-cat").selectOption("Stationery");
   await page.getByText("8 products").waitFor();
   await page.locator("#inv-cat").selectOption("all");
-  await page.getByRole("button", { name: "Expiring soon" }).click();
+  await page.getByRole("button", { name: "On order", exact: true }).click();
   await page.getByText("4 products").waitFor();
-  await page.getByRole("button", { name: "Expiring soon" }).click();
+  await page.getByRole("button", { name: "On order", exact: true }).click();
   await page.getByRole("button", { name: "Low stock only" }).click();
   const lowNames = await page.locator(".inv-card b").allInnerTexts();
   assert.ok(lowNames.includes("Gloves Box") && lowNames.includes("Room Spray") && !lowNames.includes("Battery"), lowNames.join("|"));
   await page.getByRole("button", { name: "Low stock only" }).click();
-  await page.locator("#inv-sort").selectOption("expiry");
-  assert.equal(await page.locator(".inv-card b").first().innerText(), "Micropore");   // 05/11 expires first
+  await page.locator("#inv-sort").selectOption("due");
+  assert.equal(await page.locator(".inv-card b").first().innerText(), "Micropore");   // due 05/11, first to arrive
   await page.locator("#inv-sort").selectOption("sno");
 });
 await step("register grid: copy yesterday, tap a cell, low highlight updates instantly", async () => {
@@ -125,11 +126,11 @@ await step("+ Add Product: duplicate warning, new category, S.No 90, appears in 
   await page.getByLabel("Minimum level").fill("2");
   await page.getByLabel("Monthly use").fill("5");
   await page.getByLabel("Opening stock").fill("1.5");
-  await page.getByLabel("Expiry date").fill("2026-11-20");
+  await page.getByLabel("Expected delivery (if ordered)").fill("2026-11-20");
   await page.getByRole("button", { name: "Add product" }).click();
   await page.getByText("Cotton Roll 500g added as S.No 90.").waitFor();
   const card = page.locator(".inv-card", { hasText: "Cotton Roll 500g" });
-  assert.match(await card.innerText(), /Low stock/); assert.match(await card.innerText(), /Expires in/); assert.match(await card.innerText(), /1.5/);
+  assert.match(await card.innerText(), /Low stock/); assert.match(await card.innerText(), /On order · expected 20 Nov 2026/); assert.match(await card.innerText(), /1.5/);
   await page.getByRole("button", { name: "Daily register" }).click();
   await page.locator("#reg tr", { hasText: "Cotton Roll 500g" }).waitFor();
   assert.equal(await page.locator('#reg tr:has-text("Cotton Roll 500g") td.cell.low').count(), 1);
@@ -142,6 +143,9 @@ await step("edit, archive (with confirmation) and restore a product", async () =
   await page.getByRole("button", { name: "Save changes" }).click();
   await page.getByText("Cotton Roll 500g saved.").waitFor();
   assert.doesNotMatch(await page.locator(".inv-card", { hasText: "Cotton Roll 500g" }).innerText(), /Low stock/);
+  await page.getByRole("button", { name: "Mark delivered" }).click();
+  await page.getByText("Cotton Roll 500g marked delivered.").waitFor();
+  assert.doesNotMatch(await page.locator(".inv-card", { hasText: "Cotton Roll 500g" }).innerText(), /On order/);
   await page.getByRole("button", { name: "Delete…" }).click();
   await page.getByText("It's archived, so its counts stay").waitFor();
   await page.getByRole("button", { name: "Archive", exact: true }).click();
@@ -187,7 +191,8 @@ await step("export register CSV (items x days) and printable PDF", async () => {
   const text = await page.evaluate(() => window.__lastSave);
   const lines = text.replace(/^﻿/, "").split("\r\n");
   assert.equal(lines[0], "Current Stock November 01.11.2026 – 30.11.2026");
-  assert.equal(lines[1], "S.No,Stock Name,Category,Unit,Minimum Level,Monthly Use," + Array.from({ length: 30 }, (_, i) => i + 1).join(",") + ",Expiry,Status,Notes");
+  assert.equal(lines[1], "S.No,Stock Name,Category,Unit,Minimum Level,Monthly Use," + Array.from({ length: 30 }, (_, i) => i + 1).join(",") + ",Expected Delivery,Status,Notes");
+  assert.ok(lines.find((l) => l.startsWith("16,Gauze Pack")).includes(",12/11/2026,"));
   assert.ok(lines.find((l) => l.startsWith("17,Gloves Box,Consumables,Box,6,9,2,1,1,1,1,")), "Gloves row");
   assert.ok(lines.find((l) => l.startsWith("1,ADDND 1GM Tablet")).includes(",STOP,"));
   assert.ok(lines.find((l) => l.startsWith("9,Battery")).includes(",8,8,8,8,3,"));
@@ -205,7 +210,7 @@ await step("import CSV updates matching products and adds new ones", async () =>
   await page.getByText("Import done: 1 updated, 1 added, 2 counts.").waitFor();
   await page.getByRole("button", { name: /Stock list/ }).click();
   const tb = await page.locator(".inv-card", { hasText: "Tooth Brush" }).innerText();
-  assert.match(tb, /Min 2/); assert.match(tb, /Low stock/); assert.match(tb, /Expires in/);
+  assert.match(tb, /Min 2/); assert.match(tb, /Low stock/); assert.match(tb, /On order · expected 15 Nov 2026/);
   await page.locator(".inv-card", { hasText: "New Ointment" }).waitFor();
 });
 await step("optional billing link subtracts billed quantities (off by default)", async () => {

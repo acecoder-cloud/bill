@@ -208,6 +208,18 @@ await step("admin: role permission table saves changes", async () => {
   await page.getByText("Role permissions reset to defaults.").waitFor();
   assert.ok(await page.getByLabel("Staff: Open Reports and save files").isChecked());
 });
+await step("Bills list has Edit and Delete buttons on each bill", async () => {
+  await page.getByRole("link", { name: "Bills" }).click();
+  await page.getByRole("button", { name: /^Edit bill No\. 4471 of 2 Nov 2026/ }).click();
+  await page.getByRole("heading", { name: "Edit bill" }).waitFor();
+  await page.getByRole("button", { name: "‹ Back" }).click();
+  await page.getByRole("link", { name: "Bills" }).click();
+  await page.getByRole("button", { name: /^Delete bill No\. 4471 of 28 Oct 2026/ }).click();
+  await page.getByText("and all its items? This can't be undone.").waitFor();
+  await page.getByRole("button", { name: "Keep" }).click();
+  assert.equal(await page.getByText("This can't be undone.").count(), 0);
+  await page.screenshot({ path: DIR + "a14-bill-actions.png", fullPage: true });
+});
 await step("admin can edit and delete another person's bill", async () => {
   await page.getByRole("link", { name: "Bills" }).click();
   await page.getByRole("button", { name: /^28 Oct 2026/ }).click();
@@ -249,6 +261,8 @@ await step("staff: no Admin tab, other's bill is read-only", async () => {
   await p2.getByText("You can view this bill").waitFor();
   assert.equal(await p2.getByRole("button", { name: "Save changes" }).count(), 0);
   assert.ok(await p2.getByLabel("Item name, row 1").isDisabled());
+  await p2.getByRole("button", { name: "‹ Back" }).click();
+  assert.equal(await p2.getByRole("button", { name: /^Delete bill/ }).count(), 0, "no Delete on someone else's bill");
   await p2.screenshot({ path: DIR + "a7-staff-readonly.png", fullPage: true });
 });
 await step("team roles change what people can do", async () => {

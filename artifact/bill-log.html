@@ -127,7 +127,9 @@ p { margin: 0; }
 .bill-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
 .bill-wrap .bill { border: 0; border-radius: 0; }
 .bill-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 14px 10px; border-top: 1px dashed var(--line); }
-.bill-actions .btn-paid { margin-left: auto; }
+.bill-actions .btn-paid, .bill-actions .pay-note { margin-left: auto; }
+.btn-sm { min-height: 44px; padding: 0 16px; }
+.bill-confirm { margin: 0 12px 12px; }
 .btn-paid { min-height: 44px; padding: 0 22px; background: var(--ok-bg); color: var(--ok-ink); border: 1px solid color-mix(in srgb, var(--ok-ink) 35%, transparent); }
 .pill.paid { background: var(--ok-bg); color: var(--ok-ink); }
 .pill.unpaid { background: var(--bad-bg); color: var(--bad-ink); }
@@ -322,6 +324,8 @@ table.reg { border-collapse: separate; border-spacing: 0; font-size: .85rem; wid
 .stop-tag { background: var(--line); color: var(--fg); }
 .low-tag { background: var(--warn-bg); color: var(--warn-ink); }
 .exp-tag { background: var(--bad-bg); color: var(--bad-ink); }
+.order-tag { background: var(--brand-soft); color: var(--brand); }
+.pill.order { background: var(--brand-soft); color: var(--brand); border: 1px solid color-mix(in srgb, var(--brand) 35%, transparent); }
 .inv-cellbar { position: fixed; left: 0; right: 0; bottom: calc(62px + env(safe-area-inset-bottom, 0px)); z-index: 26; background: var(--surface); border-top: 2px solid var(--brand); box-shadow: 0 -8px 24px rgb(0 0 0 / .15);
   padding: 12px max(16px, env(safe-area-inset-right, 0px)) 12px max(16px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; gap: 8px; }
 .inv-cellbar > * { width: 100%; max-width: 860px; margin: 0 auto; }
@@ -686,13 +690,19 @@ function billCard(b, opts = {}) {
   const items = b.items || [];
   const mm = items.filter((i) => hasMismatch(i.qty, i.rate, i.total_amount)).length;
   const pay = opts.pay && canChange(b);
+  const edit = opts.pay && mayEditBill(b); const del = opts.pay && mayDeleteBill(b);
+  const confirming = S.billConfirm === b.owner + "/" + b.id;
   return `<div class="bill-wrap ${isPaid(b) ? "is-paid" : ""}"><button class="bill" data-act="open" data-owner="${esc(b.owner)}" data-id="${esc(b.id)}">
     <span class="d">${esc(fmtDate(b.bill_date))}${b.bill_no ? ` <span class="billno-tag num">No. ${esc(b.bill_no)}</span>` : ""}</span><span class="t num">₹ ${money(billTotal(b))}</span>
     <span class="m"><span class="pill ${isPaid(b) ? "paid" : "unpaid"}">${payLabel(b)}</span> ${items.length} item${items.length === 1 ? "" : "s"}${b.image_id ? ' · <span class="pill">Photo</span>' : ""}${mm ? ` <span class="pill warn">${mm} to check</span>` : ""}
       <span>· by <span data-uid="${esc(b.owner)}"></span> · ${esc(fmtDT(b.logged_at))}</span></span>
-  </button>${pay ? `<div class="bill-actions">${isPaid(b)
-      ? `<span class="small muted">Paid ${esc(fmtDT(b.paid_at))}</span><button class="btn-link" data-act="mark-paid" data-v="unpaid" data-owner="${esc(b.owner)}" data-id="${esc(b.id)}">Mark unpaid</button>`
-      : `<button class="btn btn-paid" data-act="mark-paid" data-v="paid" data-owner="${esc(b.owner)}" data-id="${esc(b.id)}" aria-label="Mark bill${b.bill_no ? " No. " + esc(b.bill_no) : ""} of ${esc(fmtDate(b.bill_date))} as paid">Paid</button>`}</div>` : ""}</div>`;
+  </button>${pay || edit || del ? `<div class="bill-actions">
+      ${edit ? `<button class="btn btn-ghost btn-sm" data-act="open" data-owner="${esc(b.owner)}" data-id="${esc(b.id)}" aria-label="Edit bill${b.bill_no ? " No. " + esc(b.bill_no) : ""} of ${esc(fmtDate(b.bill_date))}">Edit</button>` : ""}
+      ${del ? `<button class="btn btn-ghost btn-sm danger-text" data-act="bill-del" data-owner="${esc(b.owner)}" data-id="${esc(b.id)}" aria-label="Delete bill${b.bill_no ? " No. " + esc(b.bill_no) : ""} of ${esc(fmtDate(b.bill_date))}">Delete</button>` : ""}
+      ${pay ? (isPaid(b)
+      ? `<span class="small muted pay-note">Paid ${esc(b.paid_at ? fmtDate(localDay(b.paid_at)).replace(/ \d{4}$/, "") : "")}</span><button class="btn-link" data-act="mark-paid" data-v="unpaid" data-owner="${esc(b.owner)}" data-id="${esc(b.id)}">Mark unpaid</button>`
+      : `<button class="btn btn-paid" data-act="mark-paid" data-v="paid" data-owner="${esc(b.owner)}" data-id="${esc(b.id)}" aria-label="Mark bill${b.bill_no ? " No. " + esc(b.bill_no) : ""} of ${esc(fmtDate(b.bill_date))} as paid">Paid</button>`) : ""}</div>
+    ${confirming ? `<div class="note bad confirm bill-confirm"><span>Delete this bill${b.bill_no ? ` (No. ${esc(b.bill_no)})` : ""} of ${esc(fmtDate(b.bill_date))}, ₹ ${money(billTotal(b))}, and all its items? This can't be undone.</span><button class="btn btn-danger" data-act="bill-del-yes" data-owner="${esc(b.owner)}" data-id="${esc(b.id)}">Delete bill</button><button class="btn btn-ghost" data-act="bill-del-no">Keep</button></div>` : ""}` : ""}</div>`;
 }
 
 /* ---------------- bills list ---------------- */
@@ -1032,7 +1042,7 @@ function paintAdmin() {
   const team = $("#team"); if (team) paintNames(team).then(() => showLabelBoxes(team));
   const a = S.audit; const box = $("#audit-list"); if (!box || !a?.rows) return;
   if (!a.rows.length) { box.innerHTML = `<p class="muted">No activity yet.</p>`; return; }
-  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed", "roles.update": "Role permissions changed", "inventory.seed": "Stock register loaded", "inventory.add": "Product added", "inventory.edit": "Product edited", "inventory.archive": "Product archived", "inventory.restore": "Product restored", "inventory.delete": "Product deleted", "inventory.month": "Stock month started", "inventory.import": "Stock CSV imported" };
+  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed", "roles.update": "Role permissions changed", "inventory.seed": "Stock register loaded", "inventory.add": "Product added", "inventory.edit": "Product edited", "inventory.archive": "Product archived", "inventory.restore": "Product restored", "inventory.delete": "Product deleted", "inventory.month": "Stock month started", "inventory.import": "Stock CSV imported", "inventory.delivered": "Order delivered" };
   box.innerHTML = a.rows.map((r, i) => `<details><summary><b>${esc(label[r.action] || r.action)}</b>
     <span class="small muted">by <span data-uid="${esc(r.actor)}"></span> · ${esc(fmtDT(r.at))} · ${r.action === "roles.update" ? "Admin / Staff / Viewer permissions" : r.action.startsWith("inventory.") ? esc((r.after || r.before || {}).name || (r.after || {}).month || "Inventory") : r.action.startsWith("team.") ? `<span data-uid="${esc((r.after || r.before || {}).member || "")}"></span>${r.after?.role ? " → " + esc(ROLES[r.after.role]?.label || r.after.role) : ""}` : `bill ${(r.after || r.before || {}).bill_no ? "No. " + esc((r.after || r.before).bill_no) + " of " : "of "}${esc(fmtDate((r.after || r.before || {}).bill_date))}`}</span></summary>
     <div class="pair"><div><div class="small muted">Before</div><pre data-json="b${i}"></pre></div><div><div class="small muted">After</div><pre data-json="a${i}"></pre></div></div></details>`).join("");
@@ -1370,6 +1380,17 @@ async function writeAudit(action, owner, id, before, after) {
     await db.doc(`audit/${S.uid}`).set({ updated_at: at });
   } catch {}
 }
+async function deleteBillFromList(owner, id, btn) {
+  const b = (S.bills.get(owner) || []).find((x) => x.id === id); if (!b || !mayDeleteBill(b)) return;
+  btn.disabled = true; btn.textContent = "Deleting…";
+  try {
+    await S.caps.db.doc(`bills/${owner}/list/${id}`).delete();
+    writeAudit("bill.delete", owner, id, stripBill(b), null);
+    if (b.image_id && S.caps.assets) S.caps.assets.delete(b.image_id).catch(() => {});
+    S.billConfirm = null; flash(`Bill${b.bill_no ? " No. " + b.bill_no : ""} deleted.`);
+  } catch (e) { S.billConfirm = null; flash(dbErrorText(e).replace("save this bill", "delete this bill")); }
+  render();
+}
 async function deleteBill() {
   const ed = S.editor; const slot = $("#del-slot");
   slot.querySelector("button").disabled = true;
@@ -1381,7 +1402,9 @@ async function deleteBill() {
   } catch (e) { slot.innerHTML = `<div class="note bad">${esc(dbErrorText(e))}</div>`; }
 }
 let flashMsg = null;
-function flash(t) { flashMsg = t; setTimeout(() => { flashMsg = null; const f = $("#flash"); f && f.remove(); }, 4000); }
+let flashSeq = 0;
+/** Show a short confirmation. Each message gets its own 4-second timer, so an older timer can't clear a newer message. */
+function flash(t) { const id = ++flashSeq; flashMsg = t; setTimeout(() => { if (id !== flashSeq) return; flashMsg = null; const f = $("#flash"); f && f.remove(); }, 4000); }
 const _render = render;
 render = function () { _render(); if (flashMsg && !S.editor) $("#main").insertAdjacentHTML("afterbegin", `<div class="note ok" id="flash">${esc(flashMsg)}</div>`); };
 
@@ -1489,6 +1512,9 @@ document.addEventListener("click", (e) => {
     case "save-pay": t.disabled = true; markPaid(ed.owner, ed.id, ed.paid, t).then(() => { S.editor = null; renderTabs(); render(); }); break;
     case "ed-pay": ed.paid = t.dataset.v === "paid"; ed.dirty = true; t.parentElement.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === t))); break;
     case "mark-paid": markPaid(t.dataset.owner, t.dataset.id, t.dataset.v === "paid", t); break;
+    case "bill-del": S.billConfirm = t.dataset.owner + "/" + t.dataset.id; render(); break;
+    case "bill-del-no": S.billConfirm = null; render(); break;
+    case "bill-del-yes": deleteBillFromList(t.dataset.owner, t.dataset.id, t); break;
     case "del-bill": {
       const slot = $("#del-slot");
       slot.innerHTML = `<div class="note bad confirm"><span>Delete this bill and all its items? This can't be undone.</span><button class="btn btn-danger" data-act="del-yes">Delete</button><button class="btn btn-ghost" data-act="del-no">Keep</button></div>`; slot.scrollIntoView({ block: "end", behavior: "smooth" }); break;
@@ -1542,7 +1568,8 @@ document.addEventListener("change", (e) => {
 
 /* ================= Inventory (monthly stock register) ================= */
 /* Storage (same claude.ai page storage as bills):
-   inventory/settings                    {months:[YYYY-MM], expiry_days, bill_link, categories, seeded_at}
+   inventory/settings                    {months:[YYYY-MM], bill_link, categories, seeded_at}
+   A product's expected_delivery (written "Exp" on paper) is the date an ordered product should arrive.
    inventory/products/items/<pid>        one product
    inventory/months/list/<YYYY-MM>       {counts: {pid: {day: number|null}}, flags: {pid: true}}  (per-day history) */
 const INV = {
@@ -1675,6 +1702,8 @@ function parseCount(v) {
 }
 const fmtCount = (n) => (n == null || !isFinite(n) ? "" : String(Number(Number(n).toFixed(3))));
 function invTodayISO() { return todayISO(); }
+/** Expected delivery date of an ordered product (older records stored it as "expiry"). */
+function dueOf(p) { return p.expected_delivery ?? p.expiry ?? null; }
 
 /* ---------- offline outbox: writes made without a connection are kept on this phone and sent later ---------- */
 const OUTBOX_KEY = "pbl-inv-outbox";
@@ -1782,16 +1811,16 @@ function invStatus(pid) {
   const stopped = p.status === "stopped"; const archived = !!p.archived;
   const autoLow = !stopped && cur && p.min_level != null && cur.value <= p.min_level;
   const manLow = !stopped && manualLow(pid);
-  let expiry = null, daysLeft = null;
-  if (p.expiry) {
-    daysLeft = Math.round((new Date(p.expiry + "T00:00:00") - new Date(invTodayISO() + "T00:00:00")) / 864e5);
-    expiry = daysLeft < 0 ? "expired" : daysLeft <= (Number(INV.settings.expiry_days) || 30) ? "soon" : null;
+  const due = dueOf(p); let order = null, daysLeft = null;
+  if (due) {
+    daysLeft = Math.round((new Date(due + "T00:00:00") - new Date(invTodayISO() + "T00:00:00")) / 864e5);
+    order = daysLeft < 0 ? "overdue" : "on_order";
   }
-  return { p, cur, stopped, archived, low: !!(autoLow || manLow), autoLow: !!autoLow, manLow, expiry, daysLeft };
+  return { p, cur, stopped, archived, low: !!(autoLow || manLow), autoLow: !!autoLow, manLow, due, order, daysLeft };
 }
 function invAlertCount() {
   let n = 0;
-  for (const pid of INV.products.keys()) { const s = invStatus(pid); if (!s.archived && !s.stopped && (s.low || s.expiry)) n++; }
+  for (const pid of INV.products.keys()) { const s = invStatus(pid); if (!s.archived && !s.stopped && (s.low || s.order === "overdue")) n++; }
   return n;
 }
 function sortedProducts(includeArchived = false) {
@@ -1835,7 +1864,7 @@ async function seedInventory(auto) {
         pid = "p" + String(o.sno).padStart(3, "0");
         while (INV.products.has(pid)) pid += "x";
         const doc = { sno: Number(o.sno), name: o.name, category: o.category || "", unit: o.unit || "", min_level: parseCount(o.min_level), monthly_use: parseCount(o.monthly_use),
-          opening_stock: null, expiry: ddmmyyyyToISO(o.expiry), batch: "", notes: o.notes || "", status: o.status.toLowerCase() === "stopped" ? "stopped" : "active",
+          opening_stock: null, expected_delivery: ddmmyyyyToISO(o.expiry), batch: "", notes: o.notes || "", status: o.status.toLowerCase() === "stopped" ? "stopped" : "active",
           archived: false, created_at: now, created_by: S.uid, updated_at: now };
         await invWrite("set", `${INV_PRODUCTS}/${pid}`, doc); added++;
       }
@@ -1846,7 +1875,7 @@ async function seedInventory(auto) {
     if (INV.months.has(mk)) await invWrite("update", `${INV_MONTHS}/${mk}`, { counts, flags });
     else await invWrite("set", `${INV_MONTHS}/${mk}`, { counts, flags, started_at: now, started_by: S.uid });
     const months = [...new Set([...(INV.settings.months || []), mk])].sort();
-    await invWrite("set", "inventory/settings", { expiry_days: 30, bill_link: false, categories: [], ...INV.settings, months, seeded_at: now });
+    await invWrite("set", "inventory/settings", { bill_link: false, categories: [], ...INV.settings, months, seeded_at: now });
     watchMonth(mk); INV.regMonth = mk;
     writeAudit("inventory.seed", null, "inventory", null, { added });
     flash(added ? `Loaded the November 2026 register: ${added} products.` : "The November 2026 register was already loaded; missing counts were filled in.");
@@ -1891,9 +1920,9 @@ function listRows() {
     (INV.cat === "all" || s.p.category === INV.cat) &&
     (INV.status === "all" || (INV.status === "stopped" ? s.stopped : !s.stopped)) &&
     (!INV.lowOnly || (s.low && !s.stopped)) &&
-    (!INV.expOnly || s.expiry) &&
+    (!INV.expOnly || s.order) &&
     (INV.showArchived ? s.archived : true));
-  const key = { sno: (r) => r.s.p.sno, name: (r) => r.s.p.name.toLowerCase(), stock: (r) => (r.s.cur ? r.s.cur.value : Infinity), expiry: (r) => r.s.p.expiry || "9999" }[INV.sort];
+  const key = { sno: (r) => r.s.p.sno, name: (r) => r.s.p.name.toLowerCase(), stock: (r) => (r.s.cur ? r.s.cur.value : Infinity), due: (r) => r.s.due || "9999" }[INV.sort];
   return rows.sort((a, b) => { const x = key(a), y = key(b); return (typeof x === "number" && typeof y === "number" ? x - y : String(x).localeCompare(String(y))) || a.s.p.sno - b.s.p.sno; });
 }
 function pills(s) {
@@ -1901,8 +1930,8 @@ function pills(s) {
   if (s.archived) out.push(`<span class="pill">Archived</span>`);
   if (s.stopped) out.push(`<span class="pill stop">Stopped</span>`);
   if (s.low) out.push(`<span class="pill low">${s.autoLow ? "Low stock" : "Marked low"}</span>`);
-  if (s.expiry === "expired") out.push(`<span class="pill unpaid">Expired ${esc(fmtDate(s.p.expiry))}</span>`);
-  else if (s.expiry === "soon") out.push(`<span class="pill warn">Expires in ${s.daysLeft} day${s.daysLeft === 1 ? "" : "s"}</span>`);
+  if (s.order === "overdue") out.push(`<span class="pill unpaid">Delivery overdue · was due ${esc(fmtDate(s.due))}</span>`);
+  else if (s.order === "on_order") out.push(`<span class="pill order">On order · ${s.daysLeft === 0 ? "due today" : `expected ${esc(fmtDate(s.due))}`}</span>`);
   if (!s.cur) out.push(`<span class="pill">No count yet</span>`);
   return out.join(" ");
 }
@@ -1914,12 +1943,12 @@ function listView() {
     <label class="field"><span>Search by name</span><input class="inp" type="search" id="inv-q" data-act="inv-q" placeholder="e.g. Syringe" value="${esc(INV.q)}" autocomplete="off"></label>
     <div class="dates">
       <label class="field"><span>Category</span><select class="inp" id="inv-cat" data-act="inv-cat"><option value="all">All categories</option>${cats.map((c) => `<option ${INV.cat === c ? "selected" : ""}>${esc(c)}</option>`).join("")}</select></label>
-      <label class="field"><span>Sort by</span><select class="inp" id="inv-sort" data-act="inv-sort">${[["sno", "S.No"], ["name", "Name"], ["stock", "Stock level"], ["expiry", "Expiry"]].map(([v, l]) => `<option value="${v}" ${INV.sort === v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+      <label class="field"><span>Sort by</span><select class="inp" id="inv-sort" data-act="inv-sort">${[["sno", "S.No"], ["name", "Name"], ["stock", "Stock level"], ["due", "Expected delivery"]].map(([v, l]) => `<option value="${v}" ${INV.sort === v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
     </div>
     <div class="seg" role="group" aria-label="Status">${[["active", "Active"], ["stopped", "Stopped"], ["all", "All"]].map(([v, l]) => `<button data-act="inv-status" data-v="${v}" aria-pressed="${INV.status === v}">${l}</button>`).join("")}</div>
     <div class="chips">
       <button class="chip" data-act="inv-low" aria-pressed="${INV.lowOnly}">Low stock only</button>
-      <button class="chip" data-act="inv-exp" aria-pressed="${INV.expOnly}">Expiring soon</button>
+      <button class="chip" data-act="inv-exp" aria-pressed="${INV.expOnly}">On order</button>
       ${canInvManage() ? `<button class="chip" data-act="inv-arch" aria-pressed="${INV.showArchived}">Archived</button>` : ""}
     </div>
   </div>
@@ -1928,7 +1957,7 @@ function listView() {
     <button class="inv-card ${s.stopped || s.archived ? "is-stopped" : ""} ${s.low && !s.stopped ? "is-low" : ""}" data-act="inv-open" data-pid="${esc(pid)}" aria-expanded="${INV.detail === pid}">
       <span class="inv-sno num">${esc(s.p.sno)}</span>
       <span class="inv-main"><b>${esc(s.p.name)}</b>
-        <span class="small muted">${esc(s.p.category || "No category")} · ${esc(s.p.unit || "—")} · Min ${s.p.min_level != null ? fmtCount(s.p.min_level) : "—"} · Monthly ${s.p.monthly_use != null ? fmtCount(s.p.monthly_use) : "—"}${s.p.expiry ? ` · Exp ${esc(fmtDate(s.p.expiry))}` : ""}</span>
+        <span class="small muted">${esc(s.p.category || "No category")} · ${esc(s.p.unit || "—")} · Min ${s.p.min_level != null ? fmtCount(s.p.min_level) : "—"} · Monthly ${s.p.monthly_use != null ? fmtCount(s.p.monthly_use) : "—"}${s.due ? ` · Expected ${esc(fmtDate(s.due))}` : ""}</span>
         <span class="inv-pills">${pills(s)}</span></span>
       <span class="inv-stock num">${s.cur ? esc(fmtCount(s.cur.value)) : "—"}<small>${esc(s.p.unit || "")}</small></span>
     </button>`).join("") || `<div class="card"><p class="muted">No products match these filters.</p></div>`}</div>`;
@@ -1944,11 +1973,12 @@ function detailView(pid) {
       <dt>S.No</dt><dd class="num">${esc(p.sno)}</dd><dt>Category</dt><dd>${esc(p.category || "—")}</dd><dt>Unit</dt><dd>${esc(p.unit || "—")}</dd>
       <dt>Minimum level</dt><dd>${p.min_level != null ? fmtCount(p.min_level) : "—"}</dd><dt>Monthly use</dt><dd>${p.monthly_use != null ? fmtCount(p.monthly_use) : "—"}</dd>
       <dt>Current stock</dt><dd><b>${s.cur ? esc(unitLabel(p, s.cur.value)) : "—"}</b>${s.cur?.day ? ` <span class="small muted">(${s.cur.day} ${esc(monthLabel(s.cur.mk))})</span>` : ""}</dd>
-      <dt>Expiry</dt><dd>${p.expiry ? esc(fmtDate(p.expiry)) : "—"}</dd><dt>Batch No.</dt><dd>${esc(p.batch || "—")}</dd><dt>Notes</dt><dd>${esc(p.notes || "—")}</dd>
+      <dt>Expected delivery</dt><dd>${s.due ? esc(fmtDate(s.due)) + (s.order === "overdue" ? ' <span class="pill unpaid">overdue</span>' : "") : "Not on order"}</dd><dt>Batch No.</dt><dd>${esc(p.batch || "—")}</dd><dt>Notes</dt><dd>${esc(p.notes || "—")}</dd>
     </dl>
     ${mk ? `<div class="small muted" style="font-weight:600">${esc(monthLabel(mk))} counts</div><div class="hist">${hist.map(([d, v]) => `<span class="num"><small>${d}</small>${esc(fmtCount(v))}</span>`).join("") || '<span class="muted small">None yet</span>'}</div>` : ""}
     <div class="inv-actions">
       ${p.min_level == null && !s.stopped && canInvCount() && mk ? `<button class="btn btn-ghost" data-act="inv-flag" data-pid="${esc(pid)}">${s.manLow ? "Clear low-stock mark" : "Mark low stock"}</button>` : ""}
+      ${s.due && canInvManage() ? `<button class="btn btn-primary" data-act="inv-delivered" data-pid="${esc(pid)}">Mark delivered</button>` : ""}
       ${canInvManage() ? `<button class="btn btn-ghost" data-act="inv-edit" data-pid="${esc(pid)}">Edit</button>
         ${p.archived ? `<button class="btn btn-ghost" data-act="inv-restore" data-pid="${esc(pid)}">Restore</button><button class="btn btn-danger" data-act="inv-del" data-pid="${esc(pid)}">Delete forever</button>`
           : `<button class="btn btn-danger" data-act="inv-archive" data-pid="${esc(pid)}">Delete…</button>`}` : ""}
@@ -1998,7 +2028,7 @@ function regRow(mk, pid, p, n, day) {
   const s = invStatus(pid); const c = monthCounts(mk, pid);
   return `<tr data-row="${esc(pid)}" class="${s.stopped ? "stopped" : ""}">
     <td class="s1 num">${esc(p.sno)}</td>
-    <td class="s2"><span>${esc(p.name)}</span>${s.stopped ? ' <em class="stop-tag">STOP</em>' : ""}${s.manLow ? ' <em class="low-tag">LOW</em>' : ""}${s.expiry ? ` <em class="exp-tag">${s.expiry === "expired" ? "EXPIRED" : "EXP " + esc(fmtDate(p.expiry).replace(/ \d{4}$/, ""))}</em>` : ""}</td>
+    <td class="s2"><span>${esc(p.name)}</span>${s.stopped ? ' <em class="stop-tag">STOP</em>' : ""}${s.manLow ? ' <em class="low-tag">LOW</em>' : ""}${s.due ? ` <em class="${s.order === "overdue" ? "exp-tag" : "order-tag"}">${s.order === "overdue" ? "OVERDUE " : "DUE "}${esc(fmtDate(s.due).replace(/ \d{4}$/, ""))}</em>` : ""}</td>
     <td class="num">${p.min_level != null ? fmtCount(p.min_level) : ""}</td><td class="num">${p.monthly_use != null ? fmtCount(p.monthly_use) : ""}</td>
     ${Array.from({ length: n }, (_, i) => { const d = i + 1; const v = c[d]; const low = !s.stopped && typeof v === "number" && p.min_level != null && v <= p.min_level;
       return `<td class="cell num ${low ? "low" : ""} ${d === day ? "today" : ""} ${INV.cell?.pid === pid && INV.cell?.day === d ? "editing" : ""}" data-act="inv-cell" data-pid="${esc(pid)}" data-day="${d}" ${canInvCount() ? 'tabindex="0" role="button"' : ""} aria-label="${esc(p.name)}, day ${d}: ${v == null ? "empty" : fmtCount(v)}">${v == null ? "" : esc(fmtCount(v))}</td>`; }).join("")}
@@ -2109,9 +2139,9 @@ function reorderView() {
   const rows = reorderRows();
   return `<section class="card">
     <div class="row-between"><h2>Reorder list</h2>${rows.length && S.caps.downloads ? `<button class="btn btn-ghost" data-act="inv-reorder-csv">Save CSV</button>` : ""}</div>
-    <p class="small muted">Active products at or below their minimum level, or marked low. Suggested order = monthly use − current stock.</p>
+    <p class="small muted">Active products at or below their minimum level, or marked low. Suggested order = monthly use − current stock. Items already ordered show their expected delivery date.</p>
     ${rows.length ? `<div class="tbl-wrap"><table><thead><tr><th>Product</th><th class="r">Current</th><th class="r">Min</th><th class="r">Monthly use</th><th class="r">Suggested order</th></tr></thead>
-      <tbody>${rows.map(({ s, suggest }) => `<tr><td class="wrap"><button class="link" data-act="inv-open" data-pid="${esc(sortedProducts().find(([, p]) => p === s.p)?.[0] || "")}">${esc(s.p.name)}</button>${s.manLow ? ' <span class="pill low">Marked low</span>' : ""}</td>
+      <tbody>${rows.map(({ s, suggest }) => `<tr><td class="wrap"><button class="link" data-act="inv-open" data-pid="${esc(sortedProducts().find(([, p]) => p === s.p)?.[0] || "")}">${esc(s.p.name)}</button>${s.manLow ? ' <span class="pill low">Marked low</span>' : ""}${s.due ? ` <span class="pill ${s.order === "overdue" ? "unpaid" : "order"}">${s.order === "overdue" ? "Overdue" : "On order"} · ${esc(fmtDate(s.due))}</span>` : ""}</td>
         <td class="r num">${s.cur ? esc(fmtCount(s.cur.value)) : "—"}</td><td class="r num">${s.p.min_level != null ? fmtCount(s.p.min_level) : "—"}</td><td class="r num">${s.p.monthly_use != null ? fmtCount(s.p.monthly_use) : "—"}</td>
         <td class="r num"><b>${suggest == null ? "set monthly use" : esc(fmtCount(suggest)) + " " + esc(s.p.unit || "")}</b></td></tr>`).join("")}</tbody></table></div>`
       : `<p class="muted">Nothing to reorder right now.</p>`}
@@ -2126,21 +2156,20 @@ function invToolsView() {
     <h2>Export and import</h2>
     ${mk && S.caps.downloads ? `<div class="duo"><button class="btn btn-ghost" data-act="inv-csv">Register CSV (${esc(monthLabel(mk))})</button><button class="btn btn-ghost" data-act="inv-pdf">Printable register (PDF)</button></div>` : mk ? `<p class="small muted">Saving files isn't available in this view.</p>` : ""}
     ${canInvManage() ? `<button class="btn btn-ghost btn-block" data-act="inv-import">Import from CSV…</button>
-      <p class="small muted">CSV columns: name (required), sno, category, unit, min_level, monthly_use, opening_stock, expiry (DD/MM/YYYY), batch, status, notes, and day columns (1, 2 … or nov1, nov2 …) for ${mk ? esc(monthLabel(mk)) : "the current month"}. Products are matched by name; existing ones are updated.</p>` : ""}
+      <p class="small muted">CSV columns: name (required), sno, category, unit, min_level, monthly_use, opening_stock, expected_delivery (DD/MM/YYYY; "exp" also works), batch, status, notes, and day columns (1, 2 … or nov1, nov2 …) for ${mk ? esc(monthLabel(mk)) : "the current month"}. Products are matched by name; existing ones are updated.</p>` : ""}
     ${ip ? importPreviewView(ip) : ""}
   </section>
   ${canInvManage() ? `<section class="card"><h2>Inventory settings</h2>
-    <label class="field"><span>Warn about expiry this many days ahead</span><input class="inp" id="inv-expdays" data-act="inv-expdays" inputmode="numeric" value="${esc(st.expiry_days ?? 30)}"></label>
     <label class="pick"><input type="checkbox" data-act="inv-billlink" ${st.bill_link ? "checked" : ""}> Subtract billed quantities from stock when a bill is saved (items matched by exact product name)</label>
     ${INV.products.size ? `<button class="btn-link" data-act="inv-seed" ${INV.seeding ? "disabled" : ""}>Load November 2026 register (adds only missing products and counts)</button>` : ""}
   </section>` : ""}`;
 }
 function registerCsv(mk) {
   const n = daysIn(mk); const days = Array.from({ length: n }, (_, i) => i + 1);
-  const lines = [[registerTitle(mk)], ["S.No", "Stock Name", "Category", "Unit", "Minimum Level", "Monthly Use", ...days.map(String), "Expiry", "Status", "Notes"]];
+  const lines = [[registerTitle(mk)], ["S.No", "Stock Name", "Category", "Unit", "Minimum Level", "Monthly Use", ...days.map(String), "Expected Delivery", "Status", "Notes"]];
   for (const [pid, p] of sortedProducts()) {
     const c = monthCounts(mk, pid);
-    lines.push([p.sno, p.name, p.category || "", p.unit || "", p.min_level ?? "", p.monthly_use ?? "", ...days.map((d) => (c[d] == null ? "" : c[d])), p.expiry ? p.expiry.split("-").reverse().join("/") : "", p.status === "stopped" ? "STOP" : "Active", p.notes || ""]);
+    lines.push([p.sno, p.name, p.category || "", p.unit || "", p.min_level ?? "", p.monthly_use ?? "", ...days.map((d) => (c[d] == null ? "" : c[d])), dueOf(p) ? dueOf(p).split("-").reverse().join("/") : "", p.status === "stopped" ? "STOP" : "Active", p.notes || ""]);
   }
   return "﻿" + lines.map((l) => l.map(csvCell).join(",")).join("\r\n") + "\r\n";
 }
@@ -2155,11 +2184,11 @@ async function registerPdf(mk) {
   const n = daysIn(mk); const days = Array.from({ length: n }, (_, i) => i + 1);
   const doc = new window.jspdf.jsPDF({ orientation: "landscape", unit: "pt", format: "a3" });
   doc.setFontSize(15); doc.text(registerTitle(mk), 30, 32);
-  doc.setFontSize(8); doc.setTextColor(100); doc.text(`Printed ${fmtDT(new Date().toISOString())} · amber = at or below minimum · grey = STOP`, 30, 46);
+  doc.setFontSize(8); doc.setTextColor(100); doc.text(`Printed ${fmtDT(new Date().toISOString())} · amber = at or below minimum · grey = STOP · due = ordered, expected delivery date`, 30, 46);
   const rows = sortedProducts(); const lowCell = new Set();
   const body = rows.map(([pid, p], r) => { const c = monthCounts(mk, pid); const s = invStatus(pid);
     days.forEach((d) => { const v = c[d]; if (!s.stopped && typeof v === "number" && p.min_level != null && v <= p.min_level) lowCell.add(`${r}:${d + 3}`); });
-    return [p.sno, p.name + (s.stopped ? " (STOP)" : "") + (p.expiry ? `  exp ${p.expiry.split("-").reverse().join(".")}` : ""), p.min_level ?? "", p.monthly_use ?? "", ...days.map((d) => (c[d] == null ? "" : fmtCount(c[d])))]; });
+    return [p.sno, p.name + (s.stopped ? " (STOP)" : "") + (dueOf(p) ? `  due ${dueOf(p).split("-").reverse().join(".")}` : ""), p.min_level ?? "", p.monthly_use ?? "", ...days.map((d) => (c[d] == null ? "" : fmtCount(c[d])))]; });
   doc.autoTable({
     startY: 56, head: [["S.No", "Stock Name", "Min", "Use", ...days.map(String)]], body, theme: "grid",
     styles: { fontSize: 6.5, cellPadding: 2, halign: "center", lineColor: 120, lineWidth: 0.3 }, headStyles: { fillColor: [15, 110, 102], textColor: 255 },
@@ -2183,7 +2212,7 @@ function buildImport(text) {
   const head = rows[hi].map((h) => h.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, ""));
   const col = (...names) => head.findIndex((h) => names.includes(h));
   const ix = { sno: col("sno", "s_no"), name: col("name", "stock_name"), category: col("category"), unit: col("unit"), min: col("min_level", "minimum_level", "min"),
-    use: col("monthly_use", "use"), open: col("opening_stock", "opening"), expiry: col("expiry", "expiry_date"), batch: col("batch", "batch_no"), status: col("status"), notes: col("notes") };
+    use: col("monthly_use", "use"), open: col("opening_stock", "opening"), due: col("expected_delivery", "expected", "delivery", "delivery_date", "exp", "expiry", "expiry_date"), batch: col("batch", "batch_no"), status: col("status"), notes: col("notes") };
   const dayCols = head.map((h, i) => { const m = /^(?:[a-z]{3}_?)?(\d{1,2})$/.exec(h); return m && Number(m[1]) >= 1 && Number(m[1]) <= 31 && h !== "sno" ? [i, Number(m[1])] : null; }).filter(Boolean);
   const mk = (INV.view === "register" && INV.regMonth) || latestMonths(1)[0] || monthKey(invTodayISO());
   const byName = new Map([...INV.products.entries()].map(([id, p]) => [normName(p.name), id]));
@@ -2197,7 +2226,7 @@ function buildImport(text) {
     if (ix.unit >= 0 && r[ix.unit]?.trim()) fields.unit = r[ix.unit].trim();
     const mn = num(r, ix.min, "Minimum level", line); if (mn !== undefined) fields.min_level = mn;
     const us = num(r, ix.use, "Monthly use", line); if (us !== undefined) fields.monthly_use = us;
-    if (ix.expiry >= 0 && r[ix.expiry]?.trim()) { const e = ddmmyyyyToISO(r[ix.expiry]); if (e) fields.expiry = e; else errors.push(`Line ${line}: expiry "${r[ix.expiry]}" isn't DD/MM/YYYY.`); }
+    if (ix.due >= 0 && r[ix.due]?.trim()) { const e = ddmmyyyyToISO(r[ix.due]); if (e) fields.expected_delivery = e; else errors.push(`Line ${line}: expected delivery "${r[ix.due]}" isn't DD/MM/YYYY.`); }
     if (ix.batch >= 0 && r[ix.batch]?.trim()) fields.batch = r[ix.batch].trim();
     if (ix.notes >= 0 && r[ix.notes]?.trim()) fields.notes = r[ix.notes].trim();
     if (ix.status >= 0 && r[ix.status]?.trim()) fields.status = /stop/i.test(r[ix.status]) ? "stopped" : "active";
@@ -2207,7 +2236,7 @@ function buildImport(text) {
       pid = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); byName.set(normName(name), pid);
       const s = Number(r[ix.sno]); const op = num(r, ix.open, "Opening stock", line);
       ops.push(["set", `${INV_PRODUCTS}/${pid}`, { sno: s > 0 && ![...INV.products.values()].some((p) => p.sno === s) ? s : sno++, name, category: "", unit: "", min_level: null, monthly_use: null,
-        opening_stock: op ?? null, expiry: null, batch: "", notes: "", status: "active", archived: false, created_at: now, created_by: S.uid, updated_at: now, ...fields }]);
+        opening_stock: op ?? null, expected_delivery: null, batch: "", notes: "", status: "active", archived: false, created_at: now, created_by: S.uid, updated_at: now, ...fields }]);
       creates++;
     }
     for (const [i, d] of dayCols) { if (d > daysIn(mk)) continue; const v = num(r, i, `Day ${d}`, line); if (typeof v === "number") { (counts[pid] ||= {})[d] = v; nCounts++; } }
@@ -2251,7 +2280,7 @@ function invFormView() {
     </div>
     ${f.mode === "add" ? `<label class="field"><span>Opening stock</span><input class="inp num" id="pf-open" data-pf="open" inputmode="decimal" value="${esc(v.open)}" placeholder="Count today, e.g. 10 or 0.5"></label>` : `<p class="small muted">Stock counts are entered in the daily register.</p>`}
     <div class="dates">
-      <label class="field"><span>Expiry date</span><input class="inp" type="date" id="pf-expiry" data-pf="expiry" value="${esc(v.expiry)}"></label>
+      <label class="field"><span>Expected delivery (if ordered)</span><input class="inp" type="date" id="pf-due" data-pf="due" value="${esc(v.due)}"></label>
       <label class="field"><span>Batch No.</span><input class="inp" id="pf-batch" data-pf="batch" value="${esc(v.batch)}" maxlength="40"></label>
     </div>
     <label class="field"><span>Notes</span><textarea class="inp" id="pf-notes" data-pf="notes" rows="2" maxlength="300">${esc(v.notes)}</textarea></label>
@@ -2263,8 +2292,8 @@ function invFormView() {
 function openForm(pid) {
   const p = pid ? INV.products.get(pid) : null;
   INV.form = { mode: p ? "edit" : "add", pid: pid || null, newCat: false, otherUnit: false, values: p ? {
-    name: p.name, category: p.category || "", unit: p.unit || "Pcs", min: fmtCount(p.min_level), use: fmtCount(p.monthly_use), open: "", expiry: p.expiry || "", batch: p.batch || "", notes: p.notes || "", status: p.status || "active",
-  } : { name: "", category: INV.cat !== "all" ? INV.cat : "", unit: "Tablet", min: "", use: "", open: "", expiry: "", batch: "", notes: "", status: "active" } };
+    name: p.name, category: p.category || "", unit: p.unit || "Pcs", min: fmtCount(p.min_level), use: fmtCount(p.monthly_use), open: "", due: dueOf(p) || "", batch: p.batch || "", notes: p.notes || "", status: p.status || "active",
+  } : { name: "", category: INV.cat !== "all" ? INV.cat : "", unit: "Tablet", min: "", use: "", open: "", due: "", batch: "", notes: "", status: "active" } };
   render(); window.scrollTo(0, 0); $("#pf-name")?.focus();
 }
 async function submitForm() {
@@ -2280,7 +2309,7 @@ async function submitForm() {
   try {
     if (f.mode === "add") {
       const pid = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-      const doc = { sno: nextSno(), name, category, unit, min_level: nums.min, monthly_use: nums.use, opening_stock: nums.open, expiry: v.expiry || null, batch: v.batch.trim(), notes: v.notes.trim(), status: v.status, archived: false, created_at: now, created_by: S.uid, updated_at: now };
+      const doc = { sno: nextSno(), name, category, unit, min_level: nums.min, monthly_use: nums.use, opening_stock: nums.open, expected_delivery: v.due || null, batch: v.batch.trim(), notes: v.notes.trim(), status: v.status, archived: false, created_at: now, created_by: S.uid, updated_at: now };
       const r = await invWrite("set", `${INV_PRODUCTS}/${pid}`, doc);
       if (nums.open != null) {
         const cur = monthKey(invTodayISO()); const mk = INV.months.has(cur) ? cur : latestMonths(1)[0];
@@ -2292,7 +2321,7 @@ async function submitForm() {
       INV.detail = pid;
     } else {
       const before = INV.products.get(f.pid);
-      const changes = { name, category, unit, min_level: nums.min, monthly_use: nums.use, expiry: v.expiry || null, batch: v.batch.trim(), notes: v.notes.trim(), status: v.status, updated_at: now, updated_by: S.uid };
+      const changes = { name, category, unit, min_level: nums.min, monthly_use: nums.use, expected_delivery: v.due || null, expiry: null, batch: v.batch.trim(), notes: v.notes.trim(), status: v.status, updated_at: now, updated_by: S.uid };
       await invWrite("update", `${INV_PRODUCTS}/${f.pid}`, changes);
       writeAudit("inventory.edit", null, f.pid, before, { ...before, ...changes });
       flash(`${name} saved.`); INV.detail = f.pid;
@@ -2340,6 +2369,14 @@ document.addEventListener("click", async (e) => {
       const arch = a === "inv-archive-yes"; INV.confirm = null;
       try { await invWrite("update", `${INV_PRODUCTS}/${pid}`, { archived: arch, updated_at: new Date().toISOString() }); writeAudit(arch ? "inventory.archive" : "inventory.restore", null, pid, null, { name: INV.products.get(pid)?.name }); flash(arch ? "Product archived." : "Product restored."); if (arch) INV.detail = null; }
       catch (err) { flash(dbErrorText(err).replace("save this bill", "change this product")); }
+      render(); break;
+    }
+    case "inv-delivered": {
+      const p = INV.products.get(pid); const was = dueOf(p);
+      try { await invWrite("update", `${INV_PRODUCTS}/${pid}`, { expected_delivery: null, expiry: null, delivered_at: new Date().toISOString(), updated_at: new Date().toISOString() });
+        writeAudit("inventory.delivered", null, pid, { name: p.name, expected_delivery: was }, { name: p.name, expected_delivery: null });
+        flash(`${p.name} marked delivered. Enter today's new count in the daily register.`); }
+      catch (err) { flash(dbErrorText(err).replace("save this bill", "update this product")); }
       render(); break;
     }
     case "inv-del-yes": {
@@ -2392,7 +2429,6 @@ document.addEventListener("change", async (e) => {
   if (a === "inv-cat") { INV.cat = t.value; render(); }
   if (a === "inv-sort") { INV.sort = t.value; render(); }
   if (a === "inv-day") { INV.regDay = { mk: INV.regMonth, day: Number(t.value) }; INV.cell = null; render(); }
-  if (a === "inv-expdays") { const n = Math.max(1, Math.min(365, Math.round(Number(t.value) || 30))); try { await invWrite(Object.keys(INV.settings).length ? "update" : "set", "inventory/settings", { expiry_days: n }); flash(`Expiry warnings now start ${n} days ahead.`); } catch (err) { flash(dbErrorText(err)); } render(); }
   if (a === "inv-billlink") { try { await invWrite(Object.keys(INV.settings).length ? "update" : "set", "inventory/settings", { bill_link: t.checked }); flash(t.checked ? "Billed quantities will now be subtracted from stock." : "Billing no longer changes stock."); } catch (err) { flash(dbErrorText(err)); } render(); }
   if (t.id === "inv-import-file") {
     const f = t.files?.[0]; t.value = ""; if (!f) return;
