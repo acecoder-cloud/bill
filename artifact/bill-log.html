@@ -260,6 +260,9 @@ tfoot td { font-weight: 800; background: var(--surface-2); border-bottom: 0; }
 @media (max-width: 520px) { .member-actions { flex-basis: 100%; padding-left: 48px; justify-content: space-between; } .member-actions .role-sel { flex: 1; max-width: 220px; } }
 .role-sel { min-height: 44px; width: auto; padding-right: 28px; }
 .confirm-slot { flex-basis: 100%; }
+.cand { flex-wrap: wrap; }
+.label-row { flex-basis: 100%; display: flex; flex-direction: column; gap: 4px; padding-left: 48px; }
+.label-row[hidden] { display: none; }
 .confirm-slot:empty { display: none; }
 .danger-text { color: var(--bad-ink); }
 .ok-text { color: var(--ok-ink); font-weight: 600; }
@@ -470,12 +473,19 @@ async function resolveNames(ids) {
   const user = S.caps.user; const need = [...new Set(ids.filter(Boolean))];
   if (!user || !need.length) return;
   const ps = await user.profiles(need);
-  for (const id of need) { const p = ps[id]; S.names[id] = p?.name || (id === S.uid ? "You" : "Someone"); S.avatars[id] = p?.avatarUrl; }
+  for (const id of need) { const p = ps[id]; S.names[id] = p?.name || (id === S.uid ? "You" : ""); S.avatars[id] = p?.avatarUrl; }
 }
-function nameOf(id) { return S.names[id] || (id === S.uid ? (S.me?.name || "You") : "…"); }
+function nameOf(id) {
+  if (S.names[id]) return S.names[id];
+  if (id === S.uid) return S.me?.name || "You";
+  const label = S.team.get(id)?.label;
+  if (label) return label;
+  return id in S.names ? "Name not shared" : "…";
+}
+const hasRealName = (id) => !!S.names[id];
 async function paintNames(root = document) {
   const els = [...root.querySelectorAll("[data-uid]:not(button):not(select):not(input)")];
-  const unknown = els.map((e) => e.dataset.uid).filter((id) => !S.names[id]);
+  const unknown = els.map((e) => e.dataset.uid).filter((id) => !(id in S.names));
   els.forEach((e) => { e.textContent = nameOf(e.dataset.uid); });
   if (unknown.length) { await resolveNames(unknown); els.forEach((e) => { e.textContent = nameOf(e.dataset.uid); }); root.querySelectorAll("img[data-avatar]").forEach((img) => { if (S.avatars[img.dataset.avatar]) img.src = S.avatars[img.dataset.avatar]; }); }
 }
@@ -812,9 +822,10 @@ function teamSection(stats) {
       <div class="row-between"><b>Add a user</b><button class="btn-link" data-act="team-close">Close</button></div>
       <label class="field"><span>Role for the new user</span>${roleSelect("", ta.role, 'id="team-new-role"', "team-new-role")}</label>
       <p class="small muted" id="team-role-desc">${esc(ROLES[ta.role].desc)}</p>
-      <label class="field"><span>Search your colleagues by name</span><input class="inp" type="search" id="team-q" data-act="team-q" placeholder="Type a name" autocomplete="off" value="${esc(ta.q)}"></label>
+      <div class="small muted" style="font-weight:600">Opened this page, not on the team yet</div>
+      ${notOnTeam.length ? `<div class="people">${notOnTeam.map(candidateRow).join("")}</div>` : `<p class="small muted">Nobody else yet. People appear here after they open the page with Editor or Contributor access.</p>`}
+      <label class="field"><span>Search colleagues in your organization by name</span><input class="inp" type="search" id="team-q" data-act="team-q" placeholder="Type a name" autocomplete="off" value="${esc(ta.q)}"></label>
       <div class="people" id="team-results">${ta.results.map((p) => candidateRow(p.id)).join("") || (ta.q ? `<p class="small muted">No colleagues found. People outside your organization can't be searched: send them the invite below, and they'll appear under "Opened this page" after they open it.</p>` : "")}</div>
-      ${notOnTeam.length ? `<div class="small muted" style="font-weight:600">Opened this page, not on the team yet</div><div class="people">${notOnTeam.map(candidateRow).join("")}</div>` : ""}
       <div class="invite">
         <div class="small muted" style="font-weight:600">Invite someone new</div>
         <ol class="small steps-help">
@@ -832,7 +843,7 @@ function teamSection(stats) {
         <div class="small muted">${st.n} bill${st.n === 1 ? "" : "s"} · <span class="num">₹ ${money(st.t)}</span>${m.added_at ? ` · added ${esc(fmtDate(m.added_at.slice(0, 10)))}` : ""}</div>
         ${m.role === "admin" && !self ? `<div class="small muted">Needs <b>Editor</b> in the Share menu to edit other people's bills.</div>` : ""}${m.role !== "admin" && !self ? `<div class="small muted">If they're an Editor in the Share menu, the app still limits them to ${ROLES[m.role].label} features.</div>` : ""}
       </div>
-      <div class="member-actions">${roleSelect(uid, m.role, self ? "disabled" : "")}${self ? "" : `<button class="btn-link danger-text" data-act="team-remove" data-member="${esc(uid)}">Remove</button>`}</div>
+      <div class="member-actions">${roleSelect(uid, m.role, self ? "disabled" : "")}${self ? "" : `<button class="btn-link" data-act="team-label" data-member="${esc(uid)}">Edit name</button><button class="btn-link danger-text" data-act="team-remove" data-member="${esc(uid)}">Remove</button>`}</div>
       <div class="confirm-slot" data-confirm="${esc(uid)}"></div>
     </div>`; }).join("")}</div>` : ""}
     <details class="small"><summary class="muted">What each role can do</summary>
@@ -842,9 +853,16 @@ function teamSection(stats) {
   </section>`;
 }
 function candidateRow(uid) {
-  return `<div class="person"><img alt="" data-avatar="${esc(uid)}" src="${esc(S.avatars[uid] || "")}">
-    <div class="grow"><b data-uid="${esc(uid)}"></b>${S.people.get(uid)?.last_seen ? `<div class="small muted">Opened ${esc(fmtDT(S.people.get(uid).last_seen))}</div>` : ""}</div>
-    <button class="btn btn-ghost" data-act="team-add" data-member="${esc(uid)}">Add</button></div>`;
+  const seen = S.people.get(uid)?.last_seen;
+  return `<div class="person cand"><img alt="" data-avatar="${esc(uid)}" src="${esc(S.avatars[uid] || "")}">
+    <div class="grow"><b data-uid="${esc(uid)}"></b>${seen ? `<div class="small muted">Last opened ${esc(fmtDT(seen))}</div>` : ""}</div>
+    <button class="btn btn-ghost" data-act="team-add" data-member="${esc(uid)}">Add</button>
+    <label class="label-row" data-label-row="${esc(uid)}" hidden><span class="small muted">claude.ai doesn't share this person's name with the page. Type a name so you can recognise them:</span>
+      <input class="inp" data-label-for="${esc(uid)}" placeholder="e.g. Abi (abipalanisg@gmail.com)" maxlength="60" autocomplete="off"></label></div>`;
+}
+/** After names load, show the name box only for people without a claude.ai name. */
+function showLabelBoxes(root) {
+  root.querySelectorAll("[data-label-row]").forEach((row) => { row.hidden = hasRealName(row.dataset.labelRow); });
 }
 async function teamWrite(fn, okText) {
   try { await fn(); flash(okText); }
@@ -853,11 +871,13 @@ async function teamWrite(fn, okText) {
 }
 async function addMember(uid) {
   const db = S.caps.db; const now = new Date().toISOString(); const role = S.teamAdd?.role || "staff";
+  const label = (document.querySelector(`[data-label-for="${CSS.escape(uid)}"]`)?.value || "").trim().slice(0, 60);
+  const shown = hasRealName(uid) ? nameOf(uid) : label || "This person";
   await teamWrite(async () => {
     if (!S.team.size && !S.team.has(S.uid)) await db.doc(`team/${S.uid}`).set({ role: "admin", added_by: S.uid, added_at: now });
-    await db.doc(`team/${uid}`).set({ role, added_by: S.uid, added_at: now });
-    writeAudit("team.add", null, uid, null, { member: uid, role });
-  }, `${nameOf(uid)} added as ${ROLES[role].label}.`);
+    await db.doc(`team/${uid}`).set({ role, added_by: S.uid, added_at: now, ...(label && !hasRealName(uid) ? { label } : {}) });
+    writeAudit("team.add", null, uid, null, { member: uid, role, ...(label ? { label } : {}) });
+  }, `${shown} added as ${ROLES[role].label}.`);
   if (S.teamAdd) { S.teamAdd.results = S.teamAdd.results.filter((p) => p.id !== uid); }
 }
 let teamSearchSeq = 0;
@@ -871,9 +891,10 @@ async function searchTeam(q) {
   const box = $("#team-results"); if (!box) return;
   box.innerHTML = ta.results.map((p) => candidateRow(p.id)).join("") || (q.trim() ? `<p class="small muted">No colleagues found. People outside your organization can't be searched: send them the invite below, and they'll appear under "Opened this page" after they open it.</p>` : "");
   box.querySelectorAll(".person").forEach((row, i) => { const id = ta.results[i]?.id; const btn = row.querySelector("button"); if (id && S.team.has(id)) { btn.disabled = true; btn.textContent = "On team"; } });
-  paintNames(box);
+  paintNames(box).then(() => showLabelBoxes(box));
 }
 function paintAdmin() {
+  const team = $("#team"); if (team) paintNames(team).then(() => showLabelBoxes(team));
   const a = S.audit; const box = $("#audit-list"); if (!box || !a?.rows) return;
   if (!a.rows.length) { box.innerHTML = `<p class="muted">No activity yet.</p>`; return; }
   const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed" };
@@ -1280,6 +1301,16 @@ document.addEventListener("click", (e) => {
     case "team-open": S.teamAdd = { role: "staff", q: "", results: [] }; render(); $("#team-q")?.focus(); break;
     case "team-close": S.teamAdd = null; render(); break;
     case "team-add": t.disabled = true; addMember(t.dataset.member); break;
+    case "team-label": {
+      const uid = t.dataset.member; const slot = document.querySelector(`[data-confirm="${CSS.escape(uid)}"]`);
+      slot.innerHTML = `<div class="note confirm"><label class="field" style="flex:1 1 100%"><span>Name shown in the app</span><input class="inp" id="label-edit" maxlength="60" value="${esc(S.team.get(uid)?.label || "")}" placeholder="e.g. Abi"></label><button class="btn btn-primary" data-act="team-label-save" data-member="${esc(uid)}">Save name</button><button class="btn btn-ghost" data-act="dismiss">Cancel</button></div>`;
+      $("#label-edit").focus(); break;
+    }
+    case "team-label-save": {
+      const uid = t.dataset.member; const label = ($("#label-edit").value || "").trim().slice(0, 60);
+      teamWrite(async () => { await S.caps.db.doc(`team/${uid}`).update({ label: label || null }); }, label ? `Name saved: ${label}.` : "Name cleared.");
+      break;
+    }
     case "team-remove": {
       const uid = t.dataset.member; const slot = document.querySelector(`[data-confirm="${CSS.escape(uid)}"]`);
       slot.innerHTML = `<div class="note bad confirm"><span>Remove <b>${esc(nameOf(uid))}</b> from the team? They won't be able to log bills. Their bills stay.</span><button class="btn btn-danger" data-act="team-remove-yes" data-member="${esc(uid)}">Remove</button><button class="btn btn-ghost" data-act="dismiss">Keep</button></div>`;
