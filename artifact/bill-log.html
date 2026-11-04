@@ -294,6 +294,7 @@ details.small ul { margin: 6px 0; padding-left: 18px; }
 .stage img { max-width: 100%; max-height: 100%; transform-origin: 0 0; user-select: none; -webkit-user-drag: none; will-change: transform; }
 
 .offline { position: fixed; left: 0; right: 0; top: env(safe-area-inset-top, 0px); z-index: 40; background: var(--warn-line); color: #2b1d00; text-align: center; font-weight: 700; font-size: .9rem; padding: 7px 16px; }
+.steps-help { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
 .confirm { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .confirm > span { flex: 1 1 100%; }
 .confirm .btn { flex: 1 1 auto; }
@@ -385,6 +386,8 @@ function myRole() {
   if (!S.team.size) return S.isAdmin ? "admin" : S.canWrite ? "staff" : "viewer";
   return "none";
 }
+/** Admin in the app: needs Editor access in the Share menu AND the Admin role (once a team exists). */
+function appAdmin() { return S.isAdmin && myRole() === "admin"; }
 function canLog() { return S.canWrite && (myRole() === "admin" || myRole() === "staff"); }
 const PEOPLE_WATCH_LIMIT = 50;
 
@@ -415,7 +418,9 @@ function startWatching() {
   const slow = setTimeout(() => { if (S.dbState === "loading") { S.dbState = "slow"; render(); } }, 10000);
   watchPerson(S.uid);
   db.collection("team").onSnapshot((snap) => {
-    S.team = new Map(snap.docs.map((d) => [d.id, d.data()])); renderTabs(); scheduleRender();
+    S.team = new Map(snap.docs.map((d) => [d.id, d.data()])); renderTabs(); renderWho();
+    if (S.tab === "admin" && !appAdmin()) { location.hash = "home"; return; }
+    scheduleRender();
   }, () => {});
   if (S.isAdmin) db.collection("people").onSnapshot((snap) => { S.people = new Map(snap.docs.map((d) => [d.id, d.data()])); if (S.tab === "admin") scheduleRender(); }, () => {});
   notePresence();
@@ -491,7 +496,7 @@ function onHash() {
   S.editor = null; S.tab = t; renderTabs(); render(); window.scrollTo(0, 0);
 }
 function renderTabs() {
-  $("#tabs").innerHTML = TABS.filter((t) => !t.admin || S.isAdmin).map((t) => `
+  $("#tabs").innerHTML = TABS.filter((t) => !t.admin || appAdmin()).map((t) => `
     <a href="#${t.id}" ${S.tab === t.id && !S.editor ? 'aria-current="page"' : ""}>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${t.icon}</svg>${t.label}</a>`).join("");
 }
@@ -501,7 +506,7 @@ function renderWho() {
   const img = document.createElement("img"); img.src = S.me.avatarUrl; img.alt = "";
   const n = document.createElement("span"); n.textContent = S.me.name || "You";
   el.append(img, n);
-  if (S.isAdmin) { const c = document.createElement("span"); c.className = "role-chip"; c.textContent = "Admin"; el.append(c); }
+  if (appAdmin()) { const c = document.createElement("span"); c.className = "role-chip"; c.textContent = "Admin"; el.append(c); }
 }
 
 function render() {
@@ -517,8 +522,14 @@ function render() {
 
 function signedOutView() {
   return `<div class="card">
-    <h1>Sign in to log bills</h1>
-    <p class="muted">Pharmacy Bill Log keeps bills in this page's shared storage, so it needs you signed in to claude.ai with access to this page. Open it from claude.ai, or ask the person who shared it to give you <b>Contributor</b> access.</p>
+    <h1>You can't log bills yet</h1>
+    <p>Your access to this page is <b>view only</b> (claude.ai shows "Can view" at the top), or you aren't signed in to claude.ai.</p>
+    <p class="muted">To get access, send the page owner the email address you use for claude.ai and ask them to:</p>
+    <ol class="steps-help">
+      <li>Open this page's <b>Share</b> menu and invite your email with <b>Editor</b> access. People outside the owner's organization need Editor; members of the same organization can be <b>Contributor</b>.</li>
+      <li>Turn off <b>Anyone with the link</b>, because invited Editors from outside the organization only get edit rights while public link sharing is off.</li>
+      <li>Add you in <b>Admin → Team</b> with your role after you reopen this page.</li>
+    </ol>
   </div>`;
 }
 
@@ -537,7 +548,7 @@ function homeView() {
   <div class="duo">
     <button class="btn btn-ghost" data-act="gallery">Upload a bill</button>
     <button class="btn btn-ghost" data-act="manual">Enter manually</button>
-  </div>` : !S.canWrite ? `<div class="note warn">You can view bills here. To log bills, ask the owner to give you <b>Contributor</b> access in the Share menu.</div>`
+  </div>` : !S.canWrite ? `<div class="note warn">Your access is view only. To log bills, ask the owner to invite you in the <b>Share</b> menu: <b>Contributor</b> if you're in their organization, otherwise <b>Editor</b> (with "Anyone with the link" turned off).</div>`
     : myRole() === "viewer" ? `<div class="note">Your role is <b>Viewer</b>: you can see bills, the summary and reports. Ask an admin if you need to log bills.</div>`
     : `<div class="note warn">You're not on the team yet. Ask an admin to add you in the Admin tab, then reopen this page.</div>`}
   <section class="card">
@@ -657,13 +668,14 @@ function rep() {
   if (!S.report) {
     let cols = REP_COLS.map((c) => c.k);
     try { const saved = JSON.parse(localStorage.getItem("pbl-cols") || "null"); if (Array.isArray(saved) && saved.length) cols = saved.includes("bill_no") || localStorage.getItem("pbl-cols-v2") ? saved : ["bill_date", "bill_no", ...saved.filter((k) => k !== "bill_date")]; localStorage.setItem("pbl-cols-v2", "1"); if (!cols.includes("payment_status") && !localStorage.getItem("pbl-cols-v3")) cols.splice(Math.max(0, cols.indexOf("total_amount") + 1), 0, "payment_status"); localStorage.setItem("pbl-cols-v3", "1"); } catch {}
-    S.report = { cols: new Set(cols), field: "bill_date", from: "", to: "", item: "", rows: null, format: "pdf", busy: false, msg: null };
+    S.report = { cols: new Set(cols), field: "bill_date", from: "", to: "", item: "", pay: "all", rows: null, format: "pdf", busy: false, msg: null };
   }
   return S.report;
 }
 function reportSubtitle(r) {
   const parts = [`${r.field === "bill_date" ? "Bill date" : "Logged date"}: ${r.from ? fmtDate(r.from) : "start"} – ${r.to ? fmtDate(r.to) : "today"}`];
   if (r.item.trim()) parts.push(`Item contains "${r.item.trim()}"`);
+  if (r.pay !== "all") parts.push(r.pay === "paid" ? "Paid bills only" : "Unpaid bills only");
   return parts.join(" · ");
 }
 function reportsView() {
@@ -679,6 +691,10 @@ function reportsView() {
       <button data-act="rep-field" data-v="logged_at" aria-pressed="${r.field === "logged_at"}">By logged date</button>
     </div>
     ${datesFields("rf", r.from, r.to, r.field === "bill_date" ? "Bill date" : "Logged date")}
+    <div class="field"><span>Payment status</span>
+      <div class="seg" role="group" aria-label="Payment status in report">
+        ${[["all", "All"], ["paid", "Paid"], ["unpaid", "Unpaid"]].map(([v, l]) => `<button data-act="rep-pay" data-v="${v}" aria-pressed="${r.pay === v}">${l}</button>`).join("")}
+      </div></div>
     <label class="field"><span>Item name contains</span><input class="inp" id="rep-item" placeholder="Leave empty for all items" value="${esc(r.item)}" data-act="rep-item"></label>
     <button class="btn btn-primary btn-block" data-act="rep-preview" ${cols.length ? "" : "disabled"}>${cols.length ? "Preview report" : "Pick at least one column"}</button>
   </section>
@@ -710,6 +726,7 @@ function runReport() {
   const r = rep(); const term = r.item.trim().toLowerCase();
   r.rows = entries().filter((e) => {
     if (term && !(e.item_name || "").toLowerCase().includes(term)) return false;
+    if (r.pay !== "all" && e.payment_status !== (r.pay === "paid" ? "Paid" : "Unpaid")) return false;
     const d = r.field === "bill_date" ? e.bill_date : localDay(e.logged_at);
     return (!r.from || d >= r.from) && (!r.to || d <= r.to);
   }).sort((a, b) => (a[r.field] || "").localeCompare(b[r.field] || "") || (a.serial_no ?? 0) - (b.serial_no ?? 0));
@@ -769,7 +786,7 @@ async function saveReport() {
 
 /* ---------------- admin ---------------- */
 function adminView() {
-  if (!S.isAdmin) return `<div class="note warn">Only admins can open this section.</div>`;
+  if (!appAdmin()) return `<div class="note warn">Only admins can open this section.</div>`;
   const stats = (uid) => { const l = S.bills.get(uid) || []; return { n: l.length, t: sum(l.map(billTotal)) }; };
   const a = S.audit;
   return `
@@ -800,7 +817,11 @@ function teamSection(stats) {
       ${notOnTeam.length ? `<div class="small muted" style="font-weight:600">Opened this page, not on the team yet</div><div class="people">${notOnTeam.map(candidateRow).join("")}</div>` : ""}
       <div class="invite">
         <div class="small muted" style="font-weight:600">Invite someone new</div>
-        <p class="small">1. Add them in this page's <b>Share</b> menu on claude.ai (<b>Contributor</b> for Staff or Viewer, <b>Editor</b> for Admin). 2. Send them the link. 3. Once they open it, add them here.</p>
+        <ol class="small steps-help">
+          <li>In this page's <b>Share</b> menu, invite their claude.ai email. <b>Someone outside your organization</b> (for example a personal Gmail account) must be invited as <b>Editor</b>, and <b>Anyone with the link</b> must be turned off, or they only get "Can view" and the page can't see them. Members of your organization can be <b>Contributor</b>.</li>
+          <li>Send them the link below.</li>
+          <li>When they've opened it, they appear under "Opened this page": add them with their role. An Editor you give the Staff role only gets Staff features in the app.</li>
+        </ol>
         <div class="copy-row"><input class="inp num" id="invite-link" readonly value="${esc(ARTIFACT_URL)}" aria-label="Invite link"><button class="btn btn-ghost" data-act="copy-invite">Copy invite</button></div>
         <p class="small ok-text" id="copy-msg" hidden></p>
       </div>
@@ -809,7 +830,7 @@ function teamSection(stats) {
       <img alt="" data-avatar="${esc(uid)}" src="${esc(S.avatars[uid] || "")}">
       <div class="grow"><b data-uid="${esc(uid)}"></b>${self ? ' <span class="pill">You</span>' : ""}
         <div class="small muted">${st.n} bill${st.n === 1 ? "" : "s"} · <span class="num">₹ ${money(st.t)}</span>${m.added_at ? ` · added ${esc(fmtDate(m.added_at.slice(0, 10)))}` : ""}</div>
-        ${m.role === "admin" && !self ? `<div class="small muted">Needs <b>Editor</b> in the Share menu to edit other people's bills.</div>` : ""}
+        ${m.role === "admin" && !self ? `<div class="small muted">Needs <b>Editor</b> in the Share menu to edit other people's bills.</div>` : ""}${m.role !== "admin" && !self ? `<div class="small muted">If they're an Editor in the Share menu, the app still limits them to ${ROLES[m.role].label} features.</div>` : ""}
       </div>
       <div class="member-actions">${roleSelect(uid, m.role, self ? "disabled" : "")}${self ? "" : `<button class="btn-link danger-text" data-act="team-remove" data-member="${esc(uid)}">Remove</button>`}</div>
       <div class="confirm-slot" data-confirm="${esc(uid)}"></div>
@@ -889,7 +910,7 @@ function openNew(file) {
 function openBill(owner, id) {
   const b = (S.bills.get(owner) || []).find((x) => x.id === id);
   if (!b) return;
-  const canEdit = S.isAdmin || (owner === S.uid && canLog());
+  const canEdit = appAdmin() || (owner === S.uid && canLog());
   S.editor = { mode: "edit", owner, id, bill: b, phase: "edit", date: b.bill_date, billNo: b.bill_no || "", paid: isPaid(b), rows: itemRows(b.items).length ? itemRows(b.items) : [emptyRow(1)], imageId: b.image_id || null, previewUrl: null, notice: canEdit ? null : { tone: "", text: "You can view this bill. Only the person who logged it, or an admin, can change it." }, canEdit, dirty: false, problems: [] };
   renderTabs(); render(); window.scrollTo(0, 0);
 }
@@ -1155,7 +1176,7 @@ function payFields(prev, paid, now) {
   if (paid) return prev && isPaid(prev) ? { payment_status: "paid", paid_at: prev.paid_at || now, paid_by: prev.paid_by || S.uid } : { payment_status: "paid", paid_at: now, paid_by: S.uid };
   return { payment_status: "unpaid", paid_at: null, paid_by: null };
 }
-function canChange(b) { return S.isAdmin || (b.owner === S.uid && canLog()); }
+function canChange(b) { return appAdmin() || (b.owner === S.uid && canLog()); }
 /** Quick Paid / Unpaid toggle from the Bills list. */
 async function markPaid(owner, id, paid, btn) {
   const b = (S.bills.get(owner) || []).find((x) => x.id === id); if (!b || !canChange(b)) return;
@@ -1251,6 +1272,7 @@ document.addEventListener("click", (e) => {
     case "sum-pay": S.summary.pay = t.dataset.v; render(); break;
     case "sort": { const k = t.dataset.k; S.summary.dir = S.summary.sort === k ? -S.summary.dir : (k === "item_name" || k === "logged_by" ? 1 : -1); S.summary.sort = k; render(); break; }
     case "rep-field": rep().field = t.dataset.v; rep().rows = null; render(); break;
+    case "rep-pay": rep().pay = t.dataset.v; rep().rows = null; render(); break;
     case "rep-preview": runReport(); render(); break;
     case "rep-format": rep().format = t.dataset.v; rep().msg = null; render(); break;
     case "rep-save": saveReport(); break;
