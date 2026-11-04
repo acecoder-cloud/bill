@@ -253,6 +253,20 @@ tfoot td { font-weight: 800; background: var(--surface-2); border-bottom: 0; }
 .person:first-child { border-top: 0; }
 .person img { width: 36px; height: 36px; border-radius: 50%; }
 .person .grow { flex: 1; min-width: 0; }
+.add-panel { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); }
+.add-panel .person { border-top-color: var(--line); }
+.member { flex-wrap: wrap; }
+.member-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+@media (max-width: 520px) { .member-actions { flex-basis: 100%; padding-left: 48px; justify-content: space-between; } .member-actions .role-sel { flex: 1; max-width: 220px; } }
+.role-sel { min-height: 44px; width: auto; padding-right: 28px; }
+.confirm-slot { flex-basis: 100%; }
+.confirm-slot:empty { display: none; }
+.danger-text { color: var(--bad-ink); }
+.ok-text { color: var(--ok-ink); font-weight: 600; }
+.invite { display: flex; flex-direction: column; gap: 6px; border-top: 1px dashed var(--line); padding-top: 10px; }
+.copy-row { display: flex; gap: 8px; }
+.copy-row .inp { flex: 1; font-size: .8rem; }
+details.small ul { margin: 6px 0; padding-left: 18px; }
 .audit { display: flex; flex-direction: column; gap: 8px; }
 .audit details { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
 .audit summary { padding: 10px 12px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
@@ -354,7 +368,24 @@ const S = {
   summary: { q: "", from: "", to: "", pay: "all", sort: "bill_date", dir: -1 },
   report: null,
   audit: null,
+  team: new Map(),    // uid -> {role, added_by, added_at}
+  people: new Map(),  // uid -> {last_seen}  (people who opened the page; admins only)
+  teamAdd: null,      // add-user panel state
 };
+const ARTIFACT_URL = "https://claude.ai/artifact/PLL9E65FCXCSJUfCC6g6eN";
+const ROLES = {
+  admin: { label: "Admin", desc: "Logs bills, edits and deletes any bill, manages the team" },
+  staff: { label: "Staff", desc: "Logs bills, edits and marks paid only their own" },
+  viewer: { label: "Viewer", desc: "Sees bills, summary and reports; can't change anything" },
+};
+/** The viewer's role in the app. Until an admin adds anyone to the team, roles follow the Share menu. */
+function myRole() {
+  if (S.me?.isOwner) return "admin";
+  const t = S.team.get(S.uid); if (t && ROLES[t.role]) return t.role;
+  if (!S.team.size) return S.isAdmin ? "admin" : S.canWrite ? "staff" : "viewer";
+  return "none";
+}
+function canLog() { return S.canWrite && (myRole() === "admin" || myRole() === "staff"); }
 const PEOPLE_WATCH_LIMIT = 50;
 
 /* ---------------- capabilities ---------------- */
@@ -383,6 +414,11 @@ function startWatching() {
   const { db } = S.caps;
   const slow = setTimeout(() => { if (S.dbState === "loading") { S.dbState = "slow"; render(); } }, 10000);
   watchPerson(S.uid);
+  db.collection("team").onSnapshot((snap) => {
+    S.team = new Map(snap.docs.map((d) => [d.id, d.data()])); renderTabs(); scheduleRender();
+  }, () => {});
+  if (S.isAdmin) db.collection("people").onSnapshot((snap) => { S.people = new Map(snap.docs.map((d) => [d.id, d.data()])); if (S.tab === "admin") scheduleRender(); }, () => {});
+  notePresence();
   db.collection("bills").onSnapshot((snap) => {
     clearTimeout(slow);
     if (!snap.metadata.fromCache || S.dbState !== "ready") S.dbState = "ready";
@@ -391,6 +427,15 @@ function startWatching() {
   }, (e) => { clearTimeout(slow); S.dbState = "error"; S.dbError = e?.code; render(); });
 }
 
+/** Remember that this person opened the page (at most twice a day), so admins can add them to the team. */
+async function notePresence() {
+  if (!S.canWrite) return;
+  try {
+    const ref = S.caps.db.doc(`people/${S.uid}`); const snap = await ref.get();
+    const last = snap.exists ? Date.parse(snap.data().last_seen || 0) : 0;
+    if (Date.now() - last > 12 * 3600e3) await ref.set({ last_seen: new Date().toISOString() });
+  } catch {}
+}
 function watchPerson(uid) {
   if (!uid || S.watched.has(uid)) return;
   if (S.watched.size >= PEOPLE_WATCH_LIMIT) { S.watchCapHit = true; return; }
@@ -424,7 +469,7 @@ async function resolveNames(ids) {
 }
 function nameOf(id) { return S.names[id] || (id === S.uid ? (S.me?.name || "You") : "…"); }
 async function paintNames(root = document) {
-  const els = [...root.querySelectorAll("[data-uid]")];
+  const els = [...root.querySelectorAll("[data-uid]:not(button):not(select):not(input)")];
   const unknown = els.map((e) => e.dataset.uid).filter((id) => !S.names[id]);
   els.forEach((e) => { e.textContent = nameOf(e.dataset.uid); });
   if (unknown.length) { await resolveNames(unknown); els.forEach((e) => { e.textContent = nameOf(e.dataset.uid); }); root.querySelectorAll("img[data-avatar]").forEach((img) => { if (S.avatars[img.dataset.avatar]) img.src = S.avatars[img.dataset.avatar]; }); }
@@ -483,7 +528,7 @@ function homeView() {
   const loading = S.dbState === "loading";
   return `
   <div><p class="muted">Hello,</p><h1>${esc(S.me?.name || "there")}</h1></div>
-  ${S.canWrite ? `
+  ${canLog() ? `
   <button class="scan" data-act="scan-menu" aria-expanded="${S.scanMenu ? "true" : "false"}" aria-controls="scan-sheet">${ICON.cam}Scan Bill</button>
   ${S.scanMenu ? `<div class="sheet" id="scan-sheet" role="group" aria-label="Scan Bill options">
     <button class="sheet-opt" data-act="camera">${ICON.cam}<span><b>Take photo</b><small>Open the camera and photograph the bill</small></span></button>
@@ -492,7 +537,9 @@ function homeView() {
   <div class="duo">
     <button class="btn btn-ghost" data-act="gallery">Upload a bill</button>
     <button class="btn btn-ghost" data-act="manual">Enter manually</button>
-  </div>` : `<div class="note warn">You can view bills here. To log bills, ask the owner to give you <b>Contributor</b> access in the Share menu.</div>`}
+  </div>` : !S.canWrite ? `<div class="note warn">You can view bills here. To log bills, ask the owner to give you <b>Contributor</b> access in the Share menu.</div>`
+    : myRole() === "viewer" ? `<div class="note">Your role is <b>Viewer</b>: you can see bills, the summary and reports. Ask an admin if you need to log bills.</div>`
+    : `<div class="note warn">You're not on the team yet. Ask an admin to add you in the Admin tab, then reopen this page.</div>`}
   <section class="card">
     <div class="row-between"><h2>Your recent bills</h2><a class="btn-link" href="#bills">See all</a></div>
     ${loading ? `<div class="row-between"><span class="spin"></span><span class="muted">Loading bills…</span></div>`
@@ -723,30 +770,94 @@ async function saveReport() {
 /* ---------------- admin ---------------- */
 function adminView() {
   if (!S.isAdmin) return `<div class="note warn">Only admins can open this section.</div>`;
-  const people = [...new Set([S.uid, ...S.bills.keys()])].filter(Boolean);
   const stats = (uid) => { const l = S.bills.get(uid) || []; return { n: l.length, t: sum(l.map(billTotal)) }; };
   const a = S.audit;
   return `
   <h1>Admin</h1>
-  <section class="card">
-    <h2>People and roles</h2>
-    <p class="muted small">People are managed from this page's <b>Share</b> menu on claude.ai. <b>Contributor</b> logs bills and edits their own. <b>Editor</b> is an admin: edits and deletes any bill and sees the activity log. <b>Viewer</b> can't open bills.</p>
-    <div class="people">${people.map((uid) => { const s = stats(uid); return `<div class="person">
-      <img alt="" data-avatar="${esc(uid)}" src="${esc(S.avatars[uid] || "")}">
-      <div class="grow"><b data-uid="${esc(uid)}"></b>${uid === S.uid ? ' <span class="pill">You</span>' : ""}<div class="small muted">${s.n} bill${s.n === 1 ? "" : "s"} · <span class="num">₹ ${money(s.t)}</span></div></div></div>`; }).join("")}</div>
-  </section>
+  ${teamSection(stats)}
   <section class="card">
     <div class="row-between"><h2>Activity log</h2><button class="btn btn-ghost" data-act="audit-load">${a?.loading ? "Loading…" : a ? "Refresh" : "Load activity"}</button></div>
-    <p class="small muted">Every bill created, edited, paid or deleted, with the values before and after.</p>
+    <p class="small muted">Every bill created, edited, paid or deleted, and every team change, with the values before and after.</p>
     <div class="audit" id="audit-list">${a?.error ? `<div class="note bad">${esc(a.error)}</div>` : ""}</div>
   </section>`;
+}
+function roleSelect(uid, role, extra = "", act = "team-role") {
+  return `<select class="inp role-sel" data-act="${act}" data-member="${esc(uid)}" aria-label="Role" ${extra}>${Object.entries(ROLES).map(([k, r]) => `<option value="${k}" ${k === role ? "selected" : ""}>${r.label}</option>`).join("")}</select>`;
+}
+function teamSection(stats) {
+  const members = [...S.team.entries()].sort((a, b) => (a[1].role === "admin" ? 0 : 1) - (b[1].role === "admin" ? 0 : 1) || (a[1].added_at || "").localeCompare(b[1].added_at || ""));
+  const ta = S.teamAdd;
+  const notOnTeam = [...new Set([...S.people.keys(), ...S.bills.keys()])].filter((id) => id && !S.team.has(id) && id !== S.uid);
+  return `<section class="card" id="team">
+    <div class="row-between"><h2>Team</h2>${ta ? "" : `<button class="btn btn-primary" data-act="team-open">+ Add user</button>`}</div>
+    ${S.team.size ? "" : `<div class="note">No team yet, so everyone with access can log bills. Add your staff here to choose exactly who can log bills, who is an admin, and who can only view.</div>`}
+    ${ta ? `<div class="add-panel">
+      <div class="row-between"><b>Add a user</b><button class="btn-link" data-act="team-close">Close</button></div>
+      <label class="field"><span>Role for the new user</span>${roleSelect("", ta.role, 'id="team-new-role"', "team-new-role")}</label>
+      <p class="small muted" id="team-role-desc">${esc(ROLES[ta.role].desc)}</p>
+      <label class="field"><span>Search your colleagues by name</span><input class="inp" type="search" id="team-q" data-act="team-q" placeholder="Type a name" autocomplete="off" value="${esc(ta.q)}"></label>
+      <div class="people" id="team-results">${ta.results.map((p) => candidateRow(p.id)).join("") || (ta.q ? `<p class="small muted">No colleagues found. People outside your organization can't be searched: send them the invite below, and they'll appear under "Opened this page" after they open it.</p>` : "")}</div>
+      ${notOnTeam.length ? `<div class="small muted" style="font-weight:600">Opened this page, not on the team yet</div><div class="people">${notOnTeam.map(candidateRow).join("")}</div>` : ""}
+      <div class="invite">
+        <div class="small muted" style="font-weight:600">Invite someone new</div>
+        <p class="small">1. Add them in this page's <b>Share</b> menu on claude.ai (<b>Contributor</b> for Staff or Viewer, <b>Editor</b> for Admin). 2. Send them the link. 3. Once they open it, add them here.</p>
+        <div class="copy-row"><input class="inp num" id="invite-link" readonly value="${esc(ARTIFACT_URL)}" aria-label="Invite link"><button class="btn btn-ghost" data-act="copy-invite">Copy invite</button></div>
+        <p class="small ok-text" id="copy-msg" hidden></p>
+      </div>
+    </div>` : ""}
+    ${members.length ? `<div class="people">${members.map(([uid, m]) => { const st = stats(uid); const self = uid === S.uid; return `<div class="person member">
+      <img alt="" data-avatar="${esc(uid)}" src="${esc(S.avatars[uid] || "")}">
+      <div class="grow"><b data-uid="${esc(uid)}"></b>${self ? ' <span class="pill">You</span>' : ""}
+        <div class="small muted">${st.n} bill${st.n === 1 ? "" : "s"} · <span class="num">₹ ${money(st.t)}</span>${m.added_at ? ` · added ${esc(fmtDate(m.added_at.slice(0, 10)))}` : ""}</div>
+        ${m.role === "admin" && !self ? `<div class="small muted">Needs <b>Editor</b> in the Share menu to edit other people's bills.</div>` : ""}
+      </div>
+      <div class="member-actions">${roleSelect(uid, m.role, self ? "disabled" : "")}${self ? "" : `<button class="btn-link danger-text" data-act="team-remove" data-member="${esc(uid)}">Remove</button>`}</div>
+      <div class="confirm-slot" data-confirm="${esc(uid)}"></div>
+    </div>`; }).join("")}</div>` : ""}
+    <details class="small"><summary class="muted">What each role can do</summary>
+      <ul>${Object.values(ROLES).map((r) => `<li><b>${r.label}</b>: ${esc(r.desc)}</li>`).join("")}</ul>
+      <p class="muted">People not on the team can't log bills once the team has at least one member. claude.ai access itself (who can open this page) is set in the Share menu.</p>
+    </details>
+  </section>`;
+}
+function candidateRow(uid) {
+  return `<div class="person"><img alt="" data-avatar="${esc(uid)}" src="${esc(S.avatars[uid] || "")}">
+    <div class="grow"><b data-uid="${esc(uid)}"></b>${S.people.get(uid)?.last_seen ? `<div class="small muted">Opened ${esc(fmtDT(S.people.get(uid).last_seen))}</div>` : ""}</div>
+    <button class="btn btn-ghost" data-act="team-add" data-member="${esc(uid)}">Add</button></div>`;
+}
+async function teamWrite(fn, okText) {
+  try { await fn(); flash(okText); }
+  catch (e) { flash(dbErrorText(e).replace("save this bill", "change the team")); }
+  render();
+}
+async function addMember(uid) {
+  const db = S.caps.db; const now = new Date().toISOString(); const role = S.teamAdd?.role || "staff";
+  await teamWrite(async () => {
+    if (!S.team.size && !S.team.has(S.uid)) await db.doc(`team/${S.uid}`).set({ role: "admin", added_by: S.uid, added_at: now });
+    await db.doc(`team/${uid}`).set({ role, added_by: S.uid, added_at: now });
+    writeAudit("team.add", null, uid, null, { member: uid, role });
+  }, `${nameOf(uid)} added as ${ROLES[role].label}.`);
+  if (S.teamAdd) { S.teamAdd.results = S.teamAdd.results.filter((p) => p.id !== uid); }
+}
+let teamSearchSeq = 0;
+async function searchTeam(q) {
+  const ta = S.teamAdd; if (!ta) return; ta.q = q;
+  const seq = ++teamSearchSeq;
+  const hits = q.trim() && S.caps.user?.search ? await S.caps.user.search(q.trim()) : [];
+  if (seq !== teamSearchSeq || !S.teamAdd) return;
+  ta.results = hits.filter((p) => p.id && p.id !== S.uid);
+  hits.forEach((p) => { S.names[p.id] = p.name || S.names[p.id]; S.avatars[p.id] = p.avatarUrl; });
+  const box = $("#team-results"); if (!box) return;
+  box.innerHTML = ta.results.map((p) => candidateRow(p.id)).join("") || (q.trim() ? `<p class="small muted">No colleagues found. People outside your organization can't be searched: send them the invite below, and they'll appear under "Opened this page" after they open it.</p>` : "");
+  box.querySelectorAll(".person").forEach((row, i) => { const id = ta.results[i]?.id; const btn = row.querySelector("button"); if (id && S.team.has(id)) { btn.disabled = true; btn.textContent = "On team"; } });
+  paintNames(box);
 }
 function paintAdmin() {
   const a = S.audit; const box = $("#audit-list"); if (!box || !a?.rows) return;
   if (!a.rows.length) { box.innerHTML = `<p class="muted">No activity yet.</p>`; return; }
-  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid" };
+  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed" };
   box.innerHTML = a.rows.map((r, i) => `<details><summary><b>${esc(label[r.action] || r.action)}</b>
-    <span class="small muted">by <span data-uid="${esc(r.actor)}"></span> · ${esc(fmtDT(r.at))} · bill ${(r.after || r.before || {}).bill_no ? "No. " + esc((r.after || r.before).bill_no) + " of " : "of "}${esc(fmtDate((r.after || r.before || {}).bill_date))}</span></summary>
+    <span class="small muted">by <span data-uid="${esc(r.actor)}"></span> · ${esc(fmtDT(r.at))} · ${r.action.startsWith("team.") ? `<span data-uid="${esc((r.after || r.before || {}).member || "")}"></span>${r.after?.role ? " → " + esc(ROLES[r.after.role]?.label || r.after.role) : ""}` : `bill ${(r.after || r.before || {}).bill_no ? "No. " + esc((r.after || r.before).bill_no) + " of " : "of "}${esc(fmtDate((r.after || r.before || {}).bill_date))}`}</span></summary>
     <div class="pair"><div><div class="small muted">Before</div><pre data-json="b${i}"></pre></div><div><div class="small muted">After</div><pre data-json="a${i}"></pre></div></div></details>`).join("");
   a.rows.forEach((r, i) => {
     $(`[data-json="b${i}"]`, box).textContent = r.before ? JSON.stringify(r.before, null, 2) : "—";
@@ -770,7 +881,7 @@ function itemRows(items) { return (items || []).map((it, i) => ({ key: newKey(),
 const emptyRow = (n) => ({ key: newKey(), serial_no: String(n), item_name: "", qty: "", rate: "", total_amount: "" });
 
 function openNew(file) {
-  if (!S.canWrite) return;
+  if (!canLog()) return;
   S.editor = { mode: "new", phase: file ? "working" : "edit", step: "compress", date: todayISO(), billNo: "", paid: false, rows: [emptyRow(1)], imageId: null, previewUrl: null, notice: null, dirty: false, problems: [] };
   renderTabs(); render(); window.scrollTo(0, 0);
   if (file) processFile(file);
@@ -778,7 +889,7 @@ function openNew(file) {
 function openBill(owner, id) {
   const b = (S.bills.get(owner) || []).find((x) => x.id === id);
   if (!b) return;
-  const canEdit = S.isAdmin || (owner === S.uid && S.canWrite);
+  const canEdit = S.isAdmin || (owner === S.uid && canLog());
   S.editor = { mode: "edit", owner, id, bill: b, phase: "edit", date: b.bill_date, billNo: b.bill_no || "", paid: isPaid(b), rows: itemRows(b.items).length ? itemRows(b.items) : [emptyRow(1)], imageId: b.image_id || null, previewUrl: null, notice: canEdit ? null : { tone: "", text: "You can view this bill. Only the person who logged it, or an admin, can change it." }, canEdit, dirty: false, problems: [] };
   renderTabs(); render(); window.scrollTo(0, 0);
 }
@@ -1044,7 +1155,7 @@ function payFields(prev, paid, now) {
   if (paid) return prev && isPaid(prev) ? { payment_status: "paid", paid_at: prev.paid_at || now, paid_by: prev.paid_by || S.uid } : { payment_status: "paid", paid_at: now, paid_by: S.uid };
   return { payment_status: "unpaid", paid_at: null, paid_by: null };
 }
-function canChange(b) { return S.isAdmin || (b.owner === S.uid && S.canWrite); }
+function canChange(b) { return S.isAdmin || (b.owner === S.uid && canLog()); }
 /** Quick Paid / Unpaid toggle from the Bills list. */
 async function markPaid(owner, id, paid, btn) {
   const b = (S.bills.get(owner) || []).find((x) => x.id === id); if (!b || !canChange(b)) return;
@@ -1144,6 +1255,23 @@ document.addEventListener("click", (e) => {
     case "rep-format": rep().format = t.dataset.v; rep().msg = null; render(); break;
     case "rep-save": saveReport(); break;
     case "audit-load": loadAudit(); break;
+    case "team-open": S.teamAdd = { role: "staff", q: "", results: [] }; render(); $("#team-q")?.focus(); break;
+    case "team-close": S.teamAdd = null; render(); break;
+    case "team-add": t.disabled = true; addMember(t.dataset.member); break;
+    case "team-remove": {
+      const uid = t.dataset.member; const slot = document.querySelector(`[data-confirm="${CSS.escape(uid)}"]`);
+      slot.innerHTML = `<div class="note bad confirm"><span>Remove <b>${esc(nameOf(uid))}</b> from the team? They won't be able to log bills. Their bills stay.</span><button class="btn btn-danger" data-act="team-remove-yes" data-member="${esc(uid)}">Remove</button><button class="btn btn-ghost" data-act="dismiss">Keep</button></div>`;
+      break;
+    }
+    case "team-remove-yes": { const uid = t.dataset.member; const before = S.team.get(uid);
+      teamWrite(async () => { await S.caps.db.doc(`team/${uid}`).delete(); writeAudit("team.remove", null, uid, { member: uid, role: before?.role }, null); }, `${nameOf(uid)} removed from the team.`); break; }
+    case "copy-invite": {
+      const text = `You're invited to Pharmacy Bill Log. Open this link signed in to claude.ai: ${ARTIFACT_URL}`;
+      const msg = $("#copy-msg");
+      navigator.clipboard.writeText(text).then(() => { msg.hidden = false; msg.textContent = "Invite copied. Paste it into WhatsApp or email."; })
+        .catch(() => { const i = $("#invite-link"); i.focus(); i.select(); msg.hidden = false; msg.textContent = "Copy the selected link and send it to them."; });
+      break;
+    }
     case "ed-back": if (ed?.dirty) askDiscard(discardAndClose); else closeEditor(); break;
     case "discard-yes": { const slot = $("#discard-slot"); const fn = slot?._onYes; fn ? fn() : discardAndClose(); break; }
     case "dismiss": t.closest(".note").remove(); break;
@@ -1189,6 +1317,7 @@ document.addEventListener("input", (e) => {
   const act = t.dataset.act;
   if (act === "sum-q") { S.summary.q = t.value; clearTimeout(t._d); t._d = setTimeout(() => { const pos = t.selectionStart; render(); const n = $("#sum-q"); n.focus(); n.setSelectionRange(pos, pos); }, 250); }
   if (act === "rep-item") { rep().item = t.value; rep().rows = null; }
+  if (act === "team-q") { clearTimeout(t._d); t._d = setTimeout(() => searchTeam(t.value), 200); }
   if (act === "bf-q") { S.filters.q = t.value; clearTimeout(t._d); t._d = setTimeout(() => { const pos = t.selectionStart; render(); const n = $("#bf-q"); n.focus(); n.setSelectionRange(pos, pos); }, 250); }
 });
 document.addEventListener("change", (e) => {
@@ -1198,6 +1327,12 @@ document.addEventListener("change", (e) => {
   if (act === "sf-date") { S.summary.from = $("#sf-from").value; S.summary.to = $("#sf-to").value; render(); }
   if (act === "rf-date") { rep().from = $("#rf-from").value; rep().to = $("#rf-to").value; rep().rows = null; render(); }
   if (act === "rep-item") render();
+  if (act === "team-new-role" && S.teamAdd) { S.teamAdd.role = t.value; $("#team-role-desc").textContent = ROLES[t.value].desc; return; }
+  if (act === "team-role") {
+    const uid = t.dataset.member; const before = S.team.get(uid); const role = t.value;
+    teamWrite(async () => { await S.caps.db.doc(`team/${uid}`).update({ role }); writeAudit("team.role", null, uid, { member: uid, role: before?.role }, { member: uid, role }); }, `${nameOf(uid)} is now ${ROLES[role].label}.`);
+    return;
+  }
   if (act === "rep-col") {
     const r = rep(); t.checked ? r.cols.add(t.value) : r.cols.delete(t.value); r.msg = null;
     try { localStorage.setItem("pbl-cols", JSON.stringify([...r.cols])); } catch {}
