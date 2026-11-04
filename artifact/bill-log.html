@@ -332,6 +332,39 @@ table.reg { border-collapse: separate; border-spacing: 0; font-size: .85rem; wid
 .cell-row { display: flex; gap: 8px; }
 .cell-row .inp { flex: 1; text-align: center; font-size: 1.4rem; min-height: 52px; }
 .cell-row .btn { flex: 1; }
+/* Accounts */
+.acc-balance { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.acc-balance b { font-size: 2.3rem; line-height: 1.1; letter-spacing: -0.02em; color: var(--brand); }
+.acc-balance b.neg, .num.neg { color: var(--bad-ink); }
+.num.pos, .pos { color: var(--ok-ink); }
+.acc-totals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.acc-totals > div { background: var(--surface-2); border-radius: 12px; padding: 8px 10px; display: flex; flex-direction: column; min-width: 0; }
+.acc-totals b { font-size: 1.05rem; overflow-wrap: anywhere; }
+.acc-cats { display: flex; flex-direction: column; gap: 6px; }
+.acc-cat { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: .88rem; }
+.acc-cat .bar { height: 10px; border-radius: 6px; background: var(--surface-2); overflow: hidden; }
+.acc-cat .bar i { display: block; height: 100%; background: var(--brand); border-radius: 6px; }
+.btn-received { background: var(--ok-bg); color: var(--ok-ink); border: 1px solid color-mix(in srgb, var(--ok-ink) 35%, transparent); }
+.acc-day { display: flex; flex-direction: column; gap: 6px; }
+.acc-day-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; padding: 4px 2px; }
+.acc-row { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.acc-row.is-received { border-left: 5px solid var(--ok-ink); background: color-mix(in srgb, var(--ok-bg) 60%, var(--surface)); }
+.acc-row-btn { all: unset; box-sizing: border-box; width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 11px 12px; cursor: pointer; align-items: start; }
+.acc-row-btn:focus-visible { outline: 3px solid var(--brand); outline-offset: -3px; }
+.acc-row-main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.acc-row-main b { overflow-wrap: anywhere; }
+.acc-amt { font-weight: 600; font-size: 1.05rem; }
+.acc-row.is-received .acc-amt { color: var(--ok-ink); }
+.acc-detail { padding: 0 12px 12px; display: flex; flex-direction: column; gap: 10px; border-top: 1px dashed var(--line); padding-top: 10px; }
+table.acc-periods tr.sel td { background: var(--brand-soft); }
+pre.wa { margin: 0; padding: 12px; border-radius: 12px; background: var(--surface-2); white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--font-ui); font-size: .92rem; max-height: 340px; overflow: auto; }
+.acc-lines { display: flex; flex-direction: column; gap: 10px; }
+.acc-line { border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 8px; background: var(--surface-2); }
+.acc-line-grid { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr) minmax(0, 1.3fr); gap: 8px; }
+.acc-total-line { display: flex; justify-content: space-between; align-items: baseline; font-size: 1.1rem; }
+.acc-total-line b { font-size: 1.4rem; }
+.acc-checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.acc-checks li { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: space-between; font-size: .9rem; }
 .audit { display: flex; flex-direction: column; gap: 8px; }
 .audit details { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
 .audit summary { padding: 10px 12px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
@@ -382,6 +415,7 @@ table.reg { border-collapse: separate; border-spacing: 0; font-size: .85rem; wid
 </main>
 <nav class="tabs" aria-label="Sections"><div class="tabs-in" id="tabs"></div></nav>
 <input id="camera" type="file" accept="image/*" capture="environment" hidden>
+<input id="acc-import-file" type="file" accept=".csv,text/csv" hidden>
 <input id="inv-import-file" type="file" accept=".csv,text/csv" hidden>
 <input id="gallery" type="file" accept="image/jpeg,image/png,image/webp,application/pdf,.pdf" hidden>
 
@@ -470,11 +504,14 @@ const PERMS = [
   { k: "inv_view", label: "Open Inventory", group: "Inventory" },
   { k: "inv_count", label: "Enter daily stock counts and mark low stock", group: "Inventory" },
   { k: "inv_manage", label: "Add, edit and archive products; start months; import; settings", group: "Inventory", editor: true },
+  { k: "acc_view", label: "Open Accounts", group: "Accounts" },
+  { k: "acc_edit", label: "Add, edit and delete expenses and money received; add items", group: "Accounts" },
+  { k: "acc_manage", label: "Accounts settings, CSV import, WhatsApp ledger import", group: "Accounts", editor: true },
 ];
 const DEFAULT_PERMS = {
   admin: Object.fromEntries(PERMS.map((p) => [p.k, true])),
-  staff: { log: true, view_all: true, edit_own: true, edit_all: false, delete_own: true, delete_all: false, pay_own: true, pay_all: false, summary: true, reports: true, admin: false, inv_view: true, inv_count: true, inv_manage: false },
-  viewer: { log: false, view_all: true, edit_own: false, edit_all: false, delete_own: false, delete_all: false, pay_own: false, pay_all: false, summary: true, reports: true, admin: false, inv_view: true, inv_count: false, inv_manage: false },
+  staff: { log: true, view_all: true, edit_own: true, edit_all: false, delete_own: true, delete_all: false, pay_own: true, pay_all: false, summary: true, reports: true, admin: false, inv_view: true, inv_count: true, inv_manage: false, acc_view: true, acc_edit: true, acc_manage: false },
+  viewer: { log: false, view_all: true, edit_own: false, edit_all: false, delete_own: false, delete_all: false, pay_own: false, pay_all: false, summary: true, reports: true, admin: false, inv_view: true, inv_count: false, inv_manage: false, acc_view: true, acc_edit: false, acc_manage: false },
 };
 function rolePerms(role) {
   const saved = S.rolePerms?.[role];
@@ -540,6 +577,7 @@ function startWatching() {
   if (S.isAdmin) db.collection("people").onSnapshot((snap) => { S.people = new Map(snap.docs.map((d) => [d.id, d.data()])); if (S.tab === "admin") scheduleRender(); }, () => {});
   notePresence();
   invStart();
+  accStart();
   db.collection("bills").onSnapshot((snap) => {
     clearTimeout(slow);
     if (!snap.metadata.fromCache || S.dbState !== "ready") S.dbState = "ready";
@@ -570,7 +608,7 @@ function watchPerson(uid) {
 let renderQueued = false;
 function scheduleRender() {
   if (renderQueued) return; renderQueued = true;
-  requestAnimationFrame(() => { renderQueued = false; if (S.tab === "inventory") { renderTabs(); return; } if (!S.editor) render(); else refreshEditorReadonlyBits(); });
+  requestAnimationFrame(() => { renderQueued = false; if (S.tab === "inventory" || S.tab === "accounts") { renderTabs(); return; } if (!S.editor) render(); else refreshEditorReadonlyBits(); });
 }
 
 function allBills() {
@@ -611,6 +649,7 @@ const TABS = [
   { id: "summary", label: "Summary", perm: "summary", icon: '<path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18"/>' },
   { id: "reports", label: "Reports", perm: "reports", icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/>' },
   { id: "inventory", label: "Inventory", perm: "inv_view", icon: '<path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>' },
+  { id: "accounts", label: "Accounts", perm: "acc_view", icon: '<rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20M16 15h2"/><path d="M6 6V5a2 2 0 0 1 2-2h8"/>' },
   { id: "admin", label: "Admin", admin: true, icon: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>' },
 ];
 function tabAllowed(id) { const t = TABS.find((x) => x.id === id); if (!t) return false; if (t.admin) return appAdmin(); return !t.perm || S.dbState === "none" || allowed(t.perm); }
@@ -639,12 +678,13 @@ function render() {
   if (S.editor) { renderEditor(); return; }
   if (S.dbState === "none") { main.innerHTML = signedOutView(); return; }
   if (S.dbState === "error") { main.innerHTML = `<div class="note bad">The bill log couldn't be loaded${S.dbError === "revoked" ? " because your access changed" : ""}. Reload the page to try again.</div>`; return; }
-  const views = { home: homeView, bills: billsView, summary: summaryView, reports: reportsView, inventory: inventoryView, admin: adminView };
+  const views = { home: homeView, bills: billsView, summary: summaryView, reports: reportsView, inventory: inventoryView, accounts: accountsView, admin: adminView };
   if (!tabAllowed(S.tab)) { main.innerHTML = `<div class="note warn">Your role doesn't include this screen. Ask an admin if you need it.</div>`; return; }
   main.innerHTML = (S.dbState === "slow" ? `<div class="note warn">The bill log is taking a while to load. Check your connection; it will appear as soon as it arrives.</div>` : "") + (views[S.tab] || homeView)();
   paintNames(main);
   if (S.tab === "admin") paintAdmin();
-  if (S.tab === "inventory") invAfterRender();
+  if (S.tab === "inventory") { invAfterRender(); maybeAutoSeed(); }
+  if (S.tab === "accounts") accMaybeSeed();
 }
 
 function signedOutView() {
@@ -927,7 +967,7 @@ function adminView() {
   ${teamSection(stats)}
   <section class="card">
     <div class="row-between"><h2>Activity log</h2><button class="btn btn-ghost" data-act="audit-load">${a?.loading ? "Loading…" : a ? "Refresh" : "Load activity"}</button></div>
-    <p class="small muted">Every bill created, edited, paid or deleted, every team change and every product change, with the values before and after.</p>
+    <p class="small muted">Every bill, team, product and accounts change, with the values before and after.</p>
     <div class="audit" id="audit-list">${a?.error ? `<div class="note bad">${esc(a.error)}</div>` : ""}</div>
   </section>`;
 }
@@ -1042,9 +1082,9 @@ function paintAdmin() {
   const team = $("#team"); if (team) paintNames(team).then(() => showLabelBoxes(team));
   const a = S.audit; const box = $("#audit-list"); if (!box || !a?.rows) return;
   if (!a.rows.length) { box.innerHTML = `<p class="muted">No activity yet.</p>`; return; }
-  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed", "roles.update": "Role permissions changed", "inventory.seed": "Stock register loaded", "inventory.add": "Product added", "inventory.edit": "Product edited", "inventory.archive": "Product archived", "inventory.restore": "Product restored", "inventory.delete": "Product deleted", "inventory.month": "Stock month started", "inventory.import": "Stock CSV imported", "inventory.delivered": "Order delivered" };
+  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed", "roles.update": "Role permissions changed", "inventory.seed": "Stock register loaded", "inventory.add": "Product added", "inventory.edit": "Product edited", "inventory.archive": "Product archived", "inventory.restore": "Product restored", "inventory.delete": "Product deleted", "inventory.month": "Stock month started", "inventory.import": "Stock CSV imported", "inventory.delivered": "Order delivered", "accounts.add": "Account entry added", "accounts.edit": "Account entry edited", "accounts.delete": "Account entry deleted", "accounts.seed": "WhatsApp ledger imported", "accounts.import": "Account entries imported" };
   box.innerHTML = a.rows.map((r, i) => `<details><summary><b>${esc(label[r.action] || r.action)}</b>
-    <span class="small muted">by <span data-uid="${esc(r.actor)}"></span> · ${esc(fmtDT(r.at))} · ${r.action === "roles.update" ? "Admin / Staff / Viewer permissions" : r.action.startsWith("inventory.") ? esc((r.after || r.before || {}).name || (r.after || {}).month || "Inventory") : r.action.startsWith("team.") ? `<span data-uid="${esc((r.after || r.before || {}).member || "")}"></span>${r.after?.role ? " → " + esc(ROLES[r.after.role]?.label || r.after.role) : ""}` : `bill ${(r.after || r.before || {}).bill_no ? "No. " + esc((r.after || r.before).bill_no) + " of " : "of "}${esc(fmtDate((r.after || r.before || {}).bill_date))}`}</span></summary>
+    <span class="small muted">by <span data-uid="${esc(r.actor)}"></span> · ${esc(fmtDT(r.at))} · ${r.action === "roles.update" ? "Admin / Staff / Viewer permissions" : r.action.startsWith("inventory.") ? esc((r.after || r.before || {}).name || (r.after || {}).month || "Inventory") : r.action.startsWith("accounts.") ? (() => { const x = r.after || r.before || {}; return x.amount != null ? esc(`${x.type === "received" ? "received" : (x.lines || []).map((l) => l.name).join(" & ")} ${inr(x.amount)} on ${dmy(x.date)}`) : "Accounts"; })() : r.action.startsWith("team.") ? `<span data-uid="${esc((r.after || r.before || {}).member || "")}"></span>${r.after?.role ? " → " + esc(ROLES[r.after.role]?.label || r.after.role) : ""}` : `bill ${(r.after || r.before || {}).bill_no ? "No. " + esc((r.after || r.before).bill_no) + " of " : "of "}${esc(fmtDate((r.after || r.before || {}).bill_date))}`}</span></summary>
     <div class="pair"><div><div class="small muted">Before</div><pre data-json="b${i}"></pre></div><div><div class="small muted">After</div><pre data-json="a${i}"></pre></div></div></details>`).join("");
   a.rows.forEach((r, i) => {
     $(`[data-json="b${i}"]`, box).textContent = r.before ? JSON.stringify(r.before, null, 2) : "—";
@@ -1711,8 +1751,10 @@ function outbox() { try { return JSON.parse(localStorage.getItem(OUTBOX_KEY) || 
 function saveOutbox(q) { try { localStorage.setItem(OUTBOX_KEY, JSON.stringify(q)); } catch {} }
 function applyLocal(op, path, data) {
   const seg = path.split("/"); const id = seg.at(-1); const col = seg.slice(0, -1).join("/");
-  const map = col === INV_PRODUCTS ? INV.products : col === INV_MONTHS ? INV.months : null;
+  const map = col === INV_PRODUCTS ? INV.products : col === INV_MONTHS ? INV.months
+    : col === "accounts/items/list" ? ACC.items : col === "accounts/tx/list" ? ACC.tx : col === "accounts/checks/list" ? ACC.checks : null;
   if (path === "inventory/settings") { INV.settings = op === "set" ? clone(data) : deepMerge(clone(INV.settings) || {}, data); return; }
+  if (path === "accounts/settings") { ACC.settings = op === "set" ? clone(data) : deepMerge(clone(ACC.settings) || {}, data); return; }
   if (!map) return;
   if (op === "delete") map.delete(id);
   else if (op === "set") map.set(id, clone(data));
@@ -1744,7 +1786,7 @@ async function flushOutbox() {
       catch (e) { if (e?.code === "unavailable") break; console.warn("dropped an inventory change the store refused", e?.code); }
       q = q.slice(1); saveOutbox(q);
     }
-  } finally { syncing = false; if (S.tab === "inventory") invRefresh(); }
+  } finally { syncing = false; if (S.tab === "inventory") invRefresh(); if (S.tab === "accounts") accRefresh(); }
 }
 let syncTimer = null;
 function invSyncSoon() { clearTimeout(syncTimer); syncTimer = setTimeout(flushOutbox, 1500); }
@@ -1884,7 +1926,7 @@ async function seedInventory(auto) {
 }
 function maybeAutoSeed() {
   if (!INV.loaded.products || !INV.loaded.settings || INV.products.size || INV.settings.seeded_at || INV.seeding) return;
-  if (S.me?.isOwner && canInvManage()) seedInventory(true);
+  if (S.tab === "inventory" && S.me?.isOwner && canInvManage()) seedInventory(true);   // runs when the owner first opens Inventory
 }
 
 /* ---------- view ---------- */
@@ -2442,6 +2484,897 @@ document.addEventListener("keydown", (e) => {
   if (e.target.id === "inv-cell-input" && e.key === "Enter") { e.preventDefault(); saveCell(true); }
   if (e.target.id === "inv-cell-input" && e.key === "Escape") { INV.cell = null; $("#inv-cellbar")?.remove(); }
   if (e.target.matches?.("#reg td.cell") && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openCell(e.target.dataset.pid, Number(e.target.dataset.day)); }
+});
+
+/* ================= Accounts (money sent for Father's hospital costs) ================= */
+/* Storage (same claude.ai page storage):
+   accounts/settings              {period: "10"|"14"|"month", anchor, default_spender, categories, seeded_at, written_last, ledger_checks}
+   accounts/items/list/<iid>      {name, category, usual_price, quick_add, price_locked, archived}
+   accounts/tx/list/<tid>         {type: "expense"|"received", date, lines:[{item_id,name,category,qty,amount}], amount, category,
+                                   note, method, from, spent_by, review, attachment, seq}
+   accounts/checks/list/<cid>     {date, at, actual, calculated, diff, note}
+   Every amount is a whole number of rupees. Balances are never stored: they are always calculated. */
+const ACC = {
+  items: new Map(), tx: new Map(), checks: new Map(), settings: {}, loaded: { items: false, tx: false, settings: false },
+  view: "entries", range: "period", from: "", to: "", q: "", type: "all", cat: "all", detail: null, confirm: null,
+  form: null, itemForm: null, lastQuick: null, seeding: null, importPreview: null, showArchived: false, checkResult: null, waPeriod: null, copied: null, busy: false,
+};
+const ACC_ITEMS = "accounts/items/list", ACC_TX = "accounts/tx/list", ACC_CHECKS = "accounts/checks/list", ACC_SETTINGS = "accounts/settings";
+const ACC_BASE_CATS = ["Food", "Fruits & juice", "Medical", "Courier", "Stationery", "Personal care", "Other"];
+const ACC_METHODS = ["PhonePe", "Google Pay", "Amazon Pay", "Cash", "Other"];
+const ACC_SEED_ITEMS = `name,category,usual_price,quick_add
+Idli,Food,116,yes
+Meals,Food,100,yes
+Dosai,Food,137,yes
+Pongal & idli,Food,176,yes
+Pongal,Food,60,no
+Curd rice & sambar rice,Food,116,no
+Sambar rice,Food,55,no
+Rasam rice,Food,45,no
+Tomato rice,Food,110,no
+Uttapam,Food,130,no
+Boiled egg,Food,13,no
+Coffee,Food,45,yes
+Tea,Food,43,yes
+Apple,Fruits & juice,159,yes
+Papaya,Fruits & juice,80,no
+Orange juice,Fruits & juice,65,yes
+Lemon juice,Fruits & juice,60,no
+Napkin,Personal care,60,no
+Volini gel,Medical,127,no
+Medicines,Medical,401,no
+ECG,Medical,980,no
+Registration fees,Medical,50,no
+Lab test advance,Medical,2000,no
+Courier,Courier,317,no
+Eraser & sharpener,Stationery,30,no`;
+const ACC_SEED_TX = `date,type,item,category,amount,note
+21/08/2026,Received,Money received (PhonePe),Received,5000,
+21/08/2026,Expense,Papaya & curd rice,Food,80,
+23/08/2026,Expense,Idli,Food,36,
+23/08/2026,Expense,Sambar rice,Food,50,
+24/08/2026,Expense,Idli,Food,36,
+24/08/2026,Expense,Apple (half kg),Fruits & juice,150,
+24/08/2026,Expense,Rasam rice,Food,45,
+25/08/2026,Expense,Pongal,Food,65,
+25/08/2026,Expense,Sambar rice,Food,55,
+26/08/2026,Expense,Pongal,Food,65,
+26/08/2026,Expense,Apple (half kg),Fruits & juice,140,
+27/08/2026,Expense,Idli,Food,72,
+27/08/2026,Expense,Meals & rasam rice,Food,150,Date written as 27/08/226
+27/08/2026,Expense,Idli,Food,50,
+28/08/2026,Expense,Idli,Food,60,
+28/08/2026,Expense,Meals & rasam rice,Food,150,
+28/08/2026,Expense,Idli,Food,50,
+29/08/2026,Expense,Idli,Food,60,
+29/08/2026,Expense,Curd rice & sambar rice,Food,100,
+29/08/2026,Expense,Idli,Food,50,
+30/08/2026,Expense,Idli,Food,60,
+30/08/2026,Expense,Curd rice & sambar rice,Food,100,Written as 28/08 but listed after 30/08
+30/08/2026,Received,Money received (PhonePe),Received,5000,
+30/08/2026,Expense,Advance for Trop-I test,Medical,2000,
+30/08/2026,Expense,Medical,Medical,401,
+30/08/2026,Expense,Registration fees,Medical,50,
+30/08/2026,Expense,ECG and medical things,Medical,980,
+31/08/2026,Expense,Idli,Food,60,
+31/08/2026,Expense,Rasam rice & curd rice,Food,100,
+01/09/2026,Expense,Idli,Food,55,
+01/09/2026,Expense,Curd rice & sambar rice & boiled egg,Food,122,
+01/09/2026,Expense,Idli,Food,48,
+02/09/2026,Expense,Idli,Food,58,
+02/09/2026,Expense,Rasam rice & sambar rice,Food,116,
+03/09/2026,Expense,Idli,Food,58,
+03/09/2026,Received,Money received (PhonePe),Received,1600,
+04/09/2026,Expense,Idli,Food,60,
+05/09/2026,Expense,Idli & pongal,Food,116,Date written as 05/09/2027
+05/09/2026,Expense,Sambar rice & curd rice & boiled egg,Food,112,
+05/09/2026,Expense,Apple,Fruits & juice,150,
+05/09/2026,Expense,Idli,Food,50,
+06/09/2026,Expense,Idli,Food,58,
+06/09/2026,Expense,Idli,Food,86,
+07/09/2026,Expense,Idli,Food,58,
+07/09/2026,Expense,Meals & tomato rice,Food,150,
+07/09/2026,Expense,Idli,Food,84,
+08/09/2026,Expense,Idli,Food,58,
+08/09/2026,Expense,Curd rice & sambar rice,Food,100,
+08/09/2026,Expense,Coffee,Food,40,
+08/09/2026,Expense,Uttapam,Food,130,
+09/09/2026,Expense,Idli,Food,58,
+09/09/2026,Received,Money received (Amazon Pay),Received,1000,
+09/09/2026,Expense,Sambar rice & curd rice,Food,110,
+09/09/2026,Expense,Idli,Food,48,Date written as 09/09/2027
+10/09/2026,Expense,Idli,Food,58,Date written as 10/09/2027
+10/09/2026,Expense,Curd rice & sambar rice,Food,110,Date written as 10/09/2025
+10/09/2026,Expense,Boiled egg,Food,13,
+10/09/2026,Expense,Apple,Fruits & juice,140,
+11/09/2026,Expense,Idli,Food,64,
+11/09/2026,Received,Money received (PhonePe),Received,2000,
+11/09/2026,Expense,Curd rice & sambar rice,Food,116,
+11/09/2026,Expense,Idli,Food,58,
+12/09/2026,Expense,Idli,Food,60,
+12/09/2026,Expense,Rasam rice & curd rice,Food,106,
+12/09/2026,Expense,Idli,Food,58,
+13/09/2026,Expense,Idli,Food,64,
+13/09/2026,Expense,Meals,Food,116,
+13/09/2026,Expense,Idli,Food,58,
+14/09/2026,Expense,Idli,Food,58,
+14/09/2026,Expense,Curd rice x2 & sambar rice x2,Food,220,
+14/09/2026,Expense,Idli,Food,116,
+15/09/2026,Expense,Idli,Food,116,
+15/09/2026,Expense,Meals,Food,116,
+15/09/2026,Expense,Idli,Food,116,
+16/09/2026,Expense,Idli,Food,116,
+16/09/2026,Expense,Meals,Food,116,
+19/09/2026,Expense,Idli,Food,116,Date written as 19/09/2023
+19/09/2026,Expense,Meals & sambar rice,Food,150,
+20/09/2026,Expense,Idli,Food,98,
+20/09/2026,Expense,Idli,Food,116,Listed in the 09/09 ledger only
+20/09/2026,Received,Money received (PhonePe),Received,2000,
+20/09/2026,Expense,Idli,Food,98,Listed again in the 20/09 ledger; possible duplicate
+21/09/2026,Expense,Idli,Food,116,
+21/09/2026,Expense,Meals,Food,100,
+21/09/2026,Expense,Courier,Courier,317,Date written as 21/08/9/2026
+21/09/2026,Expense,Idli,Food,116,
+22/09/2026,Expense,Pongal & idli,Food,190,
+22/09/2026,Expense,Meals,Food,100,
+22/09/2026,Expense,Dosai,Food,136,
+23/09/2026,Expense,Idli,Food,98,
+23/09/2026,Expense,Tea,Food,32,
+24/09/2026,Received,Money received (PhonePe),Received,3000,Ledger says 23/09; payment screenshot dated 24/09 1:09 AM
+23/09/2026,Expense,Idli,Food,116,
+24/09/2026,Expense,Orange juice,Fruits & juice,130,
+24/09/2026,Expense,Coffee,Food,42,
+24/09/2026,Expense,Dosai,Food,136,
+25/09/2026,Expense,Idli,Food,116,
+25/09/2026,Expense,Orange juice,Fruits & juice,65,
+26/09/2026,Expense,Curd rice & meals & tomato rice,Food,230,
+26/09/2026,Expense,Coffee,Food,45,
+26/09/2026,Expense,Volini gel,Medical,127,
+26/09/2026,Expense,(item not written),Other,136,No item name in the ledger
+27/09/2026,Expense,Tea,Food,43,
+27/09/2026,Expense,Meals,Food,116,Date written as 27/06/2026
+27/09/2026,Expense,(item not written),Other,116,No item name in the ledger
+28/09/2026,Expense,Idli,Food,64,
+28/09/2026,Expense,Orange juice,Fruits & juice,65,
+28/09/2026,Expense,Idli,Food,116,
+29/09/2026,Expense,Idli,Food,116,
+29/09/2026,Expense,Lemon juice & tomato rice,Food,120,
+29/09/2026,Expense,Meals,Food,116,
+29/09/2026,Expense,Dosai,Food,136,
+30/09/2026,Expense,Idli,Food,116,
+30/09/2026,Expense,Curd/tomato/lemon/keerai rice,Food,200,
+30/09/2026,Expense,Idli,Food,116,
+01/10/2026,Expense,Idli,Food,116,Date written as 01/0/10/2026
+01/10/2026,Received,Money received (PhonePe),Received,3000,
+01/10/2026,Expense,Tomato rice & curd rice,Food,110,
+01/10/2026,Expense,Dosai,Food,136,
+02/10/2026,Expense,Idli,Food,116,
+02/10/2026,Expense,Meals,Food,116,
+02/10/2026,Expense,Idli,Food,116,
+03/10/2026,Expense,Idli,Food,116,Date written as 03/09/2026
+03/10/2026,Expense,Meals,Food,116,Date written as 03/09/2026
+03/10/2026,Expense,Dosai,Food,136,
+04/10/2026,Expense,Idli,Food,122,Date written as 04/09/2026
+04/10/2026,Expense,Idli,Food,122,
+05/10/2026,Expense,Idli,Food,116,
+05/10/2026,Expense,Curd rice & lemon juice,Food,110,
+05/10/2026,Expense,Dosai,Food,136,
+06/10/2026,Expense,Meals,Food,116,
+06/10/2026,Expense,Idli,Food,116,
+07/10/2026,Expense,Idli,Food,122,
+07/10/2026,Expense,Meals,Food,100,
+07/10/2026,Expense,Idli,Food,122,
+09/10/2026,Expense,Apple,Fruits & juice,100,
+11/10/2026,Expense,Pongal & idli,Food,132,Date written as 11/09/2026
+11/10/2026,Expense,Idli,Food,116,
+12/10/2026,Expense,Idli,Food,116,
+12/10/2026,Expense,Meals & green rice,Food,170,
+12/10/2026,Expense,Coffee,Food,45,
+12/10/2026,Expense,Tea & idli,Food,148,
+13/10/2026,Expense,Idli,Food,116,
+17/10/2026,Expense,Idli,Food,116,
+17/10/2026,Expense,Pongal,Food,60,
+17/10/2026,Expense,Meals,Food,116,
+17/10/2026,Expense,Dosai,Food,148,
+18/10/2026,Expense,Idli,Food,116,
+18/10/2026,Expense,Idli,Food,116,
+19/10/2026,Expense,Idli & pongal,Food,125,An earlier version also wrote 137
+19/10/2026,Expense,Idli & eraser/sharpener,Food,148,Mixed food and stationery; date written as 19/20/206
+20/10/2026,Expense,Idli,Food,116,
+20/10/2026,Expense,Meals,Food,100,
+20/10/2026,Expense,Idli,Food,116,
+21/10/2026,Expense,Pongal & idli,Food,125,
+21/10/2026,Expense,Meals,Food,110,
+21/10/2026,Received,Money received (PhonePe),Received,5000,
+21/10/2026,Expense,Dosai,Food,136,
+22/10/2026,Expense,Apple,Fruits & juice,159,
+25/10/2026,Expense,Pongal & idli,Food,176,
+25/10/2026,Expense,Meals,Food,120,
+25/10/2026,Expense,Idli,Food,116,
+26/10/2026,Expense,Idli,Food,116,
+26/10/2026,Expense,Apple & egg,Fruits & juice,244,
+26/10/2026,Expense,Meals & napkin,Food,180,Date written as 26/10/2016
+26/10/2026,Expense,Dosai,Food,148,Written as rosai
+27/10/2026,Expense,Idli,Food,116,
+27/10/2026,Expense,Meals,Food,110,
+27/10/2026,Expense,Dosai,Food,136,
+28/10/2026,Expense,Pongal & idli,Food,176,
+28/10/2026,Expense,Meals,Food,120,
+28/10/2026,Expense,Idli,Food,116,
+01/11/2026,Expense,Meals,Food,100,
+01/11/2026,Expense,Dosai,Food,137,
+02/11/2026,Expense,Idli,Food,116,
+02/11/2026,Expense,Meals,Food,100,Date written as 02/10/2026
+02/11/2026,Expense,Idli,Food,116,Date written as 02/10/2026
+03/11/2026,Expense,Pongal & idli,Food,176,
+03/11/2026,Expense,Meals,Food,100,
+03/11/2026,Expense,Dosai,Food,137,
+04/11/2026,Expense,Pongal & idli,Food,176,
+04/11/2026,Expense,Curd rice & lemon juice & rasam rice,Food,160,`;
+/* Differences found in the hand-written WhatsApp ledger (app's closing minus the closing written in WhatsApp). */
+const ACC_SEED_CHECKS = [
+  ["21/08–09/09", 116], ["09/09–20/09", 5], ["20/09–30/09", -480], ["01/10–11/10", -10], ["12/10–21/10", 128], ["22/10–28/10", -244], ["01/11–04/11", 0],
+];
+
+/* ---------- formatting & keys ---------- */
+const inrFmt = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
+const inr = (n) => (n < 0 ? "−" : "") + "₹" + inrFmt.format(Math.abs(Math.round(n || 0)));
+const grouped = (n) => (n < 0 ? "-" : "") + inrFmt.format(Math.abs(Math.round(n || 0)));
+const signedInr = (n) => (n > 0 ? "+" : "") + inr(n);
+const dmy = (iso) => (iso ? iso.split("-").reverse().join("/") : "");
+const shortDm = (iso) => dmy(iso).slice(0, 5);
+/** "Idly", "Idliy", "IDLI" and "Idli" all give the same key. */
+function fuzzyKey(s) { return String(s || "").toLowerCase().replace(/[^a-z]/g, "").replace(/y/g, "i").replace(/(.)\1+/g, "$1"); }
+function parseRupees(v) { const s = String(v ?? "").replace(/[₹,\s]/g, ""); if (!s) return null; if (!/^\d+$/.test(s)) return NaN; return Number(s); }
+function accTodayISO() { return todayISO(); }
+function addDays(iso, n) { const d = new Date(iso + "T00:00:00"); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
+function needsReviewNote(note) { const n = String(note || ""); return /^date written as/i.test(n) || /possible duplicate/i.test(n) || /^no item name/i.test(n); }
+
+/* ---------- permissions ---------- */
+function canAccEdit() { return S.canWrite && allowed("acc_edit"); }
+function canAccManage() { return (S.isAdmin || S.me?.isOwner) && allowed("acc_manage"); }
+
+/* ---------- loading ---------- */
+function accStart() {
+  const db = S.caps.db;
+  db.collection(ACC_ITEMS).onSnapshot((snap) => { ACC.items = new Map(snap.docs.map((d) => [d.id, clone(d.data())])); reapplyOutbox(ACC_ITEMS); if (!snap.metadata.fromCache) ACC.loaded.items = true; accChanged(); accMaybeSeed(); }, () => { ACC.loaded.items = true; accChanged(); });
+  db.collection(ACC_TX).onSnapshot((snap) => { ACC.tx = new Map(snap.docs.map((d) => [d.id, clone(d.data())])); reapplyOutbox(ACC_TX); if (!snap.metadata.fromCache) ACC.loaded.tx = true; accChanged(); accMaybeSeed(); }, () => { ACC.loaded.tx = true; accChanged(); });
+  db.collection(ACC_CHECKS).onSnapshot((snap) => { ACC.checks = new Map(snap.docs.map((d) => [d.id, clone(d.data())])); reapplyOutbox(ACC_CHECKS); accChanged(); }, () => {});
+  db.doc(ACC_SETTINGS).onSnapshot((snap) => { ACC.settings = snap.exists ? clone(snap.data()) : {}; reapplyOutbox(ACC_SETTINGS); if (!snap.metadata.fromCache) ACC.loaded.settings = true; accChanged(); accMaybeSeed(); }, () => { ACC.loaded.settings = true; accChanged(); });
+}
+let accQueued = false;
+function accChanged() {
+  if (accQueued) return; accQueued = true;
+  requestAnimationFrame(() => { accQueued = false; renderTabs(); if (S.tab === "accounts" && !S.editor && !accBusy()) render(); });
+}
+function accBusy() { return !!(ACC.form || ACC.itemForm || ACC.importPreview || ACC.confirm || document.activeElement?.closest?.(".acc-filters, #acc-check")); }
+function accRefresh() { if (S.tab === "accounts" && !S.editor) render(); else renderTabs(); }
+function accWrite(op, path, data) { return invWrite(op, path, data); }   // same instant-on-screen + offline queue as Inventory
+
+/* ---------- balances (always calculated, never typed) ---------- */
+function txList() { return [...ACC.tx.entries()].map(([id, t]) => ({ id, ...t })).sort((a, b) => a.date.localeCompare(b.date) || (a.seq || 0) - (b.seq || 0)); }
+const signed = (t) => (t.type === "received" ? t.amount : -t.amount);
+function balanceThrough(iso) { let b = 0; for (const t of ACC.tx.values()) if (t.date <= iso) b += signed(t); return b; }
+function balanceBefore(iso) { let b = 0; for (const t of ACC.tx.values()) if (t.date < iso) b += signed(t); return b; }
+function totalsBetween(from, to) {
+  let received = 0, spent = 0, nRec = 0; const cats = {};
+  for (const t of ACC.tx.values()) {
+    if ((from && t.date < from) || (to && t.date > to)) continue;
+    if (t.type === "received") { received += t.amount; nRec++; }
+    else { spent += t.amount; for (const l of t.lines || []) cats[l.category || "Other"] = (cats[l.category || "Other"] || 0) + l.amount; }
+  }
+  const opening = from ? balanceBefore(from) : 0;
+  return { received, spent, nRec, cats, opening, closing: opening + received - spent };
+}
+function availableNow() { let b = 0; for (const t of ACC.tx.values()) b += signed(t); return b; }
+
+/* ---------- periods ---------- */
+function periodMode() { return ["10", "14", "month"].includes(ACC.settings.period) ? ACC.settings.period : "10"; }
+function monthEnd(iso) { const [y, m] = iso.split("-").map(Number); return `${y}-${String(m).padStart(2, "0")}-${String(new Date(y, m, 0).getDate()).padStart(2, "0")}`; }
+function periodOf(iso) {
+  const mode = periodMode(); const [y, m, d] = iso.split("-").map(Number); const ym = `${y}-${String(m).padStart(2, "0")}`;
+  if (mode === "month") return { start: `${ym}-01`, end: monthEnd(iso) };
+  if (mode === "14") {
+    const anchor = ACC.settings.anchor || txList()[0]?.date || iso;
+    const days = Math.floor((new Date(iso + "T00:00:00") - new Date(anchor + "T00:00:00")) / 864e5);
+    const start = addDays(anchor, Math.floor(days / 14) * 14); return { start, end: addDays(start, 13) };
+  }
+  if (d <= 10) return { start: `${ym}-01`, end: `${ym}-10` };
+  if (d <= 20) return { start: `${ym}-11`, end: `${ym}-20` };
+  return { start: `${ym}-21`, end: monthEnd(iso) };
+}
+function periodsList() {
+  const first = txList()[0]?.date; if (!first) return [];
+  const out = []; let p = periodOf(first); const today = accTodayISO(); const lastDate = txList().at(-1).date; const stop = lastDate > today ? lastDate : today;
+  for (let i = 0; i < 400 && p.start <= stop; i++) { out.push({ ...p, ...totalsBetween(p.start, p.end) }); p = periodOf(addDays(p.end, 1)); }
+  return out;
+}
+function periodLabel(p) { return `${dmy(p.start)} – ${dmy(p.end)}`; }
+function rangeBounds() {
+  const today = accTodayISO();
+  if (ACC.range === "period") return periodOf(today);
+  if (ACC.range === "month") return { start: today.slice(0, 8) + "01", end: monthEnd(today) };
+  if (ACC.range === "custom") return { start: ACC.from || "", end: ACC.to || "" };
+  return { start: "", end: "" };
+}
+
+/* ---------- WhatsApp message (agreed format) ---------- */
+function lineText(t) {
+  if (t.type === "received") return `*${dmy(t.date)} Amount received ${grouped(t.amount)}*`;
+  const name = (t.lines || []).map((l) => (l.qty > 1 ? `${l.name} x${l.qty}` : l.name)).join(" & ") || "Expense";
+  return `${dmy(t.date)} - ${name} ${t.amount} rupees`;
+}
+/** Top and bottom lines both show the period's closing balance, calculated from every entry up to its last day. */
+function whatsappText(p) {
+  const entries = txList().filter((t) => t.date >= p.start && t.date <= p.end);
+  const bal = grouped(balanceThrough(p.end));
+  return [`*Available -RS: ${bal}*`, "", ...entries.map(lineText), "", `*RS: ${bal}*`].join("\n");
+}
+
+/* ---------- items ---------- */
+function activeItems() { return [...ACC.items.entries()].filter(([, i]) => !i.archived).sort((a, b) => a[1].name.localeCompare(b[1].name)); }
+function itemByName(name) { const k = fuzzyKey(name); if (!k) return null; for (const [id, i] of ACC.items) if (!i.archived && fuzzyKey(i.name) === k) return [id, i]; return null; }
+function itemStats() {
+  const st = new Map(); for (const id of ACC.items.keys()) st.set(id, { used: 0, last: null });
+  const byKey = new Map([...ACC.items.entries()].map(([id, i]) => [fuzzyKey(i.name), id]));
+  for (const t of ACC.tx.values()) if (t.type === "expense") for (const l of t.lines || []) {
+    const id = l.item_id && st.has(l.item_id) ? l.item_id : byKey.get(fuzzyKey(l.name)); if (!id) continue;
+    const s = st.get(id); s.used++; if (!s.last || t.date > s.last) s.last = t.date;
+  }
+  return st;
+}
+function accCategories() {
+  return [...new Set([...ACC_BASE_CATS, ...(ACC.settings.categories || []), ...[...ACC.items.values()].map((i) => i.category).filter(Boolean)])];
+}
+
+/* ---------- seed: WhatsApp ledger Aug–Nov 2026 (first run or button; never overwrites) ---------- */
+async function accSeed(auto) {
+  if (ACC.seeding || !canAccManage()) return;
+  if (ACC.settings.seeded_at) { flash("The WhatsApp ledger was already imported."); accRefresh(); return; }
+  ACC.seeding = { done: 0, total: 0 }; accRefresh();
+  try {
+    if (auto) {
+      const lease = await S.caps.db.doc(ACC_SETTINGS).acquire({ holder: S.uid, ttlMs: 120000 }).catch(() => ({ acquired: true }));
+      if (!lease.acquired) return;
+      const fresh = await S.caps.db.doc(ACC_SETTINGS).get().catch(() => null);
+      if (fresh?.exists && fresh.data().seeded_at) return;
+    }
+    const now = new Date().toISOString();
+    const itemRows = parseCsv(ACC_SEED_ITEMS).slice(1); const txRows = parseCsv(ACC_SEED_TX).slice(1);
+    ACC.seeding.total = itemRows.length + txRows.length; accRefresh();
+    const ids = new Map([...ACC.items.entries()].map(([id, i]) => [fuzzyKey(i.name), id]));
+    let k = 0;
+    for (const [name, category, price, quick] of itemRows) {
+      if (!ids.has(fuzzyKey(name))) {
+        const id = "i" + String(++k).padStart(3, "0") + Math.random().toString(36).slice(2, 5);
+        await accWrite("set", `${ACC_ITEMS}/${id}`, { name, category, usual_price: Number(price), quick_add: quick === "yes", price_locked: false, archived: false, created_at: now, created_by: S.uid });
+        ids.set(fuzzyKey(name), id);
+      }
+      ACC.seeding.done++; if (ACC.seeding.done % 10 === 0) accRefresh();
+    }
+    let seq = 0;
+    for (const [date, type, item, category, amount, note] of txRows) {
+      const iso = ddmmyyyyToISO(date); const amt = Number(amount); seq++;
+      const id = "t" + iso.replaceAll("-", "") + String(seq).padStart(4, "0");
+      const doc = type === "Received"
+        ? { type: "received", date: iso, amount: amt, method: /amazon/i.test(item) ? "Amazon Pay" : "PhonePe", from: "", note: note || "", lines: [], category: "Received" }
+        : { type: "expense", date: iso, amount: amt, category, note: note || "", spent_by: ACC.settings.default_spender || "Nandhini", lines: [{ item_id: ids.get(fuzzyKey(item)) || null, name: item, category, qty: 1, amount: amt }] };
+      await accWrite("set", `${ACC_TX}/${id}`, { ...doc, review: needsReviewNote(note), seq, source: "whatsapp-2026", created_at: now, created_by: S.uid });
+      ACC.seeding.done++; if (ACC.seeding.done % 10 === 0) accRefresh();
+    }
+    await accWrite("set", ACC_SETTINGS, { period: "10", default_spender: "Nandhini", categories: [], ...ACC.settings, seeded_at: now,
+      written_last: { date: "2026-11-04", amount: 6378 }, ledger_checks: ACC_SEED_CHECKS.map(([label, diff]) => ({ label, diff })) });
+    writeAudit("accounts.seed", null, "accounts", null, { entries: txRows.length, items: itemRows.length });
+    flash(`Imported the WhatsApp ledger: ${txRows.length} entries and ${itemRows.length} items.`);
+  } catch (e) { flash(dbErrorText(e).replace("save this bill", "import the ledger")); }
+  finally { ACC.seeding = null; accRefresh(); }
+}
+function accMaybeSeed() {
+  if (!ACC.loaded.items || !ACC.loaded.tx || !ACC.loaded.settings || ACC.seeding || ACC.settings.seeded_at || ACC.tx.size) return;
+  if (S.tab === "accounts" && S.me?.isOwner && canAccManage()) accSeed(true);   // runs when the owner first opens Accounts
+}
+
+/* ---------- views ---------- */
+function accountsView() {
+  if (!ACC.loaded.tx && !ACC.tx.size) return `<h1>Accounts</h1><div class="card"><div class="row-between"><span class="spin"></span><span class="muted">Loading accounts…</span></div></div>`;
+  if (ACC.form) return ACC.form.kind === "received" ? receivedFormView() : expenseFormView();
+  if (ACC.itemForm) return itemFormView();
+  const pending = outbox().filter((w) => w.path.startsWith("accounts/")).length;
+  return `<h1>Accounts</h1>
+  ${pending ? `<div class="note warn">${pending} change${pending === 1 ? "" : "s"} saved on this phone, waiting for a connection to sync.</div>` : ""}
+  ${ACC.seeding ? `<div class="note">Importing the WhatsApp ledger… ${ACC.seeding.done} of ${ACC.seeding.total}</div>` : ""}
+  ${summaryCard()}
+  ${!ACC.tx.size && !ACC.seeding ? accEmpty() : ""}
+  <div class="seg acc-tabs" role="group" aria-label="Accounts view">
+    ${[["entries", "Entries"], ["periods", "Periods"], ["items", "Items"], ["check", "Check balance"]].map(([v, l]) => `<button data-act="acc-view" data-v="${v}" aria-pressed="${ACC.view === v}">${l}</button>`).join("")}
+  </div>
+  ${ACC.view === "periods" ? periodsView() : ACC.view === "items" ? itemsView() : ACC.view === "check" ? checkView() : entriesView()}
+  ${accToolsView()}`;
+}
+function accEmpty() {
+  return `<div class="card"><h2>No entries yet</h2><p class="muted">Import the WhatsApp ledger from August–November 2026, or start adding expenses and money received.</p>
+    ${canAccManage() ? `<button class="btn btn-primary btn-block" data-act="acc-seed" ${ACC.seeding ? "disabled" : ""}>Import WhatsApp ledger (Aug–Nov 2026)</button>` : ""}</div>`;
+}
+function summaryCard() {
+  const b = rangeBounds(); const tot = totalsBetween(b.start, b.end); const now = availableNow();
+  const cats = Object.entries(tot.cats).sort((x, y) => y[1] - x[1]); const max = Math.max(1, ...cats.map(([, v]) => v));
+  const quick = activeItems().filter(([, i]) => i.quick_add);
+  const label = ACC.range === "all" ? "All time" : ACC.range === "custom" ? (b.start || b.end ? `${dmy(b.start) || "start"} – ${dmy(b.end) || "today"}` : "Choose dates") : periodLabel(b);
+  return `<section class="card acc-summary">
+    <div class="acc-balance"><span class="small">Available balance</span><b class="num ${now < 0 ? "neg" : ""}" id="acc-available">${inr(now)}</b>
+      <span class="small muted">Received minus spent, calculated from every entry</span></div>
+    <div class="seg acc-filters" role="group" aria-label="Date range">${[["period", "This period"], ["month", "This month"], ["custom", "Custom"], ["all", "All time"]].map(([v, l]) => `<button data-act="acc-range" data-v="${v}" aria-pressed="${ACC.range === v}">${l}</button>`).join("")}</div>
+    ${ACC.range === "custom" ? `<div class="dates acc-filters"><label class="field"><span>From</span><input class="inp" type="date" id="acc-from" data-act="acc-dates" value="${esc(ACC.from)}"></label><label class="field"><span>To</span><input class="inp" type="date" id="acc-to" data-act="acc-dates" value="${esc(ACC.to)}"></label></div>` : ""}
+    <p class="small muted">${esc(label)}</p>
+    <div class="acc-totals">
+      <div><span class="small muted">Received</span><b class="num pos">${inr(tot.received)}</b></div>
+      <div><span class="small muted">Spent</span><b class="num">${inr(tot.spent)}</b></div>
+      <div><span class="small muted">${ACC.range === "all" ? "Available" : "Closing"}</span><b class="num">${inr(tot.closing)}</b></div>
+    </div>
+    ${ACC.range !== "all" ? `<p class="small muted">Opening balance ${inr(tot.opening)}</p>` : ""}
+    ${cats.length ? `<div class="acc-cats">${cats.map(([c, v]) => `<div class="acc-cat"><span>${esc(c)}</span><span class="bar"><i style="width:${Math.max(2, Math.round((v / max) * 100))}%"></i></span><b class="num">${inr(v)}</b></div>`).join("")}</div>` : ""}
+    ${canAccEdit() ? `<div class="duo"><button class="btn btn-primary" data-act="acc-add-expense">+ Add expense</button><button class="btn btn-received" data-act="acc-add-received">+ Add received</button></div>
+      ${quick.length ? `<div><div class="small muted" style="font-weight:600;margin-bottom:6px">Quick add for today</div><div class="chips">${quick.map(([id, i]) => `<button class="chip" data-act="acc-quick" data-id="${esc(id)}">${esc(i.name)} <span class="num">${inr(i.usual_price || 0)}</span></button>`).join("")}</div></div>` : ""}
+      ${ACC.lastQuick ? `<div class="note ok confirm"><span>Added ${esc(ACC.lastQuick.label)} for today.</span><button class="btn btn-ghost btn-sm" data-act="acc-undo">Undo</button></div>` : ""}` : ""}
+    <button class="btn btn-ghost btn-block" data-act="acc-wa" data-where="summary" data-start="${esc(periodOf(accTodayISO()).start)}">Copy for WhatsApp (this period)</button>
+    ${ACC.copied?.where === "summary" ? `<div class="note ok">${esc(ACC.copied.text)}</div>` : ""}
+  </section>`;
+}
+
+/* --- entries --- */
+function entryRows() {
+  const b = rangeBounds(); const q = normName(ACC.q);
+  return txList().filter((t) => (!b.start || t.date >= b.start) && (!b.end || t.date <= b.end) &&
+    (ACC.type === "all" || t.type === ACC.type) &&
+    (ACC.cat === "all" || (ACC.cat === "review" ? !!t.review : (t.type === "expense" && (t.lines || []).some((l) => l.category === ACC.cat)) || (ACC.cat === "Received" && t.type === "received"))) &&
+    (!q || normName(t.type === "received" ? `money received ${t.method || ""} ${t.from || ""}` : (t.lines || []).map((l) => l.name).join(" ")).includes(q) || normName(t.note).includes(q))).reverse();
+}
+function txTitle(t) { return t.type === "received" ? `Money received${t.method ? ` (${t.method})` : ""}${t.from ? ` from ${t.from}` : ""}` : (t.lines || []).map((l) => (l.qty > 1 ? `${l.name} × ${l.qty}` : l.name)).join(" & "); }
+function txCats(t) { return t.type === "received" ? "Received" : [...new Set((t.lines || []).map((l) => l.category || "Other"))].join(", "); }
+function entriesView() {
+  const rows = entryRows(); const groups = new Map();
+  for (const t of rows) { if (!groups.has(t.date)) groups.set(t.date, []); groups.get(t.date).push(t); }
+  const reviewN = [...ACC.tx.values()].filter((t) => t.review).length;
+  return `<div class="card acc-filters">
+    <label class="field"><span>Search item or note</span><input class="inp" type="search" id="acc-q" data-act="acc-q" placeholder="e.g. Idli" value="${esc(ACC.q)}" autocomplete="off"></label>
+    <div class="dates">
+      <label class="field"><span>Type</span><select class="inp" id="acc-type" data-act="acc-type">${[["all", "All entries"], ["expense", "Expenses"], ["received", "Received"]].map(([v, l]) => `<option value="${v}" ${ACC.type === v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+      <label class="field"><span>Category</span><select class="inp" id="acc-cat" data-act="acc-cat"><option value="all">All categories</option>${accCategories().map((c) => `<option ${ACC.cat === c ? "selected" : ""}>${esc(c)}</option>`).join("")}<option value="review" ${ACC.cat === "review" ? "selected" : ""}>Needs review (${reviewN})</option></select></label>
+    </div>
+  </div>
+  <p class="small muted">${rows.length} entr${rows.length === 1 ? "y" : "ies"}${reviewN ? ` · <button class="link" data-act="acc-review-filter">${reviewN} need review</button>` : ""}</p>
+  ${[...groups.entries()].map(([date, list]) => { const sp = list.filter((t) => t.type === "expense").reduce((a, t) => a + t.amount, 0); const rc = list.filter((t) => t.type === "received").reduce((a, t) => a + t.amount, 0);
+    return `<section class="acc-day"><div class="acc-day-head"><b>${esc(fmtDate(date))}</b><span class="small muted">${rc ? `<span class="pos">+${inr(rc)}</span> · ` : ""}spent <span class="num">${inr(sp)}</span> · balance <span class="num">${inr(balanceThrough(date))}</span></span></div>
+      ${list.map((t) => txRow(t)).join("")}</section>`; }).join("") || `<div class="card"><p class="muted">No entries match.</p></div>`}`;
+}
+function txRow(t) {
+  const open = ACC.detail === t.id; const conf = ACC.confirm === t.id;
+  return `<div class="acc-row ${t.type === "received" ? "is-received" : ""} ${open ? "open" : ""}">
+    <button class="acc-row-btn" data-act="acc-open" data-id="${esc(t.id)}" aria-expanded="${open}">
+      <span class="acc-row-main"><b>${esc(txTitle(t))}</b><span class="small muted">${esc(txCats(t))}${t.note ? ` · ${esc(t.note)}` : ""}</span>
+        ${t.review ? '<span class="pill warn">Needs review</span>' : ""}</span>
+      <span class="acc-amt num">${t.type === "received" ? "+" : ""}${inr(t.amount)}</span>
+    </button>
+    ${open ? `<div class="acc-detail">
+      <dl class="kv"><dt>Date</dt><dd>${esc(dmy(t.date))}</dd>
+        ${t.type === "expense" ? `${(t.lines || []).map((l) => `<dt>${esc(l.name)}${l.qty > 1 ? ` × ${l.qty}` : ""}</dt><dd class="num">${inr(l.amount)} <span class="small muted">${esc(l.category || "")}</span></dd>`).join("")}<dt>Spent by</dt><dd>${esc(t.spent_by || "—")}</dd>`
+          : `<dt>Method</dt><dd>${esc(t.method || "—")}</dd><dt>From</dt><dd>${esc(t.from || "—")}</dd>`}
+        <dt>Note</dt><dd>${esc(t.note || "—")}</dd><dt>Balance after this day</dt><dd class="num">${inr(balanceThrough(t.date))}</dd></dl>
+      ${t.attachment ? `<button class="thumb" data-act="acc-photo" data-id="${esc(t.attachment)}" aria-label="View payment screenshot"><img src="/_blob/${esc(t.attachment)}" alt=""></button>` : ""}
+      ${canAccEdit() ? `<div class="inv-actions">${t.review ? `<button class="btn btn-ghost" data-act="acc-reviewed" data-id="${esc(t.id)}">Mark reviewed</button>` : ""}<button class="btn btn-ghost" data-act="acc-edit" data-id="${esc(t.id)}">Edit</button><button class="btn btn-danger" data-act="acc-del" data-id="${esc(t.id)}">Delete</button></div>` : ""}
+      ${conf ? `<div class="note bad confirm"><span>Delete "${esc(txTitle(t))}" (${inr(t.amount)}) from ${esc(dmy(t.date))}? Every balance after it changes.</span><button class="btn btn-danger" data-act="acc-del-yes" data-id="${esc(t.id)}">Delete</button><button class="btn btn-ghost" data-act="acc-del-no">Keep</button></div>` : ""}
+    </div>` : ""}
+  </div>`;
+}
+
+/* --- periods --- */
+function periodsView() {
+  const list = periodsList().reverse(); const sel = ACC.waPeriod || list[0]?.start;
+  const mode = periodMode();
+  return `<section class="card">
+    <div class="row-between"><h2>Periods</h2><span class="small muted">${mode === "month" ? "Calendar months" : mode === "14" ? "14-day periods" : "10-day periods (1–10, 11–20, 21–end)"}</span></div>
+    <p class="small muted">Each closing balance carries forward as the next period's opening balance.</p>
+    <div class="tbl-wrap"><table class="acc-periods"><thead><tr><th>Period</th><th class="r">Opening</th><th class="r">Received</th><th class="r">Spent</th><th class="r">Closing</th><th></th></tr></thead>
+      <tbody>${list.map((p) => `<tr class="${p.start === sel ? "sel" : ""}"><td>${esc(shortDm(p.start))}–${esc(shortDm(p.end))}<span class="small muted"> ${p.start.slice(0, 4)}</span></td>
+        <td class="r num">${inr(p.opening)}</td><td class="r num pos">${p.received ? "+" + inr(p.received) : "—"}</td><td class="r num">${inr(p.spent)}</td><td class="r num"><b>${inr(p.closing)}</b></td>
+        <td><button class="btn-link" data-act="acc-period" data-start="${esc(p.start)}">Message</button></td></tr>`).join("") || `<tr><td colspan="6" class="muted">No entries yet.</td></tr>`}</tbody></table></div>
+  </section>
+  ${sel ? waCard(list.find((p) => p.start === sel) || periodOf(sel)) : ""}`;
+}
+function waCard(p) {
+  return `<section class="card" id="acc-wa-card">
+    <div class="row-between"><h2>WhatsApp message</h2><span class="small muted">${esc(periodLabel(p))}</span></div>
+    <pre class="wa" id="acc-wa-text">${esc(whatsappText(p))}</pre>
+    <div class="duo"><button class="btn btn-primary" data-act="acc-wa" data-where="card" data-start="${esc(p.start)}">Copy for WhatsApp</button>${S.caps.downloads ? `<button class="btn btn-ghost" data-act="acc-statement" data-start="${esc(p.start)}">Period statement (PDF)</button>` : ""}</div>
+    ${ACC.copied?.where === "card" ? `<div class="note ok">${esc(ACC.copied.text)}</div>` : ""}
+  </section>`;
+}
+
+/* --- items --- */
+function itemsView() {
+  const st = itemStats(); const list = [...ACC.items.entries()].filter(([, i]) => ACC.showArchived ? i.archived : !i.archived).sort((a, b) => (st.get(b[0])?.used || 0) - (st.get(a[0])?.used || 0) || a[1].name.localeCompare(b[1].name));
+  return `<section class="card">
+    <div class="row-between"><h2>Manage items</h2>${canAccEdit() ? `<button class="btn btn-primary" data-act="acc-item-new">+ Add new item</button>` : ""}</div>
+    <div class="chips"><button class="chip" data-act="acc-item-arch" aria-pressed="${ACC.showArchived}">Archived items</button></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Category</th><th class="r">Usual price</th><th class="r">Times used</th><th>Last used</th><th></th></tr></thead>
+      <tbody>${list.map(([id, i]) => { const s = st.get(id) || {}; return `<tr><td class="wrap"><b>${esc(i.name)}</b>${i.quick_add ? ' <span class="pill">Quick add</span>' : ""}</td><td>${esc(i.category || "—")}</td>
+        <td class="r num">${inr(i.usual_price || 0)}${i.price_locked ? ' <span title="Price locked" aria-label="locked">🔒</span>' : ""}</td><td class="r num">${s.used || 0}</td><td>${s.last ? esc(dmy(s.last)) : "—"}</td>
+        <td>${canAccEdit() ? `<button class="btn-link" data-act="acc-item-edit" data-id="${esc(id)}">Edit</button>` : ""}</td></tr>`; }).join("") || `<tr><td colspan="6" class="muted">No items.</td></tr>`}</tbody></table></div>
+    <p class="small muted">Usual price follows the latest price paid unless it's locked.</p>
+  </section>`;
+}
+function itemFormView() {
+  const f = ACC.itemForm; const v = f.values;
+  const dup = v.name.trim() && [...ACC.items.entries()].find(([id, i]) => id !== f.id && fuzzyKey(i.name) === fuzzyKey(v.name));
+  return `<div class="row-between"><button class="btn-link" data-act="acc-item-cancel">‹ Cancel</button><h1 style="flex:1">${f.id ? "Edit item" : "Add new item"}</h1></div>
+  <form class="card" id="acc-item-form" novalidate>
+    <label class="field"><span>Name *</span><input class="inp" id="if-name" data-if="name" value="${esc(v.name)}" maxlength="80" autocomplete="off"></label>
+    <div id="if-dup">${dup ? `<div class="note warn small">This looks like <b>${esc(dup[1].name)}</b>${dup[1].archived ? " (archived)" : ""}, which already exists. You can still save if it's a different item.</div>` : ""}</div>
+    <label class="field"><span>Category</span><select class="inp" id="if-cat" data-if="category">${accCategories().map((c) => `<option ${v.category === c ? "selected" : ""}>${esc(c)}</option>`).join("")}<option value="__new" ${f.newCat ? "selected" : ""}>+ New category…</option></select></label>
+    ${f.newCat ? `<label class="field"><span>New category name</span><input class="inp" id="if-newcat" data-if="newcat" value="${esc(v.newcat || "")}" maxlength="30"></label>` : ""}
+    <label class="field"><span>Usual price (₹)</span><input class="inp num" id="if-price" data-if="price" inputmode="numeric" value="${esc(v.price)}" placeholder="e.g. 116"></label>
+    <label class="pick"><input type="checkbox" data-if="quick" ${v.quick ? "checked" : ""}> Show as a quick-add chip</label>
+    <label class="pick"><input type="checkbox" data-if="locked" ${v.locked ? "checked" : ""}> Lock the usual price (don't update it from new expenses)</label>
+    <div id="if-err">${f.err ? `<div class="note bad">${esc(f.err)}</div>` : ""}</div>
+    <button class="btn btn-primary btn-block" type="submit">${f.id ? "Save item" : "Add item"}</button>
+    ${f.id ? `<button class="btn btn-ghost btn-block" type="button" data-act="acc-item-archive" data-id="${esc(f.id)}">${ACC.items.get(f.id)?.archived ? "Restore item" : "Archive item"}</button>` : ""}
+  </form>`;
+}
+
+/* --- expense / received forms --- */
+function openExpense(id) {
+  const t = id ? ACC.tx.get(id) : null; ACC.detail = null; ACC.confirm = null; ACC.copied = null;
+  ACC.form = { kind: "expense", id: id || null, values: t ? { date: t.date, note: t.note || "", spent_by: t.spent_by || "", review: !!t.review,
+    lines: (t.lines || []).map((l) => ({ name: l.name, qty: String(l.qty || 1), amount: String(l.amount), category: l.category || "Other", item_id: l.item_id || null })) }
+    : { date: accTodayISO(), note: "", spent_by: ACC.settings.default_spender || "Nandhini", lines: [{ name: "", qty: "1", amount: "", category: "Food", item_id: null }] } };
+  render(); window.scrollTo(0, 0); $('[data-line="0"][data-lf="name"]')?.focus();
+}
+function openReceived(id) {
+  const t = id ? ACC.tx.get(id) : null; ACC.detail = null; ACC.confirm = null; ACC.copied = null;
+  ACC.form = { kind: "received", id: id || null, values: t ? { date: t.date, amount: String(t.amount), method: t.method || "PhonePe", from: t.from || "", note: t.note || "", attachment: t.attachment || null }
+    : { date: accTodayISO(), amount: "", method: "PhonePe", from: "", note: "", attachment: null } };
+  render(); window.scrollTo(0, 0); $("#rf-amount")?.focus();
+}
+function lineMatch(l) { return itemByName(l.name); }
+function expenseFormView() {
+  const f = ACC.form; const v = f.values; const cats = accCategories();
+  const total = v.lines.reduce((a, l) => a + (parseRupees(l.amount) || 0), 0);
+  const before = availableNow() + (f.id ? ACC.tx.get(f.id)?.amount || 0 : 0);
+  return `<div class="row-between"><button class="btn-link" data-act="acc-form-cancel">‹ Cancel</button><h1 style="flex:1">${f.id ? "Edit expense" : "Add expense"}</h1></div>
+  <datalist id="acc-item-list">${activeItems().map(([, i]) => `<option value="${esc(i.name)}"></option>`).join("")}</datalist>
+  <form class="card" id="acc-exp-form" novalidate>
+    <label class="field"><span>Date</span><input class="inp" type="date" id="ef-date" data-ef="date" value="${esc(v.date)}"></label>
+    <div class="acc-lines">${v.lines.map((l, i) => { const m = l.name.trim() ? lineMatch(l) : null; return `<div class="acc-line" data-line-box="${i}">
+      <div class="row-between"><b class="small">Item ${v.lines.length > 1 ? i + 1 : ""}</b>${v.lines.length > 1 ? `<button type="button" class="btn-link danger-text" data-act="acc-line-del" data-i="${i}">Remove</button>` : ""}</div>
+      <label class="field"><span>Item</span><input class="inp" list="acc-item-list" data-line="${i}" data-lf="name" value="${esc(l.name)}" placeholder="Type or pick, e.g. Idli" autocomplete="off" aria-label="Item ${i + 1}"></label>
+      <div class="line-new" data-newbox="${i}">${l.name.trim() && !m ? `<label class="pick small"><input type="checkbox" data-line="${i}" data-lf="addNew" ${l.addNew ? "checked" : ""}> Add "${esc(l.name.trim())}" as a new item</label>` : m && m[1].name !== l.name.trim() ? `<span class="small muted">Matches item "${esc(m[1].name)}"</span>` : ""}</div>
+      <div class="acc-line-grid">
+        <label class="field"><span>Qty</span><input class="inp num" inputmode="numeric" data-line="${i}" data-lf="qty" value="${esc(l.qty)}" aria-label="Quantity ${i + 1}"></label>
+        <label class="field"><span>Amount (₹)</span><input class="inp num" inputmode="numeric" data-line="${i}" data-lf="amount" value="${esc(l.amount)}" aria-label="Amount ${i + 1}"></label>
+        <label class="field"><span>Category</span><select class="inp" data-line="${i}" data-lf="category" aria-label="Category ${i + 1}">${cats.map((c) => `<option ${l.category === c ? "selected" : ""}>${esc(c)}</option>`).join("")}</select></label>
+      </div></div>`; }).join("")}</div>
+    <button type="button" class="btn btn-ghost btn-block" data-act="acc-line-add" style="border-style:dashed">+ Another item in this expense</button>
+    <div class="dates">
+      <label class="field"><span>Spent by</span><input class="inp" id="ef-spent" data-ef="spent_by" value="${esc(v.spent_by)}" maxlength="40"></label>
+      <label class="field"><span>Note</span><input class="inp" id="ef-note" data-ef="note" value="${esc(v.note)}" maxlength="200"></label>
+    </div>
+    ${f.id && v.review ? `<label class="pick"><input type="checkbox" data-ef="clearReview" ${v.clearReview ? "checked" : ""}> This entry is correct now (clear "Needs review")</label>` : ""}
+    <div class="acc-total-line"><span>Total</span><b class="num" id="ef-total">${inr(total)}</b></div>
+    <p class="small muted" id="ef-after">Balance after saving: <b class="num ${before - total < 0 ? "neg" : ""}">${inr(before - total)}</b></p>
+    <div id="ef-err">${f.err ? f.err : ""}</div>
+    <button class="btn btn-primary btn-block" type="submit">${f.id ? "Save changes" : "Save expense"}</button>
+  </form>`;
+}
+function receivedFormView() {
+  const f = ACC.form; const v = f.values;
+  return `<div class="row-between"><button class="btn-link" data-act="acc-form-cancel">‹ Cancel</button><h1 style="flex:1">${f.id ? "Edit money received" : "Add money received"}</h1></div>
+  <form class="card" id="acc-rec-form" novalidate>
+    <div class="dates"><label class="field"><span>Date</span><input class="inp" type="date" id="rf-date" data-rf="date" value="${esc(v.date)}"></label>
+      <label class="field"><span>Amount (₹)</span><input class="inp num" id="rf-amount" data-rf="amount" inputmode="numeric" value="${esc(v.amount)}" placeholder="e.g. 5000"></label></div>
+    <label class="field"><span>Method</span><select class="inp" id="rf-method" data-rf="method">${ACC_METHODS.map((m) => `<option ${v.method === m ? "selected" : ""}>${m}</option>`).join("")}</select></label>
+    <div class="dates"><label class="field"><span>Received from (optional)</span><input class="inp" id="rf-from" data-rf="from" value="${esc(v.from)}" maxlength="60"></label>
+      <label class="field"><span>Note</span><input class="inp" id="rf-note" data-rf="note" value="${esc(v.note)}" maxlength="200"></label></div>
+    ${S.caps.assets ? `<label class="field"><span>Payment screenshot (optional)</span><input class="inp" type="file" accept="image/*" id="rf-shot"></label>${v.attachment ? `<p class="small muted">A screenshot is attached. Choose a new one to replace it.</p>` : ""}` : ""}
+    <div id="rf-err">${f.err ? `<div class="note bad">${esc(f.err)}</div>` : ""}</div>
+    <button class="btn btn-received btn-block" type="submit" ${f.saving ? "disabled" : ""}>${f.saving ? "Saving…" : f.id ? "Save changes" : "Save money received"}</button>
+  </form>`;
+}
+function refreshExpenseTotals() {
+  const f = ACC.form; if (!f || f.kind !== "expense") return;
+  const total = f.values.lines.reduce((a, l) => a + (parseRupees(l.amount) || 0), 0);
+  const before = availableNow() + (f.id ? ACC.tx.get(f.id)?.amount || 0 : 0);
+  const t = $("#ef-total"); if (t) t.textContent = inr(total);
+  const a = $("#ef-after"); if (a) a.innerHTML = `Balance after saving: <b class="num ${before - total < 0 ? "neg" : ""}">${inr(before - total)}</b>`;
+}
+async function saveExpense(force) {
+  const f = ACC.form; const v = f.values; const errBox = $("#ef-err"); const err = (m) => { errBox.innerHTML = `<div class="note bad">${esc(m)}</div>`; };
+  if (!isISODate(v.date)) return err("Pick the date.");
+  const lines = [];
+  for (const [i, l] of v.lines.entries()) {
+    const name = l.name.trim(); const amt = parseRupees(l.amount); const qty = parseRupees(l.qty || "1");
+    if (!name && amt == null) continue;
+    if (!name) return err(`Item ${i + 1}: enter what was bought.`);
+    if (amt == null || Number.isNaN(amt) || amt <= 0) return err(`Item ${i + 1}: amount must be whole rupees, like 116.`);
+    if (qty == null || Number.isNaN(qty) || qty < 1) return err(`Item ${i + 1}: quantity must be 1 or more.`);
+    lines.push({ name, amt, qty, category: l.category || "Other", item_id: lineMatch(l)?.[0] || null, addNew: !!l.addNew });
+  }
+  if (!lines.length) return err("Add at least one item with its amount.");
+  const total = lines.reduce((a, l) => a + l.amt, 0);
+  const after = availableNow() + (f.id ? ACC.tx.get(f.id)?.amount || 0 : 0) - total;
+  if (after < 0 && !force) { errBox.innerHTML = `<div class="note warn confirm"><span>This takes the balance below zero (${inr(after)}). Save anyway?</span><button type="button" class="btn btn-primary" data-act="acc-save-anyway">Save anyway</button></div>`; errBox.scrollIntoView({ block: "center" }); return; }
+  const now = new Date().toISOString();
+  try {
+    for (const l of lines) if (!l.item_id && l.addNew) {
+      const id = "i" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+      await accWrite("set", `${ACC_ITEMS}/${id}`, { name: l.name, category: l.category, usual_price: Math.round(l.amt / l.qty), quick_add: false, price_locked: false, archived: false, created_at: now, created_by: S.uid });
+      l.item_id = id;
+    }
+    const prevStats = itemStats();
+    const doc = { type: "expense", date: v.date, amount: total, category: [...new Set(lines.map((l) => l.category))].length === 1 ? lines[0].category : "Mixed",
+      lines: lines.map((l) => ({ item_id: l.item_id, name: l.name, category: l.category, qty: l.qty, amount: l.amt })), note: v.note.trim(), spent_by: v.spent_by.trim(), updated_at: now, updated_by: S.uid };
+    if (f.id) {
+      const before = ACC.tx.get(f.id);
+      await accWrite("update", `${ACC_TX}/${f.id}`, { ...doc, ...(v.clearReview ? { review: false } : {}) });
+      writeAudit("accounts.edit", null, f.id, before, { ...before, ...doc });
+    } else {
+      const id = "t" + v.date.replaceAll("-", "") + Date.now().toString(36);
+      await accWrite("set", `${ACC_TX}/${id}`, { ...doc, review: false, seq: Date.now(), created_at: now, created_by: S.uid });
+      writeAudit("accounts.add", null, id, null, doc);
+    }
+    // usual price follows the most recent price paid, unless locked
+    for (const l of lines) {
+      const it = l.item_id && ACC.items.get(l.item_id); if (!it || it.price_locked) continue;
+      const unit = Math.round(l.amt / l.qty); const last = prevStats.get(l.item_id)?.last;
+      if (unit !== it.usual_price && (!last || v.date >= last)) await accWrite("update", `${ACC_ITEMS}/${l.item_id}`, { usual_price: unit });
+    }
+    flash(`${f.id ? "Expense updated" : "Expense saved"}: ${inr(total)}. Balance ${inr(availableNow())}.`);
+    ACC.form = null; ACC.view = "entries";
+  } catch (e) { return err(dbErrorText(e).replace("save this bill", "save this expense")); }
+  render(); window.scrollTo(0, 0);
+}
+async function saveReceived() {
+  const f = ACC.form; const v = f.values; const err = (m) => { f.err = m; $("#rf-err").innerHTML = `<div class="note bad">${esc(m)}</div>`; };
+  if (!isISODate(v.date)) return err("Pick the date.");
+  const amt = parseRupees(v.amount); if (amt == null || Number.isNaN(amt) || amt <= 0) return err("Amount must be whole rupees, like 5000.");
+  f.saving = true; const btn = $("#acc-rec-form button[type=submit]"); if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
+  const now = new Date().toISOString(); let attachment = v.attachment || null;
+  try {
+    const file = $("#rf-shot")?.files?.[0];
+    if (file && S.caps.assets) { const blob = await compressImage(file); attachment = (await S.caps.assets.upload(blob, { type: "image/jpeg" })).id; }
+    const doc = { type: "received", date: v.date, amount: amt, method: v.method, from: v.from.trim(), note: v.note.trim(), attachment, lines: [], category: "Received", updated_at: now, updated_by: S.uid };
+    if (f.id) { const before = ACC.tx.get(f.id); await accWrite("update", `${ACC_TX}/${f.id}`, doc); writeAudit("accounts.edit", null, f.id, before, { ...before, ...doc }); }
+    else { const id = "t" + v.date.replaceAll("-", "") + Date.now().toString(36); await accWrite("set", `${ACC_TX}/${id}`, { ...doc, review: false, seq: Date.now(), created_at: now, created_by: S.uid }); writeAudit("accounts.add", null, id, null, doc); }
+    flash(`Money received saved: ${inr(amt)}. Balance ${inr(availableNow())}.`);
+    ACC.form = null; ACC.view = "entries";
+  } catch (e) { f.saving = false; return err(e?.code ? (e.code === "too_large" ? "That screenshot is too large." : dbErrorText(e).replace("save this bill", "save this entry")) : e.message || "Couldn't save."); }
+  render(); window.scrollTo(0, 0);
+}
+async function quickAdd(id) {
+  const it = ACC.items.get(id); if (!it) return;
+  const now = new Date().toISOString(); const date = accTodayISO(); const amt = Math.round(it.usual_price || 0);
+  if (amt <= 0) { flash(`Set a usual price for ${it.name} first.`); render(); return; }
+  const tid = "t" + date.replaceAll("-", "") + Date.now().toString(36);
+  const doc = { type: "expense", date, amount: amt, category: it.category || "Other", lines: [{ item_id: id, name: it.name, category: it.category || "Other", qty: 1, amount: amt }],
+    note: "", spent_by: ACC.settings.default_spender || "Nandhini", review: false, seq: Date.now(), created_at: now, created_by: S.uid, updated_at: now };
+  try { await accWrite("set", `${ACC_TX}/${tid}`, doc); writeAudit("accounts.add", null, tid, null, doc); ACC.lastQuick = { id: tid, label: `${it.name} ${inr(amt)}` }; }
+  catch (e) { flash(dbErrorText(e).replace("save this bill", "add this expense")); }
+  render();
+}
+async function saveItem() {
+  const f = ACC.itemForm; const v = f.values; const err = (m) => { $("#if-err").innerHTML = `<div class="note bad">${esc(m)}</div>`; };
+  const name = v.name.trim(); if (!name) return err("Enter the item name.");
+  const category = f.newCat ? (v.newcat || "").trim() : v.category; if (!category) return err("Type the new category name.");
+  const price = parseRupees(v.price); if (price != null && Number.isNaN(price)) return err("Usual price must be whole rupees, like 116.");
+  const now = new Date().toISOString();
+  try {
+    const doc = { name, category, usual_price: price || 0, quick_add: !!v.quick, price_locked: !!v.locked, updated_at: now };
+    if (f.id) await accWrite("update", `${ACC_ITEMS}/${f.id}`, doc);
+    else await accWrite("set", `${ACC_ITEMS}/${"i" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5)}`, { ...doc, archived: false, created_at: now, created_by: S.uid });
+    if (f.newCat && canAccManage()) await accWrite(Object.keys(ACC.settings).length ? "update" : "set", ACC_SETTINGS, { categories: [...new Set([...(ACC.settings.categories || []), category])] }).catch(() => {});
+    flash(`${name} ${f.id ? "saved" : "added"}.${v.quick ? " It's now a quick-add chip." : ""}`);
+    ACC.itemForm = null;
+  } catch (e) { return err(dbErrorText(e).replace("save this bill", "save this item")); }
+  render(); window.scrollTo(0, 0);
+}
+
+/* --- reconciliation --- */
+function checkView() {
+  const calc = availableNow(); const r = ACC.checkResult; const wl = ACC.settings.written_last; const lc = ACC.settings.ledger_checks || [];
+  const checks = [...ACC.checks.values()].sort((a, b) => (b.at || "").localeCompare(a.at || "")).slice(0, 10);
+  return `<section class="card" id="acc-check">
+    <h2>Check balance</h2>
+    <p class="small muted">Count the cash and UPI money actually in hand and enter it. The app compares it with the calculated balance of <b class="num">${inr(calc)}</b>.</p>
+    <div class="copy-row"><input class="inp num" id="acc-actual" inputmode="numeric" placeholder="Amount in hand, e.g. 5897" aria-label="Amount actually in hand"><button class="btn btn-primary" data-act="acc-check">Check</button></div>
+    ${r ? `<div class="note ${r.diff === 0 ? "ok" : "warn"}">${r.diff === 0 ? `It matches: ${inr(r.actual)} in hand.` : `In hand ${inr(r.actual)} vs calculated ${inr(r.calculated)}: <b>${r.diff > 0 ? `${inr(r.diff)} more` : `${inr(-r.diff)} less`}</b> than the ledger says.`}
+      ${canAccEdit() ? `<button class="btn btn-ghost btn-sm" data-act="acc-check-save">Save this check</button>` : ""}</div>` : ""}
+    ${checks.length ? `<div class="small muted" style="font-weight:600">Saved checks</div><ul class="acc-checks">${checks.map((c) => `<li><span>${esc(dmy(c.date))}</span><span class="num">in hand ${inr(c.actual)} · calculated ${inr(c.calculated)}</span><b class="num ${c.diff ? "neg" : "pos"}">${c.diff === 0 ? "matched" : signedInr(c.diff)}</b></li>`).join("")}</ul>` : ""}
+  </section>
+  ${wl || lc.length ? `<section class="card"><h2>Hand-written WhatsApp ledger</h2>
+    ${wl ? (() => { const at = balanceThrough(wl.date); const d = at - wl.amount; return `<p>Last balance written in WhatsApp on ${esc(dmy(wl.date))}: <b class="num">${inr(wl.amount)}</b>. The app calculates <b class="num">${inr(at)}</b> from the same entries, a difference of <b class="num ${d ? "neg" : "pos"}">${d === 0 ? "₹0" : `${inr(Math.abs(d))} (${d < 0 ? "written balance too high" : "written balance too low"})`}</b>.</p>`; })() : ""}
+    ${lc.length ? `<p class="small muted">Where the written balances went wrong (app's closing minus written closing, per WhatsApp message):</p>
+      <div class="tbl-wrap"><table><thead><tr><th>WhatsApp period</th><th class="r">Difference</th></tr></thead><tbody>${lc.map((c) => `<tr><td>${esc(c.label)}</td><td class="r num ${c.diff ? "neg" : "pos"}">${c.diff === 0 ? "₹0" : signedInr(c.diff)}</td></tr>`).join("")}</tbody></table></div>
+      <p class="small muted">From now on every balance is calculated, so these can't happen again.</p>` : ""}
+  </section>` : ""}`;
+}
+
+/* --- export / import / settings --- */
+function accToolsView() {
+  const ip = ACC.importPreview;
+  return `<section class="card"><h2>Export and import</h2>
+    ${S.caps.downloads ? `<button class="btn btn-ghost btn-block" data-act="acc-csv">Export entries to CSV (${esc(ACC.range === "all" ? "all time" : "selected range")})</button>` : `<p class="small muted">Saving files isn't available in this view.</p>`}
+    ${canAccManage() ? `<button class="btn btn-ghost btn-block" data-act="acc-import">Import entries from CSV…</button>
+      <p class="small muted">CSV columns: date (DD/MM/YYYY), type (Received/Expense), item, category, amount, note; optional method, spent_by, from.</p>
+      ${ip ? `<div class="add-panel"><b>Import preview</b><p class="small">${ip.rows.length} entr${ip.rows.length === 1 ? "y" : "ies"}: ${inr(ip.received)} received, ${inr(ip.spent)} spent.${ip.dups ? ` ${ip.dups} look identical to existing entries (same date, item and amount) and will be added again.` : ""}</p>
+        ${ip.errors.length ? `<div class="note warn small">${ip.errors.slice(0, 5).map(esc).join("<br>")}${ip.errors.length > 5 ? `<br>…and ${ip.errors.length - 5} more skipped` : ""}</div>` : ""}
+        <div class="duo"><button class="btn btn-primary" data-act="acc-import-apply" ${ACC.busy ? "disabled" : ""}>${ACC.busy ? "Importing…" : "Apply import"}</button><button class="btn btn-ghost" data-act="acc-import-cancel">Cancel</button></div></div>` : ""}
+      ${!ACC.settings.seeded_at && ACC.tx.size ? `<button class="btn-link" data-act="acc-seed">Import WhatsApp ledger (Aug–Nov 2026)</button>` : ""}` : ""}
+  </section>
+  ${canAccManage() ? `<section class="card"><h2>Accounts settings</h2>
+    <label class="field"><span>Period length</span><select class="inp" id="acc-period-mode" data-act="acc-period-mode">${[["10", "10 days (1–10, 11–20, 21–end)"], ["14", "14 days"], ["month", "Calendar month"]].map(([v, l]) => `<option value="${v}" ${periodMode() === v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+    <label class="field"><span>Default "Spent by"</span><input class="inp" id="acc-spender" data-act="acc-spender" value="${esc(ACC.settings.default_spender || "Nandhini")}" maxlength="40"></label>
+  </section>` : ""}`;
+}
+function accCsv() {
+  const b = rangeBounds(); const rows = txList().filter((t) => (!b.start || t.date >= b.start) && (!b.end || t.date <= b.end));
+  const lines = [["date", "type", "item", "category", "amount", "qty", "note", "method", "from", "spent_by", "needs_review", "balance_after_day"]];
+  for (const t of rows) lines.push([dmy(t.date), t.type === "received" ? "Received" : "Expense", t.type === "received" ? txTitle(t) : (t.lines || []).map((l) => l.name).join(" & "), txCats(t), t.amount,
+    t.type === "expense" ? (t.lines || []).reduce((a, l) => a + (l.qty || 1), 0) : "", t.note || "", t.method || "", t.from || "", t.spent_by || "", t.review ? "yes" : "", balanceThrough(t.date)]);
+  return "﻿" + lines.map((l) => l.map(csvCell).join(",")).join("\r\n") + "\r\n";
+}
+async function accStatementPdf(p) {
+  await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+  await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js");
+  const tot = totalsBetween(p.start, p.end); const doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" });
+  doc.setFontSize(15); doc.text(`Accounts statement ${dmy(p.start)} – ${dmy(p.end)}`, 40, 42);
+  doc.setFontSize(10); doc.setTextColor(90); doc.text(`Opening Rs ${grouped(tot.opening)} · received Rs ${grouped(tot.received)} · spent Rs ${grouped(tot.spent)} · closing Rs ${grouped(tot.closing)}`, 40, 60);
+  let bal = tot.opening; const body = [["", "Opening balance", "", "", "", grouped(bal)]];
+  for (const t of txList().filter((x) => x.date >= p.start && x.date <= p.end)) { bal += signed(t); body.push([dmy(t.date), txTitle(t), txCats(t), t.type === "received" ? grouped(t.amount) : "", t.type === "expense" ? grouped(t.amount) : "", grouped(bal)]); }
+  body.push(["", "Closing balance", "", grouped(tot.received), grouped(tot.spent), grouped(tot.closing)]);
+  doc.autoTable({ startY: 74, head: [["Date", "Item", "Category", "Received", "Spent", "Balance"]], body, styles: { fontSize: 9, cellPadding: 4 }, headStyles: { fillColor: [15, 110, 102] },
+    columnStyles: { 3: { halign: "right" }, 4: { halign: "right" }, 5: { halign: "right" } },
+    didParseCell: (d) => { if (d.section === "body" && (d.row.index === 0 || d.row.index === body.length - 1)) d.cell.styles.fontStyle = "bold"; } });
+  return doc.output("blob");
+}
+function buildAccImport(text) {
+  const rows = parseCsv(text); if (rows.length < 2) throw new Error("That file has no entries.");
+  const head = rows[0].map((h) => h.trim().toLowerCase().replace(/[^a-z]+/g, "_"));
+  const ix = (n) => head.indexOf(n); const need = ["date", "type", "amount"].filter((n) => ix(n) < 0);
+  if (need.length) throw new Error(`Missing column${need.length > 1 ? "s" : ""}: ${need.join(", ")}.`);
+  const out = []; const errors = []; let received = 0, spent = 0, dups = 0;
+  const existing = new Set([...ACC.tx.values()].map((t) => `${t.date}|${t.type}|${normName(txTitle(t))}|${t.amount}`));
+  rows.slice(1).forEach((r, k) => {
+    const line = k + 2; const get = (n) => (ix(n) >= 0 ? (r[ix(n)] || "").trim() : "");
+    const date = ddmmyyyyToISO(get("date")); const amt = parseRupees(get("amount")); const type = /^rec/i.test(get("type")) ? "received" : /^exp/i.test(get("type")) ? "expense" : null;
+    if (!date) return errors.push(`Line ${line}: date "${get("date")}" isn't DD/MM/YYYY.`);
+    if (!type) return errors.push(`Line ${line}: type must be Received or Expense.`);
+    if (amt == null || Number.isNaN(amt) || amt <= 0) return errors.push(`Line ${line}: amount "${get("amount")}" isn't whole rupees.`);
+    const item = get("item") || (type === "received" ? "Money received" : "(item not written)"); const note = get("note");
+    const t = type === "received" ? { type, date, amount: amt, method: get("method") || (/amazon/i.test(item) ? "Amazon Pay" : /phonepe/i.test(item) ? "PhonePe" : "Other"), from: get("from"), note, lines: [], category: "Received" }
+      : { type, date, amount: amt, category: get("category") || "Other", note, spent_by: get("spent_by") || ACC.settings.default_spender || "Nandhini", lines: [{ item_id: itemByName(item)?.[0] || null, name: item, category: get("category") || "Other", qty: 1, amount: amt }] };
+    if (existing.has(`${date}|${type}|${normName(txTitle(t))}|${amt}`)) dups++;
+    if (type === "received") received += amt; else spent += amt;
+    out.push({ ...t, review: needsReviewNote(note) });
+  });
+  return { rows: out, errors, received, spent, dups };
+}
+async function applyAccImport() {
+  const ip = ACC.importPreview; ACC.busy = true; accRefresh(); const now = new Date().toISOString();
+  try {
+    let n = 0; for (const t of ip.rows) { n++; await accWrite("set", `${ACC_TX}/${"t" + t.date.replaceAll("-", "") + Date.now().toString(36) + n}`, { ...t, seq: Date.now() + n, created_at: now, created_by: S.uid, source: "csv" }); }
+    writeAudit("accounts.import", null, "accounts", null, { entries: ip.rows.length });
+    flash(`Imported ${ip.rows.length} entries.`); ACC.importPreview = null;
+  } catch (e) { flash(dbErrorText(e).replace("save this bill", "import")); }
+  finally { ACC.busy = false; accRefresh(); }
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click", async (e) => {
+  const t = e.target.closest("[data-act]"); if (!t || !t.dataset.act.startsWith("acc-")) return;
+  const a = t.dataset.act; const id = t.dataset.id;
+  switch (a) {
+    case "acc-view": ACC.view = t.dataset.v; ACC.copied = null; render(); break;
+    case "acc-range": ACC.range = t.dataset.v; render(); break;
+    case "acc-add-expense": openExpense(null); break;
+    case "acc-add-received": openReceived(null); break;
+    case "acc-form-cancel": ACC.form = null; render(); break;
+    case "acc-quick": t.disabled = true; quickAdd(id); break;
+    case "acc-undo": { const q = ACC.lastQuick; ACC.lastQuick = null; if (q) { try { await accWrite("delete", `${ACC_TX}/${q.id}`); flash(`Removed ${q.label}.`); } catch (err) { flash(dbErrorText(err)); } } render(); break; }
+    case "acc-open": ACC.detail = ACC.detail === id ? null : id; ACC.confirm = null; render(); break;
+    case "acc-edit": { const tx = ACC.tx.get(id); if (tx?.type === "received") openReceived(id); else openExpense(id); break; }
+    case "acc-del": ACC.confirm = id; render(); break;
+    case "acc-del-no": ACC.confirm = null; render(); break;
+    case "acc-del-yes": {
+      const before = ACC.tx.get(id); ACC.confirm = null; ACC.detail = null;
+      try { await accWrite("delete", `${ACC_TX}/${id}`); writeAudit("accounts.delete", null, id, before, null); if (before?.attachment && S.caps.assets) S.caps.assets.delete(before.attachment).catch(() => {}); flash(`Deleted. Balance ${inr(availableNow())}.`); }
+      catch (err) { flash(dbErrorText(err).replace("save this bill", "delete this entry")); }
+      render(); break;
+    }
+    case "acc-reviewed": try { await accWrite("update", `${ACC_TX}/${id}`, { review: false, reviewed_at: new Date().toISOString(), reviewed_by: S.uid }); flash("Marked as reviewed."); } catch (err) { flash(dbErrorText(err)); } render(); break;
+    case "acc-review-filter": ACC.cat = "review"; ACC.range = "all"; ACC.view = "entries"; render(); break;
+    case "acc-photo": openViewer("/_blob/" + id); break;
+    case "acc-line-add": ACC.form.values.lines.push({ name: "", qty: "1", amount: "", category: ACC.form.values.lines.at(-1)?.category || "Food", item_id: null }); render(); document.querySelector(`[data-line="${ACC.form.values.lines.length - 1}"][data-lf="name"]`)?.focus(); break;
+    case "acc-line-del": ACC.form.values.lines.splice(Number(t.dataset.i), 1); render(); break;
+    case "acc-save-anyway": saveExpense(true); break;
+    case "acc-period": ACC.waPeriod = t.dataset.start; ACC.copied = null; render(); $("#acc-wa-card")?.scrollIntoView({ block: "start" }); break;
+    case "acc-wa": {
+      const p = periodsList().find((x) => x.start === t.dataset.start) || periodOf(t.dataset.start); const text = whatsappText(p);
+      try { await navigator.clipboard.writeText(text); ACC.copied = { where: t.dataset.where, text: `Copied the ${periodLabel(p)} message. Paste it into WhatsApp.` }; }
+      catch { ACC.copied = null; ACC.view = "periods"; ACC.waPeriod = p.start; render(); const pre = $("#acc-wa-text"); const rng = document.createRange(); rng.selectNodeContents(pre); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(rng); flash("Copying isn't allowed here. The message is selected: use your phone's Copy."); return; }
+      render(); break;
+    }
+    case "acc-statement": { const p = periodsList().find((x) => x.start === t.dataset.start) || periodOf(t.dataset.start); t.disabled = true; t.textContent = "Preparing…";
+      try { saveFile(`accounts-statement-${p.start}.pdf`, await accStatementPdf(p)); } catch (err) { flash(err.message || "The statement couldn't be made."); accRefresh(); } break; }
+    case "acc-item-new": ACC.itemForm = { id: null, newCat: false, values: { name: "", category: "Food", price: "", quick: false, locked: false } }; render(); window.scrollTo(0, 0); $("#if-name")?.focus(); break;
+    case "acc-item-edit": { const it = ACC.items.get(id); ACC.itemForm = { id, newCat: false, values: { name: it.name, category: it.category || "Other", price: String(it.usual_price ?? ""), quick: !!it.quick_add, locked: !!it.price_locked } }; render(); window.scrollTo(0, 0); break; }
+    case "acc-item-cancel": ACC.itemForm = null; render(); break;
+    case "acc-item-archive": { const it = ACC.items.get(id); try { await accWrite("update", `${ACC_ITEMS}/${id}`, { archived: !it.archived }); flash(it.archived ? `${it.name} restored.` : `${it.name} archived. It stays in past entries.`); ACC.itemForm = null; } catch (err) { flash(dbErrorText(err)); } render(); break; }
+    case "acc-item-arch": ACC.showArchived = !ACC.showArchived; render(); break;
+    case "acc-check": {
+      const v = parseRupees($("#acc-actual").value); if (v == null || Number.isNaN(v)) { flash("Enter the amount in hand in whole rupees."); render(); break; }
+      const calc = availableNow(); ACC.checkResult = { actual: v, calculated: calc, diff: v - calc }; render(); break;
+    }
+    case "acc-check-save": { const r = ACC.checkResult; if (!r) break; try { await accWrite("set", `${ACC_CHECKS}/${"c" + Date.now().toString(36)}`, { date: accTodayISO(), at: new Date().toISOString(), ...r, by: S.uid }); flash("Check saved."); ACC.checkResult = null; } catch (err) { flash(dbErrorText(err)); } render(); break; }
+    case "acc-csv": saveFile(`accounts-${ACC.range === "all" ? "all" : rangeBounds().start || "range"}.csv`, accCsv()); break;
+    case "acc-import": $("#acc-import-file").click(); break;
+    case "acc-import-cancel": ACC.importPreview = null; render(); break;
+    case "acc-import-apply": applyAccImport(); break;
+    case "acc-seed": accSeed(false); break;
+  }
+});
+document.addEventListener("input", (e) => {
+  const t = e.target; const f = ACC.form;
+  if (f && t.dataset.lf !== undefined && t.dataset.line !== undefined) {
+    const i = Number(t.dataset.line); const l = f.values.lines[i]; if (!l) return;
+    if (t.dataset.lf === "addNew") return;
+    l[t.dataset.lf] = t.value;
+    if (t.dataset.lf === "name" || t.dataset.lf === "qty") {
+      const m = lineMatch(l); const box = document.querySelector(`[data-line-box="${i}"]`);
+      if (m) {
+        const qty = Math.max(1, parseRupees(l.qty) || 1); l.item_id = m[0]; l.category = m[1].category || l.category;
+        if (t.dataset.lf === "name" || !l.amountTyped) { l.amount = String(Math.round((m[1].usual_price || 0) * qty)); box.querySelector('[data-lf="amount"]').value = l.amount; }
+        box.querySelector('[data-lf="category"]').value = l.category;
+      } else l.item_id = null;
+      const nb = box.querySelector("[data-newbox]");
+      nb.innerHTML = l.name.trim() && !m ? `<label class="pick small"><input type="checkbox" data-line="${i}" data-lf="addNew" ${l.addNew ? "checked" : ""}> Add "${esc(l.name.trim())}" as a new item</label>` : m && m[1].name !== l.name.trim() ? `<span class="small muted">Matches item "${esc(m[1].name)}"</span>` : "";
+    }
+    if (t.dataset.lf === "amount") l.amountTyped = true;
+    refreshExpenseTotals(); return;
+  }
+  if (f && t.dataset.ef) { f.values[t.dataset.ef] = t.value; return; }
+  if (f && t.dataset.rf) { f.values[t.dataset.rf] = t.value; return; }
+  if (ACC.itemForm && t.dataset.if && t.type !== "checkbox") {
+    ACC.itemForm.values[t.dataset.if] = t.value;
+    if (t.dataset.if === "name") { const dup = t.value.trim() && [...ACC.items.entries()].find(([id, i]) => id !== ACC.itemForm.id && fuzzyKey(i.name) === fuzzyKey(t.value)); $("#if-dup").innerHTML = dup ? `<div class="note warn small">This looks like <b>${esc(dup[1].name)}</b>${dup[1].archived ? " (archived)" : ""}, which already exists. You can still save if it's a different item.</div>` : ""; }
+    return;
+  }
+  if (t.dataset.act === "acc-q") { ACC.q = t.value; clearTimeout(t._d); t._d = setTimeout(() => { const pos = t.selectionStart; render(); const n = $("#acc-q"); n?.focus(); n?.setSelectionRange(pos, pos); }, 250); }
+});
+document.addEventListener("change", async (e) => {
+  const t = e.target; const f = ACC.form;
+  if (f && t.dataset.lf === "addNew") { f.values.lines[Number(t.dataset.line)].addNew = t.checked; return; }
+  if (f && t.dataset.lf === "category") { f.values.lines[Number(t.dataset.line)].category = t.value; return; }
+  if (f && t.dataset.ef === "clearReview") { f.values.clearReview = t.checked; return; }
+  if (f && t.dataset.rf === "method") { f.values.method = t.value; return; }
+  if (ACC.itemForm && t.dataset.if) {
+    if (t.dataset.if === "category") { ACC.itemForm.newCat = t.value === "__new"; if (!ACC.itemForm.newCat) ACC.itemForm.values.category = t.value; render(); $("#if-newcat")?.focus(); return; }
+    if (t.type === "checkbox") { ACC.itemForm.values[t.dataset.if] = t.checked; return; }
+  }
+  const a = t.dataset.act;
+  if (a === "acc-type") { ACC.type = t.value; render(); }
+  if (a === "acc-cat") { ACC.cat = t.value; render(); }
+  if (a === "acc-dates") { ACC.from = $("#acc-from").value; ACC.to = $("#acc-to").value; render(); }
+  if (a === "acc-period-mode") { try { await accWrite(Object.keys(ACC.settings).length ? "update" : "set", ACC_SETTINGS, { period: t.value, ...(t.value === "14" && !ACC.settings.anchor ? { anchor: txList()[0]?.date || accTodayISO() } : {}) }); flash("Period length changed."); } catch (err) { flash(dbErrorText(err)); } render(); }
+  if (a === "acc-spender") { try { await accWrite(Object.keys(ACC.settings).length ? "update" : "set", ACC_SETTINGS, { default_spender: t.value.trim() || "Nandhini" }); flash("Default \"Spent by\" saved."); } catch (err) { flash(dbErrorText(err)); } render(); }
+  if (t.id === "acc-import-file") {
+    const file = t.files?.[0]; t.value = ""; if (!file) return;
+    try { ACC.importPreview = buildAccImport(await file.text()); } catch (err) { flash(err.message || "That CSV couldn't be read."); }
+    render();
+  }
+});
+document.addEventListener("submit", (e) => {
+  if (e.target.id === "acc-exp-form") { e.preventDefault(); saveExpense(false); }
+  if (e.target.id === "acc-rec-form") { e.preventDefault(); saveReceived(); }
+  if (e.target.id === "acc-item-form") { e.preventDefault(); saveItem(); }
 });
 
 boot();

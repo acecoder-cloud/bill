@@ -5,8 +5,9 @@ so the page can be driven in Chromium outside claude.ai.
 
 ```bash
 bash build.sh            # wraps ../bill-log.html with the stand-in into page.html
-node test.mjs            # bills, summary, reports, team, roles (20 checks)
+node test.mjs            # bills, summary, reports, team, roles (21 checks)
 node inv-test.mjs        # inventory (15 checks)
+node acc-test.mjs        # accounts (16 checks, including the WhatsApp-ledger totals)
 ```
 
 Needs Playwright with Chromium, `sample-bill.png` next to the scripts, and the report/PDF libraries

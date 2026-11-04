@@ -27,7 +27,7 @@
       add: async (data) => { const r = docRef(col + "/x" + Math.random().toString(36).slice(2)); await r.set(data); return r; },
     };
   }
-  function canWrite(path) { if (ROLE === "admin") return true; const seg = path.split("/"); if (seg[0] === "inventory") return seg[1] === "months"; return (seg[0] === "bills" || seg[0] === "audit" || seg[0] === "people") && seg[1] === UID; }
+  function canWrite(path) { if (ROLE === "admin") return true; const seg = path.split("/"); if (seg[0] === "inventory") return seg[1] === "months"; if (seg[0] === "accounts") return seg[1] !== "settings"; return (seg[0] === "bills" || seg[0] === "audit" || seg[0] === "people") && seg[1] === UID; }
   function docRef(path) {
     return {
       id: path.split("/").pop(), path,
