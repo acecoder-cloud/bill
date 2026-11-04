@@ -275,6 +275,59 @@ details.small ul { margin: 6px 0; padding-left: 18px; }
 .perm-table td.wrap { min-width: 11rem; }
 .perm-box { width: 22px; height: 22px; accent-color: var(--brand); }
 .editor-pill { background: var(--warn-bg); color: var(--warn-ink); }
+/* Inventory */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { min-height: 40px; padding: 0 14px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface); font-weight: 700; font-size: .88rem; cursor: pointer; color: var(--fg); }
+.chip[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
+.inv-list { display: grid; gap: 8px; }
+@media (min-width: 680px) { .inv-list { grid-template-columns: 1fr 1fr; } }
+.inv-card { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; align-items: start; text-align: left; width: 100%; padding: 11px 12px; border-radius: var(--r); border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+.inv-card[aria-expanded="true"] { border-color: var(--brand); box-shadow: 0 0 0 2px var(--brand-soft); }
+.inv-card.is-low { border-left: 5px solid var(--warn-line); background: color-mix(in srgb, var(--warn-bg) 55%, var(--surface)); }
+.inv-card.is-stopped { opacity: .55; }
+.inv-sno { color: var(--muted); font-size: .85rem; padding-top: 2px; }
+.inv-main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.inv-main b { overflow-wrap: anywhere; }
+.inv-pills { display: flex; flex-wrap: wrap; gap: 4px; }
+.inv-stock { font-size: 1.35rem; font-weight: 600; text-align: right; line-height: 1.1; }
+.inv-stock small { display: block; font-size: .7rem; color: var(--muted); font-family: var(--font-ui); }
+.pill.low { background: var(--warn-bg); color: var(--warn-ink); border: 1px solid var(--warn-line); }
+.pill.stop { background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 0; font-size: .92rem; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.hist { display: flex; flex-wrap: wrap; gap: 6px; }
+.hist span { display: inline-flex; flex-direction: column; align-items: center; min-width: 40px; padding: 4px 6px; border-radius: 8px; background: var(--surface-2); font-size: .9rem; }
+.hist small { font-size: .65rem; color: var(--muted); font-family: var(--font-ui); }
+.inv-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.reg-head .reg-title { display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; }
+.reg-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.reg-tools .field { flex: 1 1 140px; }
+.reg-wrap { overflow: auto; max-height: 68vh; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+table.reg { border-collapse: separate; border-spacing: 0; font-size: .85rem; width: max-content; }
+.reg th, .reg td { padding: 0 6px; height: 40px; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); text-align: center; white-space: nowrap; }
+.reg thead th { position: sticky; top: 0; z-index: 3; background: var(--surface-2); }
+.reg .s1 { position: sticky; left: 0; z-index: 2; background: var(--surface); min-width: 36px; }
+.reg .s2 { position: sticky; left: 36px; z-index: 2; background: var(--surface); text-align: left; min-width: 150px; max-width: 190px; white-space: normal; line-height: 1.2; box-shadow: 2px 0 0 var(--line); }
+.reg thead .s1, .reg thead .s2 { z-index: 4; background: var(--surface-2); }
+.reg td.cell { min-width: 42px; cursor: pointer; }
+.reg td.cell:hover { background: var(--brand-soft); }
+.reg td.low { background: var(--warn-bg); color: var(--warn-ink); font-weight: 700; box-shadow: inset 0 0 0 2px var(--warn-line); }
+.reg .today { background: color-mix(in srgb, var(--brand-soft) 60%, transparent); }
+.reg th.today { color: var(--brand); }
+.reg td.editing { outline: 3px solid var(--brand); outline-offset: -3px; }
+.reg tr.stopped td { color: var(--muted); background: var(--surface-2); }
+.reg tr.stopped .s2 span { text-decoration: line-through; }
+.reg em { font-style: normal; font-size: .62rem; font-weight: 800; padding: 1px 4px; border-radius: 4px; letter-spacing: .03em; }
+.stop-tag { background: var(--line); color: var(--fg); }
+.low-tag { background: var(--warn-bg); color: var(--warn-ink); }
+.exp-tag { background: var(--bad-bg); color: var(--bad-ink); }
+.inv-cellbar { position: fixed; left: 0; right: 0; bottom: calc(62px + env(safe-area-inset-bottom, 0px)); z-index: 26; background: var(--surface); border-top: 2px solid var(--brand); box-shadow: 0 -8px 24px rgb(0 0 0 / .15);
+  padding: 12px max(16px, env(safe-area-inset-right, 0px)) 12px max(16px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; gap: 8px; }
+.inv-cellbar > * { width: 100%; max-width: 860px; margin: 0 auto; }
+.cell-row { display: flex; gap: 8px; }
+.cell-row .inp { flex: 1; text-align: center; font-size: 1.4rem; min-height: 52px; }
+.cell-row .btn { flex: 1; }
 .audit { display: flex; flex-direction: column; gap: 8px; }
 .audit details { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
 .audit summary { padding: 10px 12px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
@@ -290,7 +343,9 @@ details.small ul { margin: 6px 0; padding-left: 18px; }
   padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px));
 }
 .tabs-in { max-width: 860px; margin: 0 auto; display: flex; }
-.tabs a { flex: 1; min-height: 62px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--muted); text-decoration: none; font-size: .75rem; font-weight: 700; }
+.tabs a { flex: 1; min-width: 0; min-height: 62px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--muted); text-decoration: none; font-size: .7rem; font-weight: 700; letter-spacing: -0.01em; }
+.tab-ico { position: relative; display: inline-flex; }
+.tab-badge { position: absolute; top: -6px; right: -12px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--bad-ink); color: var(--surface); font-size: .66rem; font-weight: 800; display: grid; place-items: center; line-height: 1; }
 .tabs a svg { width: 24px; height: 24px; }
 .tabs a[aria-current="page"] { color: var(--brand); }
 
@@ -323,6 +378,7 @@ details.small ul { margin: 6px 0; padding-left: 18px; }
 </main>
 <nav class="tabs" aria-label="Sections"><div class="tabs-in" id="tabs"></div></nav>
 <input id="camera" type="file" accept="image/*" capture="environment" hidden>
+<input id="inv-import-file" type="file" accept=".csv,text/csv" hidden>
 <input id="gallery" type="file" accept="image/jpeg,image/png,image/webp,application/pdf,.pdf" hidden>
 
 <script>
@@ -407,11 +463,14 @@ const PERMS = [
   { k: "summary", label: "Open Summary", group: "Screens" },
   { k: "reports", label: "Open Reports and save files", group: "Screens" },
   { k: "admin", label: "Open Admin (team, roles, activity log)", group: "Screens", editor: true },
+  { k: "inv_view", label: "Open Inventory", group: "Inventory" },
+  { k: "inv_count", label: "Enter daily stock counts and mark low stock", group: "Inventory" },
+  { k: "inv_manage", label: "Add, edit and archive products; start months; import; settings", group: "Inventory", editor: true },
 ];
 const DEFAULT_PERMS = {
   admin: Object.fromEntries(PERMS.map((p) => [p.k, true])),
-  staff: { log: true, view_all: true, edit_own: true, edit_all: false, delete_own: true, delete_all: false, pay_own: true, pay_all: false, summary: true, reports: true, admin: false },
-  viewer: { log: false, view_all: true, edit_own: false, edit_all: false, delete_own: false, delete_all: false, pay_own: false, pay_all: false, summary: true, reports: true, admin: false },
+  staff: { log: true, view_all: true, edit_own: true, edit_all: false, delete_own: true, delete_all: false, pay_own: true, pay_all: false, summary: true, reports: true, admin: false, inv_view: true, inv_count: true, inv_manage: false },
+  viewer: { log: false, view_all: true, edit_own: false, edit_all: false, delete_own: false, delete_all: false, pay_own: false, pay_all: false, summary: true, reports: true, admin: false, inv_view: true, inv_count: false, inv_manage: false },
 };
 function rolePerms(role) {
   const saved = S.rolePerms?.[role];
@@ -476,6 +535,7 @@ function startWatching() {
   }, () => {});
   if (S.isAdmin) db.collection("people").onSnapshot((snap) => { S.people = new Map(snap.docs.map((d) => [d.id, d.data()])); if (S.tab === "admin") scheduleRender(); }, () => {});
   notePresence();
+  invStart();
   db.collection("bills").onSnapshot((snap) => {
     clearTimeout(slow);
     if (!snap.metadata.fromCache || S.dbState !== "ready") S.dbState = "ready";
@@ -506,7 +566,7 @@ function watchPerson(uid) {
 let renderQueued = false;
 function scheduleRender() {
   if (renderQueued) return; renderQueued = true;
-  requestAnimationFrame(() => { renderQueued = false; if (!S.editor) render(); else refreshEditorReadonlyBits(); });
+  requestAnimationFrame(() => { renderQueued = false; if (S.tab === "inventory") { renderTabs(); return; } if (!S.editor) render(); else refreshEditorReadonlyBits(); });
 }
 
 function allBills() {
@@ -546,6 +606,7 @@ const TABS = [
   { id: "bills", label: "Bills", icon: '<path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 7h6M9 11h6M9 15h4"/>' },
   { id: "summary", label: "Summary", perm: "summary", icon: '<path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18"/>' },
   { id: "reports", label: "Reports", perm: "reports", icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/>' },
+  { id: "inventory", label: "Inventory", perm: "inv_view", icon: '<path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>' },
   { id: "admin", label: "Admin", admin: true, icon: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>' },
 ];
 function tabAllowed(id) { const t = TABS.find((x) => x.id === id); if (!t) return false; if (t.admin) return appAdmin(); return !t.perm || S.dbState === "none" || allowed(t.perm); }
@@ -558,7 +619,7 @@ function onHash() {
 function renderTabs() {
   $("#tabs").innerHTML = TABS.filter((t) => tabAllowed(t.id)).map((t) => `
     <a href="#${t.id}" ${S.tab === t.id && !S.editor ? 'aria-current="page"' : ""}>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${t.icon}</svg>${t.label}</a>`).join("");
+      <span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${t.icon}</svg>${t.id === "inventory" && invAlertCount() ? `<span class="tab-badge" aria-label="${invAlertCount()} stock alerts">${invAlertCount()}</span>` : ""}</span>${t.label}</a>`).join("");
 }
 function renderWho() {
   const el = $("#who"); el.textContent = "";
@@ -574,11 +635,12 @@ function render() {
   if (S.editor) { renderEditor(); return; }
   if (S.dbState === "none") { main.innerHTML = signedOutView(); return; }
   if (S.dbState === "error") { main.innerHTML = `<div class="note bad">The bill log couldn't be loaded${S.dbError === "revoked" ? " because your access changed" : ""}. Reload the page to try again.</div>`; return; }
-  const views = { home: homeView, bills: billsView, summary: summaryView, reports: reportsView, admin: adminView };
+  const views = { home: homeView, bills: billsView, summary: summaryView, reports: reportsView, inventory: inventoryView, admin: adminView };
   if (!tabAllowed(S.tab)) { main.innerHTML = `<div class="note warn">Your role doesn't include this screen. Ask an admin if you need it.</div>`; return; }
   main.innerHTML = (S.dbState === "slow" ? `<div class="note warn">The bill log is taking a while to load. Check your connection; it will appear as soon as it arrives.</div>` : "") + (views[S.tab] || homeView)();
   paintNames(main);
   if (S.tab === "admin") paintAdmin();
+  if (S.tab === "inventory") invAfterRender();
 }
 
 function signedOutView() {
@@ -855,7 +917,7 @@ function adminView() {
   ${teamSection(stats)}
   <section class="card">
     <div class="row-between"><h2>Activity log</h2><button class="btn btn-ghost" data-act="audit-load">${a?.loading ? "Loading…" : a ? "Refresh" : "Load activity"}</button></div>
-    <p class="small muted">Every bill created, edited, paid or deleted, and every team change, with the values before and after.</p>
+    <p class="small muted">Every bill created, edited, paid or deleted, every team change and every product change, with the values before and after.</p>
     <div class="audit" id="audit-list">${a?.error ? `<div class="note bad">${esc(a.error)}</div>` : ""}</div>
   </section>`;
 }
@@ -970,9 +1032,9 @@ function paintAdmin() {
   const team = $("#team"); if (team) paintNames(team).then(() => showLabelBoxes(team));
   const a = S.audit; const box = $("#audit-list"); if (!box || !a?.rows) return;
   if (!a.rows.length) { box.innerHTML = `<p class="muted">No activity yet.</p>`; return; }
-  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed", "roles.update": "Role permissions changed" };
+  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed", "roles.update": "Role permissions changed", "inventory.seed": "Stock register loaded", "inventory.add": "Product added", "inventory.edit": "Product edited", "inventory.archive": "Product archived", "inventory.restore": "Product restored", "inventory.delete": "Product deleted", "inventory.month": "Stock month started", "inventory.import": "Stock CSV imported" };
   box.innerHTML = a.rows.map((r, i) => `<details><summary><b>${esc(label[r.action] || r.action)}</b>
-    <span class="small muted">by <span data-uid="${esc(r.actor)}"></span> · ${esc(fmtDT(r.at))} · ${r.action === "roles.update" ? "Admin / Staff / Viewer permissions" : r.action.startsWith("team.") ? `<span data-uid="${esc((r.after || r.before || {}).member || "")}"></span>${r.after?.role ? " → " + esc(ROLES[r.after.role]?.label || r.after.role) : ""}` : `bill ${(r.after || r.before || {}).bill_no ? "No. " + esc((r.after || r.before).bill_no) + " of " : "of "}${esc(fmtDate((r.after || r.before || {}).bill_date))}`}</span></summary>
+    <span class="small muted">by <span data-uid="${esc(r.actor)}"></span> · ${esc(fmtDT(r.at))} · ${r.action === "roles.update" ? "Admin / Staff / Viewer permissions" : r.action.startsWith("inventory.") ? esc((r.after || r.before || {}).name || (r.after || {}).month || "Inventory") : r.action.startsWith("team.") ? `<span data-uid="${esc((r.after || r.before || {}).member || "")}"></span>${r.after?.role ? " → " + esc(ROLES[r.after.role]?.label || r.after.role) : ""}` : `bill ${(r.after || r.before || {}).bill_no ? "No. " + esc((r.after || r.before).bill_no) + " of " : "of "}${esc(fmtDate((r.after || r.before || {}).bill_date))}`}</span></summary>
     <div class="pair"><div><div class="small muted">Before</div><pre data-json="b${i}"></pre></div><div><div class="small muted">After</div><pre data-json="a${i}"></pre></div></div></details>`).join("");
   a.rows.forEach((r, i) => {
     $(`[data-json="b${i}"]`, box).textContent = r.before ? JSON.stringify(r.before, null, 2) : "—";
@@ -1260,8 +1322,9 @@ async function submit(force) {
     if (ed.mode === "new") await db.doc(`bills/${owner}`).set({ updated_at: now });
     writeAudit(ed.mode === "new" ? "bill.create" : "bill.update", owner, id, before, body);
     const wasNew = ed.mode === "new";
+    const stockN = wasNew ? await invAfterBill(v.items).catch(() => 0) : 0;
     S.editor = null;
-    flash(wasNew ? "Bill saved." : "Changes saved.");
+    flash(wasNew ? `Bill saved.${stockN ? ` Stock reduced for ${stockN} item${stockN === 1 ? "" : "s"}.` : ""}` : "Changes saved.");
     renderTabs(); render();
   } catch (e) {
     btn.disabled = false; btn.textContent = ed.mode === "new" ? "Submit" : "Save changes";
@@ -1475,6 +1538,874 @@ document.addEventListener("change", (e) => {
     try { localStorage.setItem("pbl-cols", JSON.stringify([...r.cols])); } catch {}
     render();
   }
+});
+
+/* ================= Inventory (monthly stock register) ================= */
+/* Storage (same claude.ai page storage as bills):
+   inventory/settings                    {months:[YYYY-MM], expiry_days, bill_link, categories, seeded_at}
+   inventory/products/items/<pid>        one product
+   inventory/months/list/<YYYY-MM>       {counts: {pid: {day: number|null}}, flags: {pid: true}}  (per-day history) */
+const INV = {
+  products: new Map(), months: new Map(), monthSubs: new Map(), settings: {},
+  loaded: { products: false, settings: false },
+  view: "list", q: "", cat: "all", status: "active", lowOnly: false, expOnly: false, sort: "sno", showArchived: false,
+  regMonth: null, regDay: null, cell: null, form: null, detail: null, confirm: null, importPreview: null, busy: null, seeding: false,
+};
+const UNITS = ["Tablet", "Pcs", "Pack", "Bottle", "Box", "Pouch", "ml", "Roll"];
+const INV_PRODUCTS = "inventory/products/items";
+const INV_MONTHS = "inventory/months/list";
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+const SEED_CSV = `sno,name,category,unit,min_level,monthly_use,nov1,nov2,nov3,nov4,expiry,status,notes
+1,ADDND 1GM Tablet,Medicine,Tablet,,,7,4,4,4,,Stopped,
+2,Agaro Multi Cooker,Equipment,Pcs,,1,1,1,1,1,,Active,
+3,Albuzest Powder,Medicine,Pack,,1,1,1,1,1,,Active,
+4,Apron,Consumables,Pcs,,1,1,1,1,1,,Active,
+5,Ashwagandha Choornam,Ayurvedic,Pack,,1,1,1,1,1,,Active,
+6,Avipathi Choornam,Ayurvedic,Pack,,1,1,1,1,1,,Active,
+7,Ball,Games & Toys,Pcs,,,2,2,2,2,,Active,
+8,Bandage Roll,Consumables,Roll,,2,3,3,3,3,,Active,
+9,Battery,Equipment,Pcs,4,10,8,8,8,8,,Active,
+10,Betadine Solution,Medicine,Bottle,,1,,1,1,1,,Active,
+11,Carboxy Eye Drops,Medicine,Bottle,,1,1,1,1,1,,Active,
+12,Dettol Wipes,Consumables,Pack,,1,1,1,1,1,,Active,
+13,Diaper Bag,Consumables,Pack,2,4,4,3,3,3,,Active,
+14,Duolin Respules,Medicine,Pcs,,90,3,,3,5,,Active,
+15,Easy Bath,Consumables,Pack,20,40,45,44,43,42,,Active,
+16,Gauze Pack,Consumables,Pack,2,4,3,3,3,2,12/11/2026,Active,Low stock flagged on 4 Nov
+17,Gloves Box,Consumables,Box,6,9,2,1,1,1,06/11/2026,Active,Low stock flagged 1-4 Nov
+18,Himalaya,Toiletries,Pcs,,,,,,,,Active,No counts recorded
+19,Hydroheal Ointment,Medicine,Pack,,1,1,1,1,1,,Active,
+20,Kaarppasaasthyaadi Thailam,Ayurvedic,Bottle,,1,2,2,2,2,,Active,
+21,Ksheerabala,Ayurvedic,Bottle,,1,3,3,3,3,,Active,
+22,Lignocaine Gel,Medicine,Pack,,1,1,1,1,1,,Active,
+23,Liquid Paraffin 100ml,Medicine,Pack,,4,2,2,2,2,,Active,
+24,Mahamasha Thailam,Ayurvedic,Bottle,,1,2,2,2,2,,Active,
+25,Magnorate Tablet,Medicine,Tablet,,90,9,9,9,9,,Active,
+26,Mask Box,Consumables,Pcs,,15,480,479,479,479,,Active,
+27,Mesna Respules,Medicine,Pcs,,90,4,1,3,6,,Active,
+28,Modalert 100mg,Medicine,Tablet,,,6,6,6,6,,Active,
+29,Mouth Wash 500ml,Toiletries,Bottle,0.5,1,1,1,1,1,,Active,
+30,Mupirocin Ointment,Medicine,Pack,,1,2,2,2,2,,Active,
+31,Nicardia 5mg,Medicine,Tablet,,90,7,7,7,7,,Active,
+32,Nicardia 10mg,Medicine,Tablet,,90,3,6,7,5,,Active,
+33,Niftan 100mg,Medicine,Tablet,,,3,3,3,3,,Active,
+34,NS 500ml,Medicine,Bottle,15,30,25,24,23,22,,Active,
+35,Odonil Gel Pocket,Toiletries,Pcs,,,,,,,,Active,No counts recorded
+36,Pantocid 40mg,Medicine,Tablet,,30,3,3,3,3,,Active,
+37,Paracetamol 1gm,Medicine,Tablet,,90,10,10,10,10,,Active,
+38,Pentamen Powder,Medicine,Pack,,1,1,1,1,1,,Active,
+39,Pendasure Powder,Medicine,Pack,,1,1,1,1,1,,Active,
+40,Raasnaadi Ghrutam,Ayurvedic,Pack,,1,8,8,8,8,,Active,
+41,Resodim 15mg,Medicine,Tablet,,15,5.5,5,5,5,,Stopped,
+42,Room Spray,Toiletries,Pcs,,1,1,1,1,1,,Active,Low stock flagged 1-4 Nov
+43,Strocit Plus 500mg,Medicine,Tablet,1,30,9,8,7,6,,Active,
+44,Suction Tube,Consumables,Pack,15,30,35,34,33,32,,Active,
+45,Syringe 2ml,Consumables,Pcs,5,10,96,95,95,95,,Active,
+46,Syringe 5ml,Consumables,Pcs,5,10,97,96,96,96,,Active,
+47,Syringe 50ml,Consumables,Pcs,15,30,14,13,12,11,11/11/2026,Active,
+48,Syp Citralka,Medicine,Bottle,,1,1,1,1,1,,Active,
+49,T. Taxim O 200mg,Medicine,Tablet,,,7,7,7,7,,Active,
+50,Tablet Crusher,Equipment,Pcs,,,2,2,2,2,,Active,
+51,Thermometer,Equipment,Pcs,,,1,1,1,1,,Active,
+52,Tobramist 5ml Respules,Medicine,Pcs,,60,,,,,,Active,No counts recorded
+53,Tooth Brush,Toiletries,Pcs,1,2,1,1,1,1,,Active,
+54,Trachea Life,Consumables,Pcs,15,35,6,6,44,42,,Active,Low stock flagged 1-2 Nov
+55,Under Pad,Consumables,Pack,2,3,7,7,7,7,,Active,
+56,Vacuum Suction,Equipment,Pcs,1,2,7,6,6,6,,Active,
+57,Vim Liquid,Toiletries,Pack,0.5,1,0.75,0.75,0.75,0.75,,Active,
+58,Budicort,Medicine,Pcs,,60,,,,,,Active,No counts recorded
+59,Sandoor Hand Wash,Toiletries,Pouch,0.5,1,0.5,0.5,0.5,0.5,,Active,
+60,Pencil,Stationery,Pcs,1,1,6,6,6,6,,Active,
+61,Colour Pen,Stationery,Pcs,,1,12,12,12,12,,Active,
+62,Blue Pen,Stationery,Pcs,3,1,16,16,16,16,,Active,
+63,Black Pen,Stationery,Pcs,,1,3,3,3,3,,Active,
+64,Red Pen,Stationery,Pcs,3,1,1,1,1,1,,Active,
+65,Scale 30cm,Stationery,Pcs,,1,1,1,1,1,,Active,
+66,Tab B-Complex,Medicine,Tablet,,30,2,10,10,9,,Active,
+67,Fishing Game,Games & Toys,Pcs,,,1,1,1,1,,Active,
+68,Ludo Game,Games & Toys,Pcs,,,1,1,1,1,,Active,
+69,Snake and Ladders,Games & Toys,Pcs,,,1,1,1,1,,Active,
+70,Educational Math Toy,Games & Toys,Pcs,,,1,1,1,1,,Active,
+71,Hercules Jenga Game,Games & Toys,Pcs,,,1,1,1,1,,Active,
+72,Prolomet-XL 12.5,Medicine,Tablet,,30,7,6,5,4,,Active,
+73,Rosuvas CV 10mg,Medicine,Tablet,,30,1,,6,5,,Active,
+74,Rador 20mg,Medicine,Tablet,,30,2,1,5,4,,Active,
+75,Zyrcoid,Medicine,Tablet,,30,,,,,,Active,No counts recorded
+76,Cotrimoxazole 800/160mg,Medicine,Tablet,,60,,,,,,Active,No counts recorded
+77,Hot Bag,Equipment,Pcs,,,1,1,1,1,,Active,
+78,Battle Jenga Cup,Games & Toys,Pcs,,,1,1,1,1,,Active,
+79,Hercules Jenga Wooden Toy,Games & Toys,Pcs,,,1,1,1,1,,Active,
+80,Rope Challenge Game,Games & Toys,Pcs,,,1,1,1,1,,Active,
+81,Flipping Chess Match,Games & Toys,Pcs,,,1,1,1,1,,Active,
+82,Tissue Box,Toiletries,Box,3,6,,,,,,Active,No counts recorded
+83,Bucket Puzzle,Games & Toys,Pcs,,,1,1,1,1,,Active,
+84,Sharpener,Stationery,Pcs,,,1,1,1,1,,Active,
+85,Eraser,Stationery,Pcs,,,1,1,1,1,,Active,
+86,Charcoal Shaving Foam,Toiletries,Pcs,,,1,1,1,1,,Active,
+87,Shaving Blade,Toiletries,Pcs,,,5,5,5,5,,Active,
+88,Micropore,Consumables,Roll,,,0.25,0.25,0.25,,05/11/2026,Active,Low stock flagged 1-3 Nov; 4 Nov not recorded
+89,Yardley London Powder,Toiletries,Pcs,,,1,1,1,1,,Active,`;
+/* On paper these were circled but have no minimum level, so they carry a manual low-stock flag. */
+const SEED_MANUAL_LOW = ["Room Spray", "Micropore"];
+
+/* ---------- small helpers ---------- */
+const clone = (o) => (o == null ? o : JSON.parse(JSON.stringify(o)));
+function isObj(v) { return v && typeof v === "object" && !Array.isArray(v); }
+function deepMerge(target, src) {
+  for (const [k, v] of Object.entries(src)) { if (isObj(v) && isObj(target[k])) deepMerge(target[k], v); else target[k] = isObj(v) ? clone(v) : v; }
+  return target;
+}
+function normName(s) { return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+function monthKey(iso) { return iso.slice(0, 7); }
+function daysIn(mk) { const [y, m] = mk.split("-").map(Number); return new Date(y, m, 0).getDate(); }
+function monthLabel(mk) { const [y, m] = mk.split("-").map(Number); return `${MONTH_NAMES[m - 1]} ${y}`; }
+function addMonths(mk, n) { const [y, m] = mk.split("-").map(Number); const d = new Date(y, m - 1 + n, 1); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; }
+function registerTitle(mk) { const [y, m] = mk.split("-"); return `Current Stock ${MONTH_NAMES[Number(m) - 1]} 01.${m}.${y} – ${daysIn(mk)}.${m}.${y}`; }
+function ddmmyyyyToISO(s) { const m = /^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/.exec(String(s || "").trim()); if (!m) return isISODate(s) ? s : null; const iso = `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`; return isISODate(iso) ? iso : null; }
+/** "3", "3P", "2 PC", "0.5", "1/2", "1 1/2", "½" -> number; "" -> null; junk -> NaN */
+function parseCount(v) {
+  if (v == null) return null;
+  if (typeof v === "number") return isFinite(v) ? v : NaN;
+  let s = String(v).trim().toLowerCase().replace(/½/g, " 1/2").replace(/¼/g, " 1/4").replace(/¾/g, " 3/4").replace(/\s*(pcs?|p|packs?|nos?)\.?$/i, "").trim();
+  if (!s) return null;
+  let m = /^(\d+)\s+(\d+)\/(\d+)$/.exec(s); if (m) return Number(m[1]) + Number(m[2]) / Number(m[3]);
+  m = /^(\d+)\/(\d+)$/.exec(s); if (m && Number(m[2])) return Number(m[1]) / Number(m[2]);
+  const n = parseNum(s); return n == null ? NaN : n;
+}
+const fmtCount = (n) => (n == null || !isFinite(n) ? "" : String(Number(Number(n).toFixed(3))));
+function invTodayISO() { return todayISO(); }
+
+/* ---------- offline outbox: writes made without a connection are kept on this phone and sent later ---------- */
+const OUTBOX_KEY = "pbl-inv-outbox";
+function outbox() { try { return JSON.parse(localStorage.getItem(OUTBOX_KEY) || "[]"); } catch { return []; } }
+function saveOutbox(q) { try { localStorage.setItem(OUTBOX_KEY, JSON.stringify(q)); } catch {} }
+function applyLocal(op, path, data) {
+  const seg = path.split("/"); const id = seg.at(-1); const col = seg.slice(0, -1).join("/");
+  const map = col === INV_PRODUCTS ? INV.products : col === INV_MONTHS ? INV.months : null;
+  if (path === "inventory/settings") { INV.settings = op === "set" ? clone(data) : deepMerge(clone(INV.settings) || {}, data); return; }
+  if (!map) return;
+  if (op === "delete") map.delete(id);
+  else if (op === "set") map.set(id, clone(data));
+  else map.set(id, deepMerge(clone(map.get(id)) || {}, data));
+}
+async function sendWrite(op, path, data) {
+  const ref = S.caps.db.doc(path);
+  if (op === "set") return ref.set(data);
+  if (op === "update") return ref.update(data);
+  return ref.delete();
+}
+/** Apply on screen at once, then save. Offline (or the store is unreachable) -> queued on this phone. */
+async function invWrite(op, path, data) {
+  applyLocal(op, path, data);
+  if (!navigator.onLine || outbox().length) { saveOutbox([...outbox(), { op, path, data }]); invSyncSoon(); return "queued"; }
+  try { await sendWrite(op, path, data); return "saved"; }
+  catch (e) {
+    if (e?.code === "unavailable" || !navigator.onLine) { saveOutbox([...outbox(), { op, path, data }]); return "queued"; }
+    throw e;
+  }
+}
+let syncing = false;
+async function flushOutbox() {
+  if (syncing || !navigator.onLine || !S.caps.db) return; syncing = true;
+  try {
+    let q = outbox();
+    while (q.length) {
+      try { await sendWrite(q[0].op, q[0].path, q[0].data); }
+      catch (e) { if (e?.code === "unavailable") break; console.warn("dropped an inventory change the store refused", e?.code); }
+      q = q.slice(1); saveOutbox(q);
+    }
+  } finally { syncing = false; if (S.tab === "inventory") invRefresh(); }
+}
+let syncTimer = null;
+function invSyncSoon() { clearTimeout(syncTimer); syncTimer = setTimeout(flushOutbox, 1500); }
+window.addEventListener("online", () => flushOutbox());
+/** Re-apply queued changes over what the store sent, so offline edits stay visible. */
+function reapplyOutbox(filterPath) { for (const w of outbox()) if (!filterPath || w.path.startsWith(filterPath)) applyLocal(w.op, w.path, w.data); }
+
+/* ---------- permissions ---------- */
+function canInvCount() { return S.canWrite && allowed("inv_count"); }
+function canInvManage() { return (S.isAdmin || S.me?.isOwner) && allowed("inv_manage"); }
+
+/* ---------- loading ---------- */
+function invStart() {
+  const db = S.caps.db;
+  db.collection(INV_PRODUCTS).onSnapshot((snap) => {
+    INV.products = new Map(snap.docs.map((d) => [d.id, clone(d.data())]));
+    reapplyOutbox(INV_PRODUCTS);
+    if (!snap.metadata.fromCache) INV.loaded.products = true;
+    invChanged(); maybeAutoSeed();
+  }, () => { INV.loaded.products = true; invChanged(); });
+  db.doc("inventory/settings").onSnapshot((snap) => {
+    INV.settings = snap.exists ? clone(snap.data()) : {};
+    reapplyOutbox("inventory/settings");
+    if (!snap.metadata.fromCache) INV.loaded.settings = true;
+    for (const mk of latestMonths(2)) watchMonth(mk);
+    watchMonth(monthKey(invTodayISO()));
+    invChanged(); maybeAutoSeed();
+  }, () => { INV.loaded.settings = true; invChanged(); });
+  flushOutbox();
+}
+function watchMonth(mk) {
+  if (!mk || INV.monthSubs.has(mk)) return;
+  INV.monthSubs.set(mk, S.caps.db.doc(`${INV_MONTHS}/${mk}`).onSnapshot((snap) => {
+    if (snap.exists) INV.months.set(mk, clone(snap.data())); else INV.months.delete(mk);
+    reapplyOutbox(`${INV_MONTHS}/${mk}`);
+    invChanged();
+  }, () => {}));
+}
+function knownMonths() { return [...new Set([...(INV.settings.months || []), ...INV.months.keys()])].filter((m) => /^\d{4}-\d{2}$/.test(m)).sort(); }
+function latestMonths(n) { return knownMonths().slice(-n); }
+let invQueued = false;
+function invChanged() {
+  if (invQueued) return; invQueued = true;
+  requestAnimationFrame(() => { invQueued = false; renderTabs(); if (S.tab === "inventory" && !S.editor && !invBusy()) render(); else if (S.tab === "inventory") invRefreshLive(); });
+}
+function invBusy() { return !!(INV.form || INV.importPreview || INV.confirm || document.activeElement?.closest?.("#inv-cellbar, .inv-filters")); }
+function invRefresh() { if (S.tab === "inventory" && !S.editor) render(); else renderTabs(); }
+
+/* ---------- stock maths ---------- */
+function monthCounts(mk, pid) { return INV.months.get(mk)?.counts?.[pid] || {}; }
+function lastInMonth(mk, pid, beforeDay = 99) {
+  const c = monthCounts(mk, pid); let best = null;
+  for (const [d, v] of Object.entries(c)) { const day = Number(d); if (day <= beforeDay && typeof v === "number" && (!best || day > best.day)) best = { day, value: v }; }
+  return best;
+}
+/** Latest recorded count across months (newest first), else the opening stock. */
+function currentStock(pid) {
+  for (const mk of [...knownMonths()].reverse()) { const b = lastInMonth(mk, pid); if (b) return { value: b.value, mk, day: b.day }; }
+  const p = INV.products.get(pid); return p?.opening_stock != null ? { value: p.opening_stock, mk: null, day: null } : null;
+}
+function manualLow(pid) { const mk = latestMonths(1)[0]; return !!(mk && INV.months.get(mk)?.flags?.[pid]); }
+function invStatus(pid) {
+  const p = INV.products.get(pid); const cur = currentStock(pid);
+  const stopped = p.status === "stopped"; const archived = !!p.archived;
+  const autoLow = !stopped && cur && p.min_level != null && cur.value <= p.min_level;
+  const manLow = !stopped && manualLow(pid);
+  let expiry = null, daysLeft = null;
+  if (p.expiry) {
+    daysLeft = Math.round((new Date(p.expiry + "T00:00:00") - new Date(invTodayISO() + "T00:00:00")) / 864e5);
+    expiry = daysLeft < 0 ? "expired" : daysLeft <= (Number(INV.settings.expiry_days) || 30) ? "soon" : null;
+  }
+  return { p, cur, stopped, archived, low: !!(autoLow || manLow), autoLow: !!autoLow, manLow, expiry, daysLeft };
+}
+function invAlertCount() {
+  let n = 0;
+  for (const pid of INV.products.keys()) { const s = invStatus(pid); if (!s.archived && !s.stopped && (s.low || s.expiry)) n++; }
+  return n;
+}
+function sortedProducts(includeArchived = false) {
+  return [...INV.products.entries()].filter(([, p]) => includeArchived || !p.archived).sort((a, b) => (a[1].sno || 0) - (b[1].sno || 0));
+}
+function nextSno() { let m = 0; for (const p of INV.products.values()) m = Math.max(m, Number(p.sno) || 0); return m + 1; }
+function categories() { return [...new Set([...[...INV.products.values()].map((p) => p.category).filter(Boolean), ...(INV.settings.categories || [])])].sort((a, b) => a.localeCompare(b)); }
+function unitLabel(p, n) { return p.unit ? `${fmtCount(n)} ${p.unit}` : fmtCount(n); }
+
+/* ---------- seed (first run or "Load November 2026 register"; adds only what's missing) ---------- */
+function parseCsv(text) {
+  const rows = []; let row = [], cell = "", q = false; text = text.replace(/^﻿/, "");
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += c; }
+    else if (c === '"') q = true;
+    else if (c === ",") { row.push(cell); cell = ""; }
+    else if (c === "\n" || c === "\r") { if (c === "\r" && text[i + 1] === "\n") i++; row.push(cell); rows.push(row); row = []; cell = ""; }
+    else cell += c;
+  }
+  if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter((r) => r.some((x) => x.trim() !== ""));
+}
+async function seedInventory(auto) {
+  if (INV.seeding || !canInvManage()) return; INV.seeding = true; invRefresh();
+  try {
+    if (auto) {
+      const lease = await S.caps.db.doc("inventory/settings").acquire({ holder: S.uid, ttlMs: 60000 }).catch(() => ({ acquired: true }));
+      if (!lease.acquired) return;
+      const fresh = await S.caps.db.doc("inventory/settings").get().catch(() => null);
+      if (fresh?.exists && fresh.data().seeded_at) return;
+    }
+    const rows = parseCsv(SEED_CSV); const head = rows.shift().map((h) => h.trim());
+    const byName = new Map([...INV.products.entries()].map(([id, p]) => [normName(p.name), id]));
+    const now = new Date().toISOString(); const mk = "2026-11";
+    const counts = {}; const flags = {}; let added = 0;
+    for (const r of rows) {
+      const o = Object.fromEntries(head.map((h, i) => [h, (r[i] ?? "").trim()]));
+      let pid = byName.get(normName(o.name));
+      if (!pid) {
+        pid = "p" + String(o.sno).padStart(3, "0");
+        while (INV.products.has(pid)) pid += "x";
+        const doc = { sno: Number(o.sno), name: o.name, category: o.category || "", unit: o.unit || "", min_level: parseCount(o.min_level), monthly_use: parseCount(o.monthly_use),
+          opening_stock: null, expiry: ddmmyyyyToISO(o.expiry), batch: "", notes: o.notes || "", status: o.status.toLowerCase() === "stopped" ? "stopped" : "active",
+          archived: false, created_at: now, created_by: S.uid, updated_at: now };
+        await invWrite("set", `${INV_PRODUCTS}/${pid}`, doc); added++;
+      }
+      const day = {}; ["nov1", "nov2", "nov3", "nov4"].forEach((k, i) => { const v = parseCount(o[k]); if (typeof v === "number" && !isNaN(v) && monthCounts(mk, pid)[i + 1] == null) day[i + 1] = v; });
+      if (Object.keys(day).length) counts[pid] = day;
+      if (SEED_MANUAL_LOW.includes(o.name)) flags[pid] = true;
+    }
+    if (INV.months.has(mk)) await invWrite("update", `${INV_MONTHS}/${mk}`, { counts, flags });
+    else await invWrite("set", `${INV_MONTHS}/${mk}`, { counts, flags, started_at: now, started_by: S.uid });
+    const months = [...new Set([...(INV.settings.months || []), mk])].sort();
+    await invWrite("set", "inventory/settings", { expiry_days: 30, bill_link: false, categories: [], ...INV.settings, months, seeded_at: now });
+    watchMonth(mk); INV.regMonth = mk;
+    writeAudit("inventory.seed", null, "inventory", null, { added });
+    flash(added ? `Loaded the November 2026 register: ${added} products.` : "The November 2026 register was already loaded; missing counts were filled in.");
+  } catch (e) { flash(dbErrorText(e).replace("save this bill", "load the register")); }
+  finally { INV.seeding = false; invRefresh(); }
+}
+function maybeAutoSeed() {
+  if (!INV.loaded.products || !INV.loaded.settings || INV.products.size || INV.settings.seeded_at || INV.seeding) return;
+  if (S.me?.isOwner && canInvManage()) seedInventory(true);
+}
+
+/* ---------- view ---------- */
+function inventoryView() {
+  if (!INV.loaded.products && !INV.products.size) return `<h1>Inventory</h1><div class="card"><div class="row-between"><span class="spin"></span><span class="muted">Loading stock register…</span></div></div>`;
+  if (INV.form) return invFormView();
+  const pending = outbox().length;
+  const alerts = invAlertCount(); const reorderN = reorderRows().length;
+  return `
+  <div class="row-between"><h1>Inventory</h1>${canInvManage() ? `<button class="btn btn-primary" data-act="inv-add">+ Add Product</button>` : ""}</div>
+  ${pending ? `<div class="note warn">${pending} change${pending === 1 ? "" : "s"} saved on this phone, waiting for a connection to sync.</div>` : ""}
+  ${!INV.products.size ? invEmptyView() : `
+  <div class="seg inv-tabs" role="group" aria-label="Inventory view">
+    ${[["list", `Stock list${alerts ? ` · ${alerts}` : ""}`], ["register", "Daily register"], ["reorder", `Reorder${reorderN ? ` · ${reorderN}` : ""}`]].map(([v, l]) => `<button data-act="inv-view" data-v="${v}" aria-pressed="${INV.view === v}">${l}</button>`).join("")}
+  </div>
+  ${INV.view === "register" ? registerView() : INV.view === "reorder" ? reorderView() : listView()}
+  ${invToolsView()}`}`;
+}
+function invEmptyView() {
+  return `<div class="card"><h2>No products yet</h2>
+    <p class="muted">Load the November 2026 paper register (89 items with counts for 1–4 November), add products one by one, or import a CSV.</p>
+    ${canInvManage() ? `<button class="btn btn-primary btn-block" data-act="inv-seed" ${INV.seeding ? "disabled" : ""}>${INV.seeding ? "Loading…" : "Load November 2026 register"}</button>
+      <button class="btn btn-ghost btn-block" data-act="inv-import">Import from CSV</button>` : `<p class="small muted">Ask an admin to load the stock register.</p>`}
+  </div>`;
+}
+
+/* --- list --- */
+function listRows() {
+  const q = normName(INV.q);
+  let rows = sortedProducts(INV.showArchived).map(([pid]) => ({ pid, s: invStatus(pid) }));
+  rows = rows.filter(({ s }) =>
+    (!q || normName(s.p.name).includes(q)) &&
+    (INV.cat === "all" || s.p.category === INV.cat) &&
+    (INV.status === "all" || (INV.status === "stopped" ? s.stopped : !s.stopped)) &&
+    (!INV.lowOnly || (s.low && !s.stopped)) &&
+    (!INV.expOnly || s.expiry) &&
+    (INV.showArchived ? s.archived : true));
+  const key = { sno: (r) => r.s.p.sno, name: (r) => r.s.p.name.toLowerCase(), stock: (r) => (r.s.cur ? r.s.cur.value : Infinity), expiry: (r) => r.s.p.expiry || "9999" }[INV.sort];
+  return rows.sort((a, b) => { const x = key(a), y = key(b); return (typeof x === "number" && typeof y === "number" ? x - y : String(x).localeCompare(String(y))) || a.s.p.sno - b.s.p.sno; });
+}
+function pills(s) {
+  const out = [];
+  if (s.archived) out.push(`<span class="pill">Archived</span>`);
+  if (s.stopped) out.push(`<span class="pill stop">Stopped</span>`);
+  if (s.low) out.push(`<span class="pill low">${s.autoLow ? "Low stock" : "Marked low"}</span>`);
+  if (s.expiry === "expired") out.push(`<span class="pill unpaid">Expired ${esc(fmtDate(s.p.expiry))}</span>`);
+  else if (s.expiry === "soon") out.push(`<span class="pill warn">Expires in ${s.daysLeft} day${s.daysLeft === 1 ? "" : "s"}</span>`);
+  if (!s.cur) out.push(`<span class="pill">No count yet</span>`);
+  return out.join(" ");
+}
+function listView() {
+  const rows = listRows(); const cats = categories();
+  const detail = INV.detail && INV.products.has(INV.detail) ? detailView(INV.detail) : "";
+  return `${detail}
+  <div class="card inv-filters">
+    <label class="field"><span>Search by name</span><input class="inp" type="search" id="inv-q" data-act="inv-q" placeholder="e.g. Syringe" value="${esc(INV.q)}" autocomplete="off"></label>
+    <div class="dates">
+      <label class="field"><span>Category</span><select class="inp" id="inv-cat" data-act="inv-cat"><option value="all">All categories</option>${cats.map((c) => `<option ${INV.cat === c ? "selected" : ""}>${esc(c)}</option>`).join("")}</select></label>
+      <label class="field"><span>Sort by</span><select class="inp" id="inv-sort" data-act="inv-sort">${[["sno", "S.No"], ["name", "Name"], ["stock", "Stock level"], ["expiry", "Expiry"]].map(([v, l]) => `<option value="${v}" ${INV.sort === v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+    </div>
+    <div class="seg" role="group" aria-label="Status">${[["active", "Active"], ["stopped", "Stopped"], ["all", "All"]].map(([v, l]) => `<button data-act="inv-status" data-v="${v}" aria-pressed="${INV.status === v}">${l}</button>`).join("")}</div>
+    <div class="chips">
+      <button class="chip" data-act="inv-low" aria-pressed="${INV.lowOnly}">Low stock only</button>
+      <button class="chip" data-act="inv-exp" aria-pressed="${INV.expOnly}">Expiring soon</button>
+      ${canInvManage() ? `<button class="chip" data-act="inv-arch" aria-pressed="${INV.showArchived}">Archived</button>` : ""}
+    </div>
+  </div>
+  <p class="small muted">${rows.length} product${rows.length === 1 ? "" : "s"}</p>
+  <div class="inv-list">${rows.map(({ pid, s }) => `
+    <button class="inv-card ${s.stopped || s.archived ? "is-stopped" : ""} ${s.low && !s.stopped ? "is-low" : ""}" data-act="inv-open" data-pid="${esc(pid)}" aria-expanded="${INV.detail === pid}">
+      <span class="inv-sno num">${esc(s.p.sno)}</span>
+      <span class="inv-main"><b>${esc(s.p.name)}</b>
+        <span class="small muted">${esc(s.p.category || "No category")} · ${esc(s.p.unit || "—")} · Min ${s.p.min_level != null ? fmtCount(s.p.min_level) : "—"} · Monthly ${s.p.monthly_use != null ? fmtCount(s.p.monthly_use) : "—"}${s.p.expiry ? ` · Exp ${esc(fmtDate(s.p.expiry))}` : ""}</span>
+        <span class="inv-pills">${pills(s)}</span></span>
+      <span class="inv-stock num">${s.cur ? esc(fmtCount(s.cur.value)) : "—"}<small>${esc(s.p.unit || "")}</small></span>
+    </button>`).join("") || `<div class="card"><p class="muted">No products match these filters.</p></div>`}</div>`;
+}
+function detailView(pid) {
+  const s = invStatus(pid); const p = s.p; const mk = latestMonths(1)[0];
+  const hist = mk ? Object.entries(monthCounts(mk, pid)).filter(([, v]) => v != null).sort((a, b) => a[0] - b[0]) : [];
+  const conf = INV.confirm?.pid === pid ? INV.confirm.kind : null;
+  return `<section class="card inv-detail" id="inv-detail">
+    <div class="row-between"><h2>${esc(p.name)}</h2><button class="btn-link" data-act="inv-close-detail">Close</button></div>
+    <div class="inv-pills">${pills(s)}</div>
+    <dl class="kv">
+      <dt>S.No</dt><dd class="num">${esc(p.sno)}</dd><dt>Category</dt><dd>${esc(p.category || "—")}</dd><dt>Unit</dt><dd>${esc(p.unit || "—")}</dd>
+      <dt>Minimum level</dt><dd>${p.min_level != null ? fmtCount(p.min_level) : "—"}</dd><dt>Monthly use</dt><dd>${p.monthly_use != null ? fmtCount(p.monthly_use) : "—"}</dd>
+      <dt>Current stock</dt><dd><b>${s.cur ? esc(unitLabel(p, s.cur.value)) : "—"}</b>${s.cur?.day ? ` <span class="small muted">(${s.cur.day} ${esc(monthLabel(s.cur.mk))})</span>` : ""}</dd>
+      <dt>Expiry</dt><dd>${p.expiry ? esc(fmtDate(p.expiry)) : "—"}</dd><dt>Batch No.</dt><dd>${esc(p.batch || "—")}</dd><dt>Notes</dt><dd>${esc(p.notes || "—")}</dd>
+    </dl>
+    ${mk ? `<div class="small muted" style="font-weight:600">${esc(monthLabel(mk))} counts</div><div class="hist">${hist.map(([d, v]) => `<span class="num"><small>${d}</small>${esc(fmtCount(v))}</span>`).join("") || '<span class="muted small">None yet</span>'}</div>` : ""}
+    <div class="inv-actions">
+      ${p.min_level == null && !s.stopped && canInvCount() && mk ? `<button class="btn btn-ghost" data-act="inv-flag" data-pid="${esc(pid)}">${s.manLow ? "Clear low-stock mark" : "Mark low stock"}</button>` : ""}
+      ${canInvManage() ? `<button class="btn btn-ghost" data-act="inv-edit" data-pid="${esc(pid)}">Edit</button>
+        ${p.archived ? `<button class="btn btn-ghost" data-act="inv-restore" data-pid="${esc(pid)}">Restore</button><button class="btn btn-danger" data-act="inv-del" data-pid="${esc(pid)}">Delete forever</button>`
+          : `<button class="btn btn-danger" data-act="inv-archive" data-pid="${esc(pid)}">Delete…</button>`}` : ""}
+    </div>
+    ${conf === "archive" ? `<div class="note bad confirm"><span>Remove <b>${esc(p.name)}</b> from the stock list? It's archived, so its counts stay in past months and you can restore it later.</span><button class="btn btn-danger" data-act="inv-archive-yes" data-pid="${esc(pid)}">Archive</button><button class="btn btn-ghost" data-act="inv-confirm-no">Cancel</button></div>` : ""}
+    ${conf === "delete" ? `<div class="note bad confirm"><span>Delete <b>${esc(p.name)}</b> for good? Its product details are removed; counts already in past months stay in exports.</span><button class="btn btn-danger" data-act="inv-del-yes" data-pid="${esc(pid)}">Delete forever</button><button class="btn btn-ghost" data-act="inv-confirm-no">Cancel</button></div>` : ""}
+  </section>`;
+}
+
+/* --- register grid --- */
+function regMonth() {
+  const months = knownMonths(); const cur = monthKey(invTodayISO());
+  if (!INV.regMonth || !months.includes(INV.regMonth)) INV.regMonth = months.includes(cur) ? cur : months.at(-1) || cur;
+  watchMonth(INV.regMonth); watchMonth(addMonths(INV.regMonth, -1));
+  return INV.regMonth;
+}
+function regDay(mk) {
+  const n = daysIn(mk); const t = invTodayISO();
+  if (!INV.regDay || INV.regDay.mk !== mk) INV.regDay = { mk, day: monthKey(t) === mk ? Number(t.slice(8, 10)) : Math.min(n, Math.max(1, ...Object.values(INV.months.get(mk)?.counts || {}).flatMap((c) => Object.keys(c).map(Number)), 1)) };
+  return INV.regDay.day;
+}
+function registerView() {
+  const months = knownMonths(); const mk = regMonth(); const doc = INV.months.get(mk); const n = daysIn(mk); const day = regDay(mk);
+  const next = addMonths(months.at(-1) || mk, 1);
+  const head = `<div class="card reg-head">
+    <div class="row-between"><button class="btn btn-ghost" data-act="inv-month" data-v="${esc(addMonths(mk, -1))}" ${months.includes(addMonths(mk, -1)) ? "" : "disabled"} aria-label="Previous month">‹</button>
+      <div class="reg-title"><b>${esc(monthLabel(mk))}</b><span class="small muted">${esc(registerTitle(mk))}</span></div>
+      <button class="btn btn-ghost" data-act="inv-month" data-v="${esc(addMonths(mk, 1))}" ${months.includes(addMonths(mk, 1)) ? "" : "disabled"} aria-label="Next month">›</button></div>
+    ${doc ? `<div class="reg-tools">
+      <label class="field"><span>Counting day</span><select class="inp" id="inv-day" data-act="inv-day">${Array.from({ length: n }, (_, i) => i + 1).map((d) => `<option value="${d}" ${d === day ? "selected" : ""}>${d} ${esc(MONTH_NAMES[Number(mk.slice(5)) - 1].slice(0, 3))}</option>`).join("")}</select></label>
+      ${canInvCount() ? `<button class="btn btn-ghost" data-act="inv-copy">Copy ${day === 1 ? "last month's closing" : `day ${day - 1}`} → day ${day}</button>` : ""}
+    </div>` : ""}
+    ${canInvManage() && mk === months.at(-1) && doc ? `<button class="btn-link" data-act="inv-newmonth">Start ${esc(monthLabel(next))} (carry closing stock to day 1)</button>` : ""}
+  </div>`;
+  if (!doc) {
+    return head + `<div class="card"><p>${esc(monthLabel(mk))} hasn't been started.</p>${canInvManage() ? `<button class="btn btn-primary" data-act="inv-newmonth" data-v="${esc(mk)}">Start ${esc(monthLabel(mk))}</button>` : `<p class="small muted">Ask an admin to start this month.</p>`}</div>`;
+  }
+  const rows = sortedProducts().map(([pid, p]) => ({ pid, p }));
+  return head + `<p class="small muted">Tap a cell to enter that day's closing count. Fractions like 0.5, 1/2 or 3P work. Amber cells are at or below the minimum level.</p>
+  <div class="reg-wrap"><table class="reg" id="reg">
+    <thead><tr><th class="s1">S.No</th><th class="s2">Stock name</th><th>Min</th><th>Use</th>${Array.from({ length: n }, (_, i) => `<th class="${i + 1 === day ? "today" : ""}">${i + 1}</th>`).join("")}</tr></thead>
+    <tbody>${rows.map(({ pid, p }) => regRow(mk, pid, p, n, day)).join("")}</tbody>
+  </table></div>
+  ${INV.cell ? cellBar() : ""}`;
+}
+function regRow(mk, pid, p, n, day) {
+  const s = invStatus(pid); const c = monthCounts(mk, pid);
+  return `<tr data-row="${esc(pid)}" class="${s.stopped ? "stopped" : ""}">
+    <td class="s1 num">${esc(p.sno)}</td>
+    <td class="s2"><span>${esc(p.name)}</span>${s.stopped ? ' <em class="stop-tag">STOP</em>' : ""}${s.manLow ? ' <em class="low-tag">LOW</em>' : ""}${s.expiry ? ` <em class="exp-tag">${s.expiry === "expired" ? "EXPIRED" : "EXP " + esc(fmtDate(p.expiry).replace(/ \d{4}$/, ""))}</em>` : ""}</td>
+    <td class="num">${p.min_level != null ? fmtCount(p.min_level) : ""}</td><td class="num">${p.monthly_use != null ? fmtCount(p.monthly_use) : ""}</td>
+    ${Array.from({ length: n }, (_, i) => { const d = i + 1; const v = c[d]; const low = !s.stopped && typeof v === "number" && p.min_level != null && v <= p.min_level;
+      return `<td class="cell num ${low ? "low" : ""} ${d === day ? "today" : ""} ${INV.cell?.pid === pid && INV.cell?.day === d ? "editing" : ""}" data-act="inv-cell" data-pid="${esc(pid)}" data-day="${d}" ${canInvCount() ? 'tabindex="0" role="button"' : ""} aria-label="${esc(p.name)}, day ${d}: ${v == null ? "empty" : fmtCount(v)}">${v == null ? "" : esc(fmtCount(v))}</td>`; }).join("")}
+  </tr>`;
+}
+function cellBar() {
+  const { pid, day, mk, err } = INV.cell; const p = INV.products.get(pid); if (!p) return "";
+  const v = monthCounts(mk, pid)[day]; const prev = lastInMonth(mk, pid, day - 1);
+  return `<div class="inv-cellbar" id="inv-cellbar" role="dialog" aria-label="Enter stock count">
+    <div class="row-between"><div><b>${esc(p.name)}</b><div class="small muted">${day} ${esc(monthLabel(mk))}${p.min_level != null ? ` · min ${fmtCount(p.min_level)}` : ""}${prev ? ` · day ${prev.day}: ${fmtCount(prev.value)}` : ""}</div></div>
+      <button class="btn-link" data-act="inv-cell-close">Close</button></div>
+    <div class="cell-row">
+      <button class="btn btn-ghost" data-act="inv-step" data-v="-1" aria-label="Minus one">−1</button>
+      <input class="inp num" id="inv-cell-input" inputmode="decimal" autocomplete="off" value="${esc(v == null ? "" : fmtCount(v))}" placeholder="${prev ? esc(fmtCount(prev.value)) : "count"}" aria-label="Count for ${esc(p.name)} on day ${day}">
+      <button class="btn btn-ghost" data-act="inv-step" data-v="1" aria-label="Plus one">+1</button>
+    </div>
+    <div class="chips">${[["0.25", "¼"], ["0.5", "½"], ["0.75", "¾"]].map(([x, l]) => `<button class="chip" data-act="inv-frac" data-v="${x}">+${l}</button>`).join("")}${prev ? `<button class="chip" data-act="inv-same">Same as day ${prev.day}</button>` : ""}</div>
+    ${err ? `<p class="small" style="color:var(--bad-ink)">${esc(err)}</p>` : ""}
+    <div class="cell-row"><button class="btn btn-ghost" data-act="inv-cell-clear">Clear</button><button class="btn btn-ghost" data-act="inv-cell-save" data-next="0">Save</button><button class="btn btn-primary" data-act="inv-cell-save" data-next="1">Save & next ↓</button></div>
+  </div>`;
+}
+/** Scroll the register sideways so a cell sits just right of the pinned S.No / name columns. */
+/** Position of an element inside the register's scroll box (sticky cells make offsetLeft unreliable). */
+function posInWrap(el, wrap) {
+  const r = el.getBoundingClientRect(); const w = wrap.getBoundingClientRect();
+  return { left: r.left - w.left + wrap.scrollLeft, top: r.top - w.top + wrap.scrollTop, width: r.width, height: r.height };
+}
+function pinnedWidth(wrap) { return (wrap.querySelector("thead .s1")?.offsetWidth || 0) + (wrap.querySelector("thead .s2")?.offsetWidth || 0); }
+function revealInRegister(el) {
+  const wrap = el?.closest(".reg-wrap"); if (!wrap) return;
+  const p = posInWrap(el, wrap); const pinned = pinnedWidth(wrap); const head = wrap.querySelector("thead")?.offsetHeight || 0;
+  if (p.left - pinned < wrap.scrollLeft) wrap.scrollLeft = Math.max(0, p.left - pinned - 4);
+  else if (p.left + p.width > wrap.scrollLeft + wrap.clientWidth) wrap.scrollLeft = p.left + p.width - wrap.clientWidth + 4;
+  if (p.top - head < wrap.scrollTop) wrap.scrollTop = Math.max(0, p.top - head - 4);
+  else if (p.top + p.height > wrap.scrollTop + wrap.clientHeight) wrap.scrollTop = p.top + p.height - wrap.clientHeight + 4;
+}
+function invAfterRender() {
+  const th = document.querySelector("#reg thead th.today"); if (!th) return;
+  const wrap = th.closest(".reg-wrap"); const p = posInWrap(th, wrap);
+  wrap.scrollLeft = Math.max(0, p.left - pinnedWidth(wrap) - p.width * 2);  // today's column, with the two days before it
+}
+/** Update one row of the grid in place (keeps the scroll position while counting). */
+function invRefreshLive() {
+  const table = $("#reg"); if (!table) { renderTabs(); return; }
+  const mk = INV.regMonth; const n = daysIn(mk); const day = regDay(mk);
+  for (const tr of table.querySelectorAll("tr[data-row]")) { const pid = tr.dataset.row; const p = INV.products.get(pid); if (p) tr.outerHTML = regRow(mk, pid, p, n, day); }
+  renderTabs();
+}
+function openCell(pid, day) {
+  if (!canInvCount()) return;
+  INV.cell = { pid, day, mk: INV.regMonth, err: "" };
+  const bar = $("#inv-cellbar"); const html = cellBar();
+  if (bar) bar.outerHTML = html; else $("#main").insertAdjacentHTML("beforeend", html);
+  document.querySelectorAll("#reg td.editing").forEach((td) => td.classList.remove("editing"));
+  const td = document.querySelector(`#reg td[data-pid="${CSS.escape(pid)}"][data-day="${day}"]`); td?.classList.add("editing");
+  revealInRegister(td);
+  const inp = $("#inv-cell-input"); inp.focus(); inp.select();
+}
+async function saveCell(goNext, forceValue) {
+  const c = INV.cell; if (!c) return;
+  const raw = forceValue !== undefined ? forceValue : $("#inv-cell-input").value;
+  const v = parseCount(raw);
+  if (Number.isNaN(v) || (typeof v === "number" && v < 0)) { c.err = "Enter a number like 5, 0.5, 1/2 or 3P."; $("#inv-cellbar").outerHTML = cellBar(); $("#inv-cell-input").focus(); return; }
+  try { await invWrite("update", `${INV_MONTHS}/${c.mk}`, { counts: { [c.pid]: { [c.day]: v } } }); }
+  catch (e) { c.err = dbErrorText(e).replace("save this bill", "save this count"); $("#inv-cellbar").outerHTML = cellBar(); return; }
+  const tr = document.querySelector(`#reg tr[data-row="${CSS.escape(c.pid)}"]`);
+  if (tr) tr.outerHTML = regRow(c.mk, c.pid, INV.products.get(c.pid), daysIn(c.mk), regDay(c.mk));
+  renderTabs();
+  if (goNext) {
+    const order = sortedProducts().map(([pid]) => pid); const i = order.indexOf(c.pid);
+    if (i >= 0 && i < order.length - 1) { openCell(order[i + 1], c.day); return; }
+  }
+  INV.cell = null; $("#inv-cellbar")?.remove(); document.querySelectorAll("#reg td.editing").forEach((td) => td.classList.remove("editing"));
+}
+async function copyPrevious() {
+  const mk = INV.regMonth; const day = regDay(mk); const counts = {}; let n = 0;
+  for (const [pid, p] of sortedProducts()) {
+    if (monthCounts(mk, pid)[day] != null) continue;
+    const src = day > 1 ? monthCounts(mk, pid)[day - 1] : lastInMonth(addMonths(mk, -1), pid)?.value;
+    if (typeof src === "number") { counts[pid] = { [day]: src }; n++; }
+  }
+  if (!n) { flash(day > 1 ? `Nothing to copy: day ${day} is already filled, or day ${day - 1} is empty.` : "Nothing to copy from last month."); render(); return; }
+  try { const r = await invWrite("update", `${INV_MONTHS}/${mk}`, { counts }); flash(`Copied ${n} count${n === 1 ? "" : "s"} to day ${day}. Now change only what's different.${r === "queued" ? " (Saved on this phone until you're back online.)" : ""}`); }
+  catch (e) { flash(dbErrorText(e).replace("save this bill", "copy counts")); }
+  render();
+}
+async function startMonth(target) {
+  const months = knownMonths(); const mk = target || addMonths(months.at(-1) || monthKey(invTodayISO()), 1);
+  if (INV.months.has(mk)) { INV.regMonth = mk; render(); return; }
+  const counts = {}; const now = new Date().toISOString();
+  for (const [pid] of sortedProducts()) { const cur = currentStock(pid); if (cur) counts[pid] = { 1: cur.value }; }
+  try {
+    await invWrite("set", `${INV_MONTHS}/${mk}`, { counts, flags: {}, started_at: now, started_by: S.uid });
+    await invWrite(INV.settings && Object.keys(INV.settings).length ? "update" : "set", "inventory/settings", { months: [...new Set([...months, mk])].sort() });
+    watchMonth(mk); INV.regMonth = mk; INV.regDay = null;
+    writeAudit("inventory.month", null, mk, null, { month: mk, items: Object.keys(counts).length });
+    flash(`${monthLabel(mk)} started with ${Object.keys(counts).length} closing counts carried to day 1.`);
+  } catch (e) { flash(dbErrorText(e).replace("save this bill", "start the month")); }
+  render();
+}
+
+/* --- reorder --- */
+function reorderRows() {
+  return sortedProducts().map(([pid]) => invStatus(pid)).filter((s) => !s.stopped && s.low)
+    .map((s) => ({ s, suggest: s.p.monthly_use != null ? Math.max(0, Number((s.p.monthly_use - (s.cur?.value || 0)).toFixed(3))) : null }));
+}
+function reorderView() {
+  const rows = reorderRows();
+  return `<section class="card">
+    <div class="row-between"><h2>Reorder list</h2>${rows.length && S.caps.downloads ? `<button class="btn btn-ghost" data-act="inv-reorder-csv">Save CSV</button>` : ""}</div>
+    <p class="small muted">Active products at or below their minimum level, or marked low. Suggested order = monthly use − current stock.</p>
+    ${rows.length ? `<div class="tbl-wrap"><table><thead><tr><th>Product</th><th class="r">Current</th><th class="r">Min</th><th class="r">Monthly use</th><th class="r">Suggested order</th></tr></thead>
+      <tbody>${rows.map(({ s, suggest }) => `<tr><td class="wrap"><button class="link" data-act="inv-open" data-pid="${esc(sortedProducts().find(([, p]) => p === s.p)?.[0] || "")}">${esc(s.p.name)}</button>${s.manLow ? ' <span class="pill low">Marked low</span>' : ""}</td>
+        <td class="r num">${s.cur ? esc(fmtCount(s.cur.value)) : "—"}</td><td class="r num">${s.p.min_level != null ? fmtCount(s.p.min_level) : "—"}</td><td class="r num">${s.p.monthly_use != null ? fmtCount(s.p.monthly_use) : "—"}</td>
+        <td class="r num"><b>${suggest == null ? "set monthly use" : esc(fmtCount(suggest)) + " " + esc(s.p.unit || "")}</b></td></tr>`).join("")}</tbody></table></div>`
+      : `<p class="muted">Nothing to reorder right now.</p>`}
+  </section>`;
+}
+
+/* --- tools: export, import, settings --- */
+function invToolsView() {
+  const mk = INV.view === "register" ? INV.regMonth : latestMonths(1)[0];
+  const st = INV.settings; const ip = INV.importPreview;
+  return `<section class="card">
+    <h2>Export and import</h2>
+    ${mk && S.caps.downloads ? `<div class="duo"><button class="btn btn-ghost" data-act="inv-csv">Register CSV (${esc(monthLabel(mk))})</button><button class="btn btn-ghost" data-act="inv-pdf">Printable register (PDF)</button></div>` : mk ? `<p class="small muted">Saving files isn't available in this view.</p>` : ""}
+    ${canInvManage() ? `<button class="btn btn-ghost btn-block" data-act="inv-import">Import from CSV…</button>
+      <p class="small muted">CSV columns: name (required), sno, category, unit, min_level, monthly_use, opening_stock, expiry (DD/MM/YYYY), batch, status, notes, and day columns (1, 2 … or nov1, nov2 …) for ${mk ? esc(monthLabel(mk)) : "the current month"}. Products are matched by name; existing ones are updated.</p>` : ""}
+    ${ip ? importPreviewView(ip) : ""}
+  </section>
+  ${canInvManage() ? `<section class="card"><h2>Inventory settings</h2>
+    <label class="field"><span>Warn about expiry this many days ahead</span><input class="inp" id="inv-expdays" data-act="inv-expdays" inputmode="numeric" value="${esc(st.expiry_days ?? 30)}"></label>
+    <label class="pick"><input type="checkbox" data-act="inv-billlink" ${st.bill_link ? "checked" : ""}> Subtract billed quantities from stock when a bill is saved (items matched by exact product name)</label>
+    ${INV.products.size ? `<button class="btn-link" data-act="inv-seed" ${INV.seeding ? "disabled" : ""}>Load November 2026 register (adds only missing products and counts)</button>` : ""}
+  </section>` : ""}`;
+}
+function registerCsv(mk) {
+  const n = daysIn(mk); const days = Array.from({ length: n }, (_, i) => i + 1);
+  const lines = [[registerTitle(mk)], ["S.No", "Stock Name", "Category", "Unit", "Minimum Level", "Monthly Use", ...days.map(String), "Expiry", "Status", "Notes"]];
+  for (const [pid, p] of sortedProducts()) {
+    const c = monthCounts(mk, pid);
+    lines.push([p.sno, p.name, p.category || "", p.unit || "", p.min_level ?? "", p.monthly_use ?? "", ...days.map((d) => (c[d] == null ? "" : c[d])), p.expiry ? p.expiry.split("-").reverse().join("/") : "", p.status === "stopped" ? "STOP" : "Active", p.notes || ""]);
+  }
+  return "﻿" + lines.map((l) => l.map(csvCell).join(",")).join("\r\n") + "\r\n";
+}
+async function saveFile(filename, data) {
+  try { await S.caps.downloads.save({ filename, data }); flash("File saved."); }
+  catch (e) { if (e?.code !== "declined") flash(e?.code === "rate_limited" ? "A save is already waiting for your answer." : e?.message && !e.code ? e.message : "This file couldn't be saved here."); }
+  invRefresh();
+}
+async function registerPdf(mk) {
+  await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+  await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js");
+  const n = daysIn(mk); const days = Array.from({ length: n }, (_, i) => i + 1);
+  const doc = new window.jspdf.jsPDF({ orientation: "landscape", unit: "pt", format: "a3" });
+  doc.setFontSize(15); doc.text(registerTitle(mk), 30, 32);
+  doc.setFontSize(8); doc.setTextColor(100); doc.text(`Printed ${fmtDT(new Date().toISOString())} · amber = at or below minimum · grey = STOP`, 30, 46);
+  const rows = sortedProducts(); const lowCell = new Set();
+  const body = rows.map(([pid, p], r) => { const c = monthCounts(mk, pid); const s = invStatus(pid);
+    days.forEach((d) => { const v = c[d]; if (!s.stopped && typeof v === "number" && p.min_level != null && v <= p.min_level) lowCell.add(`${r}:${d + 3}`); });
+    return [p.sno, p.name + (s.stopped ? " (STOP)" : "") + (p.expiry ? `  exp ${p.expiry.split("-").reverse().join(".")}` : ""), p.min_level ?? "", p.monthly_use ?? "", ...days.map((d) => (c[d] == null ? "" : fmtCount(c[d])))]; });
+  doc.autoTable({
+    startY: 56, head: [["S.No", "Stock Name", "Min", "Use", ...days.map(String)]], body, theme: "grid",
+    styles: { fontSize: 6.5, cellPadding: 2, halign: "center", lineColor: 120, lineWidth: 0.3 }, headStyles: { fillColor: [15, 110, 102], textColor: 255 },
+    columnStyles: { 1: { halign: "left", cellWidth: 150 }, 0: { cellWidth: 22 } },
+    didParseCell: (d) => { if (d.section !== "body") return; if (lowCell.has(`${d.row.index}:${d.column.index}`)) d.cell.styles.fillColor = [255, 228, 160]; if (rows[d.row.index]?.[1].status === "stopped") d.cell.styles.textColor = 150; },
+  });
+  return doc.output("blob");
+}
+function importPreviewView(ip) {
+  return `<div class="add-panel">
+    <b>Import preview</b>
+    <p class="small">${ip.updates} product${ip.updates === 1 ? "" : "s"} to update, ${ip.creates} new, ${ip.countsN} count${ip.countsN === 1 ? "" : "s"} for ${esc(monthLabel(ip.mk))}.${ip.skipped ? ` ${ip.skipped} row${ip.skipped === 1 ? "" : "s"} skipped (no name).` : ""}</p>
+    ${ip.errors.length ? `<div class="note warn small">${ip.errors.slice(0, 5).map(esc).join("<br>")}${ip.errors.length > 5 ? `<br>…and ${ip.errors.length - 5} more` : ""}</div>` : ""}
+    <div class="duo"><button class="btn btn-primary" data-act="inv-import-apply" ${INV.busy ? "disabled" : ""}>${INV.busy ? "Importing…" : "Apply import"}</button><button class="btn btn-ghost" data-act="inv-import-cancel">Cancel</button></div>
+  </div>`;
+}
+function buildImport(text) {
+  const rows = parseCsv(text); if (!rows.length) throw new Error("That file is empty.");
+  let hi = rows.findIndex((r) => r.some((c) => /^(stock\s*)?name$/i.test(c.trim())));
+  if (hi < 0) throw new Error('No "name" column found. Use the register CSV or the seed column names.');
+  const head = rows[hi].map((h) => h.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, ""));
+  const col = (...names) => head.findIndex((h) => names.includes(h));
+  const ix = { sno: col("sno", "s_no"), name: col("name", "stock_name"), category: col("category"), unit: col("unit"), min: col("min_level", "minimum_level", "min"),
+    use: col("monthly_use", "use"), open: col("opening_stock", "opening"), expiry: col("expiry", "expiry_date"), batch: col("batch", "batch_no"), status: col("status"), notes: col("notes") };
+  const dayCols = head.map((h, i) => { const m = /^(?:[a-z]{3}_?)?(\d{1,2})$/.exec(h); return m && Number(m[1]) >= 1 && Number(m[1]) <= 31 && h !== "sno" ? [i, Number(m[1])] : null; }).filter(Boolean);
+  const mk = (INV.view === "register" && INV.regMonth) || latestMonths(1)[0] || monthKey(invTodayISO());
+  const byName = new Map([...INV.products.entries()].map(([id, p]) => [normName(p.name), id]));
+  const ops = []; const counts = {}; const errors = []; let updates = 0, creates = 0, nCounts = 0, skipped = 0; let sno = nextSno();
+  const num = (r, i, label, line) => { if (i < 0) return undefined; const v = parseCount(r[i]); if (Number.isNaN(v)) { errors.push(`Line ${line}: ${label} "${r[i]}" isn't a number.`); return undefined; } return v; };
+  rows.slice(hi + 1).forEach((r, k) => {
+    const line = hi + k + 2; const name = (r[ix.name] || "").trim(); if (!name) { skipped++; return; }
+    let pid = byName.get(normName(name)); const exists = !!pid;
+    const fields = {};
+    if (ix.category >= 0 && r[ix.category]?.trim()) fields.category = r[ix.category].trim();
+    if (ix.unit >= 0 && r[ix.unit]?.trim()) fields.unit = r[ix.unit].trim();
+    const mn = num(r, ix.min, "Minimum level", line); if (mn !== undefined) fields.min_level = mn;
+    const us = num(r, ix.use, "Monthly use", line); if (us !== undefined) fields.monthly_use = us;
+    if (ix.expiry >= 0 && r[ix.expiry]?.trim()) { const e = ddmmyyyyToISO(r[ix.expiry]); if (e) fields.expiry = e; else errors.push(`Line ${line}: expiry "${r[ix.expiry]}" isn't DD/MM/YYYY.`); }
+    if (ix.batch >= 0 && r[ix.batch]?.trim()) fields.batch = r[ix.batch].trim();
+    if (ix.notes >= 0 && r[ix.notes]?.trim()) fields.notes = r[ix.notes].trim();
+    if (ix.status >= 0 && r[ix.status]?.trim()) fields.status = /stop/i.test(r[ix.status]) ? "stopped" : "active";
+    const now = new Date().toISOString();
+    if (exists) { if (Object.keys(fields).length) { ops.push(["update", `${INV_PRODUCTS}/${pid}`, { ...fields, updated_at: now }]); updates++; } }
+    else {
+      pid = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); byName.set(normName(name), pid);
+      const s = Number(r[ix.sno]); const op = num(r, ix.open, "Opening stock", line);
+      ops.push(["set", `${INV_PRODUCTS}/${pid}`, { sno: s > 0 && ![...INV.products.values()].some((p) => p.sno === s) ? s : sno++, name, category: "", unit: "", min_level: null, monthly_use: null,
+        opening_stock: op ?? null, expiry: null, batch: "", notes: "", status: "active", archived: false, created_at: now, created_by: S.uid, updated_at: now, ...fields }]);
+      creates++;
+    }
+    for (const [i, d] of dayCols) { if (d > daysIn(mk)) continue; const v = num(r, i, `Day ${d}`, line); if (typeof v === "number") { (counts[pid] ||= {})[d] = v; nCounts++; } }
+  });
+  return { ops, countsObj: counts, countsN: nCounts, mk, updates, creates, skipped, errors };
+}
+async function applyImport() {
+  const ip = INV.importPreview; INV.busy = true; invRefresh();
+  try {
+    for (const [op, path, data] of ip.ops) await invWrite(op, path, data);
+    if (Object.keys(ip.countsObj).length) {
+      if (INV.months.has(ip.mk)) await invWrite("update", `${INV_MONTHS}/${ip.mk}`, { counts: ip.countsObj });
+      else { await invWrite("set", `${INV_MONTHS}/${ip.mk}`, { counts: ip.countsObj, flags: {}, started_at: new Date().toISOString(), started_by: S.uid });
+        await invWrite(Object.keys(INV.settings).length ? "update" : "set", "inventory/settings", { months: [...new Set([...knownMonths(), ip.mk])].sort() }); watchMonth(ip.mk); }
+    }
+    writeAudit("inventory.import", null, "inventory", null, { updates: ip.updates, creates: ip.creates, counts: ip.countsN });
+    flash(`Import done: ${ip.updates} updated, ${ip.creates} added, ${ip.countsN} counts.`);
+    INV.importPreview = null;
+  } catch (e) { flash(dbErrorText(e).replace("save this bill", "import")); }
+  finally { INV.busy = false; invRefresh(); }
+}
+
+/* --- add / edit product --- */
+function invFormView() {
+  const f = INV.form; const v = f.values; const cats = categories();
+  const dup = v.name.trim() && [...INV.products.entries()].find(([id, p]) => id !== f.pid && normName(p.name) === normName(v.name));
+  const unitOther = v.unit && !UNITS.includes(v.unit);
+  return `<div class="row-between"><button class="btn-link" data-act="inv-form-cancel">‹ Cancel</button><h1 style="flex:1">${f.mode === "add" ? "Add product" : "Edit product"}</h1></div>
+  <form class="card" id="inv-form" novalidate>
+    <label class="field"><span>Name *</span><input class="inp" id="pf-name" data-pf="name" value="${esc(v.name)}" required autocomplete="off" maxlength="120"></label>
+    <div id="pf-dup">${dup ? `<div class="note warn small">A product called <b>${esc(dup[1].name)}</b>${dup[1].archived ? " (archived)" : ""} already exists. You can still save if this is a different item.</div>` : ""}</div>
+    <div class="dates">
+      <label class="field"><span>Category</span><select class="inp" id="pf-category" data-pf="category"><option value="">No category</option>${cats.map((c) => `<option ${v.category === c ? "selected" : ""}>${esc(c)}</option>`).join("")}<option value="__new" ${f.newCat ? "selected" : ""}>+ New category…</option></select></label>
+      <label class="field"><span>Unit</span><select class="inp" id="pf-unit" data-pf="unit">${UNITS.map((u) => `<option ${v.unit === u ? "selected" : ""}>${u}</option>`).join("")}<option value="__other" ${unitOther || f.otherUnit ? "selected" : ""}>Other…</option></select></label>
+    </div>
+    ${f.newCat ? `<label class="field"><span>New category name</span><input class="inp" id="pf-newcat" data-pf="newcat" value="${esc(v.newcat || "")}" maxlength="40"></label>` : ""}
+    ${unitOther || f.otherUnit ? `<label class="field"><span>Unit name</span><input class="inp" id="pf-otherunit" data-pf="otherunit" value="${esc(unitOther ? v.unit : v.otherunit || "")}" maxlength="20" placeholder="e.g. Strip"></label>` : ""}
+    <div class="dates">
+      <label class="field"><span>Minimum level</span><input class="inp num" id="pf-min" data-pf="min" inputmode="decimal" value="${esc(v.min)}" placeholder="e.g. 2"></label>
+      <label class="field"><span>Monthly use</span><input class="inp num" id="pf-use" data-pf="use" inputmode="decimal" value="${esc(v.use)}" placeholder="e.g. 30"></label>
+    </div>
+    ${f.mode === "add" ? `<label class="field"><span>Opening stock</span><input class="inp num" id="pf-open" data-pf="open" inputmode="decimal" value="${esc(v.open)}" placeholder="Count today, e.g. 10 or 0.5"></label>` : `<p class="small muted">Stock counts are entered in the daily register.</p>`}
+    <div class="dates">
+      <label class="field"><span>Expiry date</span><input class="inp" type="date" id="pf-expiry" data-pf="expiry" value="${esc(v.expiry)}"></label>
+      <label class="field"><span>Batch No.</span><input class="inp" id="pf-batch" data-pf="batch" value="${esc(v.batch)}" maxlength="40"></label>
+    </div>
+    <label class="field"><span>Notes</span><textarea class="inp" id="pf-notes" data-pf="notes" rows="2" maxlength="300">${esc(v.notes)}</textarea></label>
+    <div class="field"><span class="small muted" style="font-weight:600">Status</span><div class="seg" role="group" aria-label="Status">${[["active", "Active"], ["stopped", "Stopped"]].map(([k, l]) => `<button type="button" data-act="pf-status" data-v="${k}" aria-pressed="${v.status === k}">${l}</button>`).join("")}</div></div>
+    <div id="pf-err">${f.err ? `<div class="note bad">${esc(f.err)}</div>` : ""}</div>
+    <button class="btn btn-primary btn-block" type="submit" ${f.saving ? "disabled" : ""}>${f.saving ? "Saving…" : f.mode === "add" ? "Add product" : "Save changes"}</button>
+  </form>`;
+}
+function openForm(pid) {
+  const p = pid ? INV.products.get(pid) : null;
+  INV.form = { mode: p ? "edit" : "add", pid: pid || null, newCat: false, otherUnit: false, values: p ? {
+    name: p.name, category: p.category || "", unit: p.unit || "Pcs", min: fmtCount(p.min_level), use: fmtCount(p.monthly_use), open: "", expiry: p.expiry || "", batch: p.batch || "", notes: p.notes || "", status: p.status || "active",
+  } : { name: "", category: INV.cat !== "all" ? INV.cat : "", unit: "Tablet", min: "", use: "", open: "", expiry: "", batch: "", notes: "", status: "active" } };
+  render(); window.scrollTo(0, 0); $("#pf-name")?.focus();
+}
+async function submitForm() {
+  const f = INV.form; const v = f.values;
+  const name = v.name.trim(); const err = (m) => { f.err = m; $("#pf-err").innerHTML = `<div class="note bad">${esc(m)}</div>`; };
+  if (!name) return err("Enter the product name.");
+  const category = f.newCat ? (v.newcat || "").trim() : v.category;
+  if (f.newCat && !category) return err("Type the new category name, or pick an existing one.");
+  const unit = (f.otherUnit || (v.unit && !UNITS.includes(v.unit))) ? (v.otherunit ?? v.unit ?? "").trim() : v.unit;
+  const nums = {}; for (const [k, label] of [["min", "Minimum level"], ["use", "Monthly use"], ["open", "Opening stock"]]) { const n = parseCount(v[k]); if (Number.isNaN(n) || n < 0) return err(`${label} must be a number like 5, 0.5 or 1/2.`); nums[k] = n; }
+  f.saving = true; render();
+  const now = new Date().toISOString();
+  try {
+    if (f.mode === "add") {
+      const pid = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      const doc = { sno: nextSno(), name, category, unit, min_level: nums.min, monthly_use: nums.use, opening_stock: nums.open, expiry: v.expiry || null, batch: v.batch.trim(), notes: v.notes.trim(), status: v.status, archived: false, created_at: now, created_by: S.uid, updated_at: now };
+      const r = await invWrite("set", `${INV_PRODUCTS}/${pid}`, doc);
+      if (nums.open != null) {
+        const cur = monthKey(invTodayISO()); const mk = INV.months.has(cur) ? cur : latestMonths(1)[0];
+        if (mk && INV.months.has(mk)) await invWrite("update", `${INV_MONTHS}/${mk}`, { counts: { [pid]: { [mk === cur ? Number(invTodayISO().slice(8, 10)) : 1]: nums.open } } });
+      }
+      if (category && !categories().includes(category)) await invWrite(Object.keys(INV.settings).length ? "update" : "set", "inventory/settings", { categories: [...new Set([...(INV.settings.categories || []), category])] });
+      writeAudit("inventory.add", null, pid, null, doc);
+      flash(`${name} added as S.No ${doc.sno}.${r === "queued" ? " Saved on this phone until you're back online." : ""}`);
+      INV.detail = pid;
+    } else {
+      const before = INV.products.get(f.pid);
+      const changes = { name, category, unit, min_level: nums.min, monthly_use: nums.use, expiry: v.expiry || null, batch: v.batch.trim(), notes: v.notes.trim(), status: v.status, updated_at: now, updated_by: S.uid };
+      await invWrite("update", `${INV_PRODUCTS}/${f.pid}`, changes);
+      writeAudit("inventory.edit", null, f.pid, before, { ...before, ...changes });
+      flash(`${name} saved.`); INV.detail = f.pid;
+    }
+    INV.form = null; INV.view = "list";
+  } catch (e) { f.saving = false; f.err = dbErrorText(e).replace("save this bill", "save this product"); }
+  render(); window.scrollTo(0, 0);
+}
+
+/* ---------- optional link to billing ---------- */
+async function invAfterBill(items) {
+  if (!INV.settings.bill_link || !canInvCount()) return 0;
+  const mk = monthKey(invTodayISO()); if (!INV.months.has(mk)) return 0;
+  const day = Number(invTodayISO().slice(8, 10)); const byName = new Map(sortedProducts().map(([pid, p]) => [normName(p.name), pid]));
+  const counts = {}; let n = 0;
+  for (const it of items) {
+    const pid = byName.get(normName(it.item_name)); if (!pid || !(it.qty > 0)) continue;
+    const base = counts[pid]?.[day] ?? currentStock(pid)?.value; if (base == null) continue;
+    counts[pid] = { [day]: Math.max(0, Number((base - it.qty).toFixed(3))) }; n++;
+  }
+  if (n) await invWrite("update", `${INV_MONTHS}/${mk}`, { counts }).catch(() => {});
+  return n;
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click", async (e) => {
+  const t = e.target.closest("[data-act]"); if (!t || !t.dataset.act.startsWith("inv-") && !t.dataset.act.startsWith("pf-")) return;
+  const a = t.dataset.act; const pid = t.dataset.pid;
+  switch (a) {
+    case "inv-view": INV.view = t.dataset.v; INV.cell = null; render(); break;
+    case "inv-add": openForm(null); break;
+    case "inv-edit": openForm(pid); break;
+    case "inv-form-cancel": INV.form = null; render(); break;
+    case "pf-status": INV.form.values.status = t.dataset.v; t.parentElement.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === t))); break;
+    case "inv-open": INV.detail = INV.detail === pid ? null : pid; INV.confirm = null; INV.view = "list"; render(); if (INV.detail) $("#inv-detail")?.scrollIntoView({ block: "start" }); break;
+    case "inv-close-detail": INV.detail = null; INV.confirm = null; render(); break;
+    case "inv-status": INV.status = t.dataset.v; render(); break;
+    case "inv-low": INV.lowOnly = !INV.lowOnly; render(); break;
+    case "inv-exp": INV.expOnly = !INV.expOnly; render(); break;
+    case "inv-arch": INV.showArchived = !INV.showArchived; INV.status = "all"; render(); break;
+    case "inv-archive": INV.confirm = { pid, kind: "archive" }; render(); break;
+    case "inv-del": INV.confirm = { pid, kind: "delete" }; render(); break;
+    case "inv-confirm-no": INV.confirm = null; render(); break;
+    case "inv-archive-yes": case "inv-restore": {
+      const arch = a === "inv-archive-yes"; INV.confirm = null;
+      try { await invWrite("update", `${INV_PRODUCTS}/${pid}`, { archived: arch, updated_at: new Date().toISOString() }); writeAudit(arch ? "inventory.archive" : "inventory.restore", null, pid, null, { name: INV.products.get(pid)?.name }); flash(arch ? "Product archived." : "Product restored."); if (arch) INV.detail = null; }
+      catch (err) { flash(dbErrorText(err).replace("save this bill", "change this product")); }
+      render(); break;
+    }
+    case "inv-del-yes": {
+      const before = INV.products.get(pid); INV.confirm = null;
+      try { await invWrite("delete", `${INV_PRODUCTS}/${pid}`); writeAudit("inventory.delete", null, pid, before, null); INV.detail = null; flash("Product deleted."); }
+      catch (err) { flash(dbErrorText(err).replace("save this bill", "delete this product")); }
+      render(); break;
+    }
+    case "inv-flag": {
+      const mk = latestMonths(1)[0]; const on = !manualLow(pid);
+      try { await invWrite("update", `${INV_MONTHS}/${mk}`, { flags: { [pid]: on } }); flash(on ? "Marked as low stock." : "Low-stock mark cleared."); } catch (err) { flash(dbErrorText(err)); }
+      render(); break;
+    }
+    case "inv-month": INV.regMonth = t.dataset.v; INV.regDay = null; INV.cell = null; render(); break;
+    case "inv-newmonth": startMonth(t.dataset.v); break;
+    case "inv-copy": copyPrevious(); break;
+    case "inv-cell": if (canInvCount()) openCell(t.dataset.pid, Number(t.dataset.day)); break;
+    case "inv-cell-close": INV.cell = null; $("#inv-cellbar")?.remove(); document.querySelectorAll("#reg td.editing").forEach((td) => td.classList.remove("editing")); break;
+    case "inv-cell-save": saveCell(t.dataset.next === "1"); break;
+    case "inv-cell-clear": saveCell(false, ""); break;
+    case "inv-step": case "inv-frac": { const inp = $("#inv-cell-input"); const base = parseCount(inp.value) ?? (lastInMonth(INV.cell.mk, INV.cell.pid, INV.cell.day - 1)?.value || 0); if (!Number.isNaN(base)) inp.value = fmtCount(Math.max(0, base + Number(t.dataset.v))); inp.focus(); break; }
+    case "inv-same": { const prev = lastInMonth(INV.cell.mk, INV.cell.pid, INV.cell.day - 1); $("#inv-cell-input").value = fmtCount(prev.value); saveCell(true); break; }
+    case "inv-seed": seedInventory(false); break;
+    case "inv-csv": { const mk = INV.view === "register" ? INV.regMonth : latestMonths(1)[0]; saveFile(`stock-register-${mk}.csv`, registerCsv(mk)); break; }
+    case "inv-pdf": { const mk = INV.view === "register" ? INV.regMonth : latestMonths(1)[0]; t.disabled = true; t.textContent = "Preparing…";
+      try { saveFile(`stock-register-${mk}.pdf`, await registerPdf(mk)); } catch (err) { flash(err.message || "The PDF couldn't be made."); invRefresh(); } break; }
+    case "inv-reorder-csv": {
+      const rows = reorderRows(); const lines = [["S.No", "Product", "Category", "Unit", "Current stock", "Minimum level", "Monthly use", "Suggested order"], ...rows.map(({ s, suggest }) => [s.p.sno, s.p.name, s.p.category || "", s.p.unit || "", s.cur?.value ?? "", s.p.min_level ?? "", s.p.monthly_use ?? "", suggest ?? ""])];
+      saveFile(`reorder-list-${invTodayISO()}.csv`, "﻿" + lines.map((l) => l.map(csvCell).join(",")).join("\r\n") + "\r\n"); break;
+    }
+    case "inv-import": $("#inv-import-file").click(); break;
+    case "inv-import-cancel": INV.importPreview = null; render(); break;
+    case "inv-import-apply": applyImport(); break;
+  }
+});
+document.addEventListener("input", (e) => {
+  const t = e.target;
+  if (t.dataset.pf && INV.form) {
+    INV.form.values[t.dataset.pf] = t.value;
+    if (t.dataset.pf === "name") { const dup = t.value.trim() && [...INV.products.entries()].find(([id, p]) => id !== INV.form.pid && normName(p.name) === normName(t.value)); $("#pf-dup").innerHTML = dup ? `<div class="note warn small">A product called <b>${esc(dup[1].name)}</b>${dup[1].archived ? " (archived)" : ""} already exists. You can still save if this is a different item.</div>` : ""; }
+    return;
+  }
+  if (t.dataset.act === "inv-q") { INV.q = t.value; clearTimeout(t._d); t._d = setTimeout(() => { const pos = t.selectionStart; render(); const n = $("#inv-q"); n?.focus(); n?.setSelectionRange(pos, pos); }, 250); }
+});
+document.addEventListener("change", async (e) => {
+  const t = e.target;
+  if (t.dataset.pf === "category" && INV.form) { INV.form.newCat = t.value === "__new"; if (!INV.form.newCat) INV.form.values.category = t.value; render(); $("#pf-newcat")?.focus(); return; }
+  if (t.dataset.pf === "unit" && INV.form) { INV.form.otherUnit = t.value === "__other"; if (!INV.form.otherUnit) INV.form.values.unit = t.value; else INV.form.values.unit = ""; render(); $("#pf-otherunit")?.focus(); return; }
+  const a = t.dataset.act;
+  if (a === "inv-cat") { INV.cat = t.value; render(); }
+  if (a === "inv-sort") { INV.sort = t.value; render(); }
+  if (a === "inv-day") { INV.regDay = { mk: INV.regMonth, day: Number(t.value) }; INV.cell = null; render(); }
+  if (a === "inv-expdays") { const n = Math.max(1, Math.min(365, Math.round(Number(t.value) || 30))); try { await invWrite(Object.keys(INV.settings).length ? "update" : "set", "inventory/settings", { expiry_days: n }); flash(`Expiry warnings now start ${n} days ahead.`); } catch (err) { flash(dbErrorText(err)); } render(); }
+  if (a === "inv-billlink") { try { await invWrite(Object.keys(INV.settings).length ? "update" : "set", "inventory/settings", { bill_link: t.checked }); flash(t.checked ? "Billed quantities will now be subtracted from stock." : "Billing no longer changes stock."); } catch (err) { flash(dbErrorText(err)); } render(); }
+  if (t.id === "inv-import-file") {
+    const f = t.files?.[0]; t.value = ""; if (!f) return;
+    try { INV.importPreview = buildImport(await f.text()); }
+    catch (err) { flash(err.message || "That CSV couldn't be read."); }
+    render();
+  }
+});
+document.addEventListener("submit", (e) => { if (e.target.id === "inv-form") { e.preventDefault(); submitForm(); } });
+document.addEventListener("keydown", (e) => {
+  if (e.target.id === "inv-cell-input" && e.key === "Enter") { e.preventDefault(); saveCell(true); }
+  if (e.target.id === "inv-cell-input" && e.key === "Escape") { INV.cell = null; $("#inv-cellbar")?.remove(); }
+  if (e.target.matches?.("#reg td.cell") && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openCell(e.target.dataset.pid, Number(e.target.dataset.day)); }
 });
 
 boot();
