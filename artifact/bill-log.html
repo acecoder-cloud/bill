@@ -107,6 +107,12 @@ p { margin: 0; }
   box-shadow: 0 6px 18px color-mix(in srgb, var(--brand) 30%, transparent);
 }
 .scan svg { width: 40px; height: 40px; }
+.sheet { display: flex; flex-direction: column; gap: 8px; margin-top: -6px; padding: 8px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 8px 24px rgb(0 0 0 / .08); }
+.sheet-opt { display: flex; align-items: center; gap: 14px; min-height: 64px; padding: 8px 12px; border: 0; border-radius: 12px; background: var(--surface-2); color: var(--fg); text-align: left; cursor: pointer; }
+.sheet-opt:active { background: var(--brand-soft); }
+.sheet-opt svg { width: 28px; height: 28px; color: var(--brand); flex: none; }
+.sheet-opt span { display: flex; flex-direction: column; }
+.sheet-opt small { color: var(--muted); font-size: .85rem; }
 .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .duo .btn { min-height: 56px; }
 
@@ -118,6 +124,13 @@ p { margin: 0; }
 
 /* Bill list */
 .bills { display: flex; flex-direction: column; gap: 10px; }
+.bill-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.bill-wrap .bill { border: 0; border-radius: 0; }
+.bill-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 14px 10px; border-top: 1px dashed var(--line); }
+.bill-actions .btn-paid { margin-left: auto; }
+.btn-paid { min-height: 44px; padding: 0 22px; background: var(--ok-bg); color: var(--ok-ink); border: 1px solid color-mix(in srgb, var(--ok-ink) 35%, transparent); }
+.pill.paid { background: var(--ok-bg); color: var(--ok-ink); }
+.pill.unpaid { background: var(--bad-bg); color: var(--bad-ink); }
 .bill {
   text-align: left; width: 100%; cursor: pointer; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
   padding: 13px 14px; display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; color: var(--fg);
@@ -160,6 +173,11 @@ tfoot td { font-weight: 800; background: var(--surface-2); border-bottom: 0; }
 
 /* Editor */
 .card.ed-top { flex-direction: row; gap: 12px; align-items: flex-end; }
+.pay-row { flex-direction: row; align-items: center; flex-wrap: wrap; gap: 8px 12px; padding-block: 10px; }
+.pay-row .field-lbl { font-size: .82rem; font-weight: 600; color: var(--muted); }
+.pay-row .seg { flex: 1; min-width: 200px; }
+.pay-row .seg button[data-v="paid"][aria-pressed="true"] { color: var(--ok-ink); background: var(--ok-bg); }
+.pay-row .small { flex-basis: 100%; }
 .ed-fields { flex: 1; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 10px; }
 .ed-top .billno { min-height: 52px; font-size: 1.1rem; font-weight: 700; font-family: var(--font-num); }
 @media (max-width: 420px) { .ed-fields { grid-template-columns: 1fr; } }
@@ -282,7 +300,7 @@ tfoot td { font-weight: 800; background: var(--surface-2); border-bottom: 0; }
 </main>
 <nav class="tabs" aria-label="Sections"><div class="tabs-in" id="tabs"></div></nav>
 <input id="camera" type="file" accept="image/*" capture="environment" hidden>
-<input id="gallery" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+<input id="gallery" type="file" accept="image/jpeg,image/png,image/webp,application/pdf,.pdf" hidden>
 
 <script>
 "use strict";
@@ -314,6 +332,7 @@ function hasMismatch(q, r, t) {
 let keySeq = 0; const newKey = () => "k" + (++keySeq);
 const newId = () => "b" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 const ICON = {
+  upload: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-7M9 14l3-3 3 3"/></svg>',
   trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>',
   cam: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
 };
@@ -332,7 +351,7 @@ const S = {
   editor: null,       // open editor state
   viewer: null,
   filters: { scope: "all", from: "", to: "", q: "" },
-  summary: { q: "", from: "", to: "", sort: "bill_date", dir: -1 },
+  summary: { q: "", from: "", to: "", pay: "all", sort: "bill_date", dir: -1 },
   report: null,
   audit: null,
 };
@@ -393,6 +412,8 @@ function allBills() {
   for (const list of S.bills.values()) out.push(...list);
   return out.sort((a, b) => (b.bill_date || "").localeCompare(a.bill_date || "") || (b.logged_at || "").localeCompare(a.logged_at || ""));
 }
+const isPaid = (b) => b.payment_status === "paid";
+const payLabel = (b) => (isPaid(b) ? "Paid" : "Unpaid");
 function billTotal(b) { return sum((b.items || []).map((i) => i.total_amount)); }
 
 async function resolveNames(ids) {
@@ -463,9 +484,13 @@ function homeView() {
   return `
   <div><p class="muted">Hello,</p><h1>${esc(S.me?.name || "there")}</h1></div>
   ${S.canWrite ? `
-  <button class="scan" data-act="camera">${ICON.cam}Scan Bill</button>
+  <button class="scan" data-act="scan-menu" aria-expanded="${S.scanMenu ? "true" : "false"}" aria-controls="scan-sheet">${ICON.cam}Scan Bill</button>
+  ${S.scanMenu ? `<div class="sheet" id="scan-sheet" role="group" aria-label="Scan Bill options">
+    <button class="sheet-opt" data-act="camera">${ICON.cam}<span><b>Take photo</b><small>Open the camera and photograph the bill</small></span></button>
+    <button class="sheet-opt" data-act="gallery">${ICON.upload}<span><b>Upload a bill</b><small>Choose a photo or PDF from your phone</small></span></button>
+  </div>` : ""}
   <div class="duo">
-    <button class="btn btn-ghost" data-act="gallery">Choose from gallery</button>
+    <button class="btn btn-ghost" data-act="gallery">Upload a bill</button>
     <button class="btn btn-ghost" data-act="manual">Enter manually</button>
   </div>` : `<div class="note warn">You can view bills here. To log bills, ask the owner to give you <b>Contributor</b> access in the Share menu.</div>`}
   <section class="card">
@@ -476,14 +501,17 @@ function homeView() {
   </section>`;
 }
 
-function billCard(b) {
+function billCard(b, opts = {}) {
   const items = b.items || [];
   const mm = items.filter((i) => hasMismatch(i.qty, i.rate, i.total_amount)).length;
-  return `<button class="bill" data-act="open" data-owner="${esc(b.owner)}" data-id="${esc(b.id)}">
+  const pay = opts.pay && canChange(b);
+  return `<div class="bill-wrap ${isPaid(b) ? "is-paid" : ""}"><button class="bill" data-act="open" data-owner="${esc(b.owner)}" data-id="${esc(b.id)}">
     <span class="d">${esc(fmtDate(b.bill_date))}${b.bill_no ? ` <span class="billno-tag num">No. ${esc(b.bill_no)}</span>` : ""}</span><span class="t num">₹ ${money(billTotal(b))}</span>
-    <span class="m">${items.length} item${items.length === 1 ? "" : "s"}${b.image_id ? ' · <span class="pill">Photo</span>' : ""}${mm ? ` <span class="pill warn">${mm} to check</span>` : ""}
+    <span class="m"><span class="pill ${isPaid(b) ? "paid" : "unpaid"}">${payLabel(b)}</span> ${items.length} item${items.length === 1 ? "" : "s"}${b.image_id ? ' · <span class="pill">Photo</span>' : ""}${mm ? ` <span class="pill warn">${mm} to check</span>` : ""}
       <span>· by <span data-uid="${esc(b.owner)}"></span> · ${esc(fmtDT(b.logged_at))}</span></span>
-  </button>`;
+  </button>${pay ? `<div class="bill-actions">${isPaid(b)
+      ? `<span class="small muted">Paid ${esc(fmtDT(b.paid_at))}</span><button class="btn-link" data-act="mark-paid" data-v="unpaid" data-owner="${esc(b.owner)}" data-id="${esc(b.id)}">Mark unpaid</button>`
+      : `<button class="btn btn-paid" data-act="mark-paid" data-v="paid" data-owner="${esc(b.owner)}" data-id="${esc(b.id)}" aria-label="Mark bill${b.bill_no ? " No. " + esc(b.bill_no) : ""} of ${esc(fmtDate(b.bill_date))} as paid">Paid</button>`}</div>` : ""}</div>`;
 }
 
 /* ---------------- bills list ---------------- */
@@ -506,7 +534,7 @@ function billsView() {
   </div>
   ${S.watchCapHit ? `<div class="note warn">Showing bills from the first ${PEOPLE_WATCH_LIMIT} people only.</div>` : ""}
   ${S.dbState === "loading" ? `<div class="card"><div class="row-between"><span class="spin"></span><span class="muted">Loading bills…</span></div></div>`
-    : list.length ? `<p class="muted small">${list.length} bill${list.length === 1 ? "" : "s"} · <span class="num">₹ ${money(sum(list.map(billTotal)))}</span></p><div class="bills">${list.map(billCard).join("")}</div>`
+    : list.length ? `<p class="muted small">${list.length} bill${list.length === 1 ? "" : "s"} · <span class="num">₹ ${money(sum(list.map(billTotal)))}</span> · unpaid <span class="num">₹ ${money(sum(list.filter((b) => !isPaid(b)).map(billTotal)))}</span></p><div class="bills">${list.map((b) => billCard(b, { pay: true })).join("")}</div>`
     : `<div class="card"><p class="muted">${f.from || f.to || f.q || f.scope === "mine" ? "No bills match these filters." : "No bills have been logged yet."}</p></div>`}`;
 }
 function datesFields(prefix, from, to, label) {
@@ -520,17 +548,17 @@ function datesFields(prefix, from, to, label) {
 /* ---------------- summary ---------------- */
 function entries() {
   const out = [];
-  for (const b of allBills()) (b.items || []).forEach((it, i) => out.push({ key: b.owner + "/" + b.id + "/" + i, owner: b.owner, bill_id: b.id, bill_no: b.bill_no || "", bill_date: b.bill_date, logged_at: b.logged_at, ...it }));
+  for (const b of allBills()) (b.items || []).forEach((it, i) => out.push({ key: b.owner + "/" + b.id + "/" + i, owner: b.owner, bill_id: b.id, bill_no: b.bill_no || "", payment_status: payLabel(b), bill_date: b.bill_date, logged_at: b.logged_at, ...it }));
   return out;
 }
 const SUM_COLS = [
   { k: "bill_date", label: "Bill date" }, { k: "bill_no", label: "Bill No." }, { k: "serial_no", label: "S.No.", n: 1 }, { k: "item_name", label: "Item name" },
-  { k: "qty", label: "Qty.", n: 1 }, { k: "rate", label: "Rate", n: 1 }, { k: "total_amount", label: "Tot. Amt.", n: 1 },
+  { k: "qty", label: "Qty.", n: 1 }, { k: "rate", label: "Rate", n: 1 }, { k: "total_amount", label: "Tot. Amt.", n: 1 }, { k: "payment_status", label: "Payment status" },
   { k: "logged_at", label: "Logged at" }, { k: "logged_by", label: "Logged by" },
 ];
 function summaryRows() {
   const s = S.summary; const q = s.q.trim().toLowerCase();
-  const rows = entries().filter((e) => (!q || (e.item_name || "").toLowerCase().includes(q)) && (!s.from || e.bill_date >= s.from) && (!s.to || e.bill_date <= s.to));
+  const rows = entries().filter((e) => (!q || (e.item_name || "").toLowerCase().includes(q)) && (!s.from || e.bill_date >= s.from) && (!s.to || e.bill_date <= s.to) && (s.pay === "all" || e.payment_status === (s.pay === "paid" ? "Paid" : "Unpaid")));
   const get = (e) => (s.sort === "logged_by" ? nameOf(e.owner) : e[s.sort]);
   return rows.sort((a, b) => {
     const av = get(a), bv = get(b);
@@ -546,8 +574,12 @@ function summaryView() {
   <div class="card">
     <label class="field"><span>Search item name</span><input class="inp" type="search" id="sum-q" placeholder="e.g. Dolo" value="${esc(s.q)}" data-act="sum-q"></label>
     ${datesFields("sf", s.from, s.to, "Bill date")}
+    <div class="field"><span class="small muted" style="font-weight:600">Payment status</span>
+      <div class="seg" role="group" aria-label="Payment status filter">
+        ${[["all", "All"], ["paid", "Paid"], ["unpaid", "Unpaid"]].map(([v, l]) => `<button data-act="sum-pay" data-v="${v}" aria-pressed="${s.pay === v}">${l}</button>`).join("")}
+      </div></div>
   </div>
-  <div class="total-band"><span>Grand total · ${rows.length} item${rows.length === 1 ? "" : "s"}</span><b class="num">₹ ${money(total)}</b></div>
+  <div class="total-band"><span>${s.pay === "all" ? "Grand total" : s.pay === "paid" ? "Paid total" : "Unpaid total"} · ${rows.length} item${rows.length === 1 ? "" : "s"}</span><b class="num">₹ ${money(total)}</b></div>
   ${rows.length ? `<p class="small muted">Swipe the table sideways to see every column. Tap a heading to sort.</p>
   <div class="tbl-wrap"><table id="sum-table">
     <thead><tr>${SUM_COLS.map((c) => `<th class="${c.n ? "r" : ""}"><button data-act="sort" data-k="${c.k}" aria-sort="${s.sort === c.k ? (s.dir === 1 ? "ascending" : "descending") : "none"}">${c.label} <span aria-hidden="true">${s.sort === c.k ? (s.dir === 1 ? "▲" : "▼") : "↕"}</span></button></th>`).join("")}</tr></thead>
@@ -555,9 +587,10 @@ function summaryView() {
       <td><button class="link" data-act="open" data-owner="${esc(r.owner)}" data-id="${esc(r.bill_id)}">${esc(fmtDate(r.bill_date))}</button></td>
       <td class="num">${esc(r.bill_no)}</td><td class="r num">${esc(r.serial_no ?? "")}</td><td class="wrap">${esc(r.item_name)}</td>
       <td class="r num">${qtyFmt(r.qty)}</td><td class="r num">${money(r.rate)}</td><td class="r num"${bad ? ' title="Qty × Rate does not match"' : ""}><b>${money(r.total_amount)}</b></td>
+      <td><span class="pill ${r.payment_status === "Paid" ? "paid" : "unpaid"}">${r.payment_status}</span></td>
       <td>${esc(fmtDT(r.logged_at))}</td><td data-uid="${esc(r.owner)}"></td></tr>`; }).join("")}</tbody>
-    <tfoot><tr><td colspan="6">Grand total</td><td class="r num">${money(total)}</td><td colspan="2"></td></tr></tfoot>
-  </table></div>` : `<div class="card"><p class="muted">${S.dbState === "loading" ? "Loading…" : "No items match. Try clearing the search or dates."}</p></div>`}`;
+    <tfoot><tr><td colspan="6">Grand total</td><td class="r num">${money(total)}</td><td colspan="3"></td></tr></tfoot>
+  </table></div>` : `<div class="card"><p class="muted">${S.dbState === "loading" ? "Loading…" : "No items match. Try clearing the search, dates or payment filter."}</p></div>`}`;
 }
 
 /* ---------------- reports ---------------- */
@@ -569,13 +602,14 @@ const REP_COLS = [
   { k: "qty", label: "Qty.", n: 1, text: (e) => qtyFmt(e.qty), raw: (e) => e.qty ?? null },
   { k: "rate", label: "Rate", n: 1, text: (e) => money(e.rate), raw: (e) => e.rate ?? null },
   { k: "total_amount", label: "Tot. Amt.", n: 1, text: (e) => money(e.total_amount), raw: (e) => e.total_amount ?? null },
+  { k: "payment_status", label: "Payment status", text: (e) => e.payment_status, raw: (e) => e.payment_status },
   { k: "logged_at", label: "Logged at", text: (e) => fmtDT(e.logged_at), raw: (e) => fmtDT(e.logged_at) },
   { k: "logged_by", label: "Logged by", text: (e) => nameOf(e.owner), raw: (e) => nameOf(e.owner) },
 ];
 function rep() {
   if (!S.report) {
     let cols = REP_COLS.map((c) => c.k);
-    try { const saved = JSON.parse(localStorage.getItem("pbl-cols") || "null"); if (Array.isArray(saved) && saved.length) cols = saved.includes("bill_no") || localStorage.getItem("pbl-cols-v2") ? saved : ["bill_date", "bill_no", ...saved.filter((k) => k !== "bill_date")]; localStorage.setItem("pbl-cols-v2", "1"); } catch {}
+    try { const saved = JSON.parse(localStorage.getItem("pbl-cols") || "null"); if (Array.isArray(saved) && saved.length) cols = saved.includes("bill_no") || localStorage.getItem("pbl-cols-v2") ? saved : ["bill_date", "bill_no", ...saved.filter((k) => k !== "bill_date")]; localStorage.setItem("pbl-cols-v2", "1"); if (!cols.includes("payment_status") && !localStorage.getItem("pbl-cols-v3")) cols.splice(Math.max(0, cols.indexOf("total_amount") + 1), 0, "payment_status"); localStorage.setItem("pbl-cols-v3", "1"); } catch {}
     S.report = { cols: new Set(cols), field: "bill_date", from: "", to: "", item: "", rows: null, format: "pdf", busy: false, msg: null };
   }
   return S.report;
@@ -657,7 +691,7 @@ async function buildReport(format) {
     const aoa = [cols.map((c) => c.label), ...rows.map((e) => cols.map((c) => { const v = c.raw(e); return c.k === "bill_date" && v ? new Date(v + "T00:00:00") : v; }))];
     if (hasTotal) aoa.push(cols.map((c, i) => (c.k === "total_amount" ? total : i === 0 ? "Grand total" : null)));
     const ws = window.XLSX.utils.aoa_to_sheet(aoa, { cellDates: true, dateNF: "dd-mmm-yyyy" });
-    ws["!cols"] = cols.map((c) => ({ wch: { item_name: 36, logged_at: 20, logged_by: 18, bill_no: 14 }[c.k] || 12 }));
+    ws["!cols"] = cols.map((c) => ({ wch: { item_name: 36, logged_at: 20, logged_by: 18, bill_no: 14, payment_status: 15 }[c.k] || 12 }));
     const wb = window.XLSX.utils.book_new(); window.XLSX.utils.book_append_sheet(wb, ws, "Bills");
     return { filename, data: new Blob([window.XLSX.write(wb, { type: "array", bookType: "xlsx" })]) };
   }
@@ -703,14 +737,14 @@ function adminView() {
   </section>
   <section class="card">
     <div class="row-between"><h2>Activity log</h2><button class="btn btn-ghost" data-act="audit-load">${a?.loading ? "Loading…" : a ? "Refresh" : "Load activity"}</button></div>
-    <p class="small muted">Every bill created, edited or deleted, with the values before and after.</p>
+    <p class="small muted">Every bill created, edited, paid or deleted, with the values before and after.</p>
     <div class="audit" id="audit-list">${a?.error ? `<div class="note bad">${esc(a.error)}</div>` : ""}</div>
   </section>`;
 }
 function paintAdmin() {
   const a = S.audit; const box = $("#audit-list"); if (!box || !a?.rows) return;
   if (!a.rows.length) { box.innerHTML = `<p class="muted">No activity yet.</p>`; return; }
-  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted" };
+  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid" };
   box.innerHTML = a.rows.map((r, i) => `<details><summary><b>${esc(label[r.action] || r.action)}</b>
     <span class="small muted">by <span data-uid="${esc(r.actor)}"></span> · ${esc(fmtDT(r.at))} · bill ${(r.after || r.before || {}).bill_no ? "No. " + esc((r.after || r.before).bill_no) + " of " : "of "}${esc(fmtDate((r.after || r.before || {}).bill_date))}</span></summary>
     <div class="pair"><div><div class="small muted">Before</div><pre data-json="b${i}"></pre></div><div><div class="small muted">After</div><pre data-json="a${i}"></pre></div></div></details>`).join("");
@@ -737,7 +771,7 @@ const emptyRow = (n) => ({ key: newKey(), serial_no: String(n), item_name: "", q
 
 function openNew(file) {
   if (!S.canWrite) return;
-  S.editor = { mode: "new", phase: file ? "working" : "edit", step: "compress", date: todayISO(), billNo: "", rows: [emptyRow(1)], imageId: null, previewUrl: null, notice: null, dirty: false, problems: [] };
+  S.editor = { mode: "new", phase: file ? "working" : "edit", step: "compress", date: todayISO(), billNo: "", paid: false, rows: [emptyRow(1)], imageId: null, previewUrl: null, notice: null, dirty: false, problems: [] };
   renderTabs(); render(); window.scrollTo(0, 0);
   if (file) processFile(file);
 }
@@ -745,7 +779,7 @@ function openBill(owner, id) {
   const b = (S.bills.get(owner) || []).find((x) => x.id === id);
   if (!b) return;
   const canEdit = S.isAdmin || (owner === S.uid && S.canWrite);
-  S.editor = { mode: "edit", owner, id, bill: b, phase: "edit", date: b.bill_date, billNo: b.bill_no || "", rows: itemRows(b.items).length ? itemRows(b.items) : [emptyRow(1)], imageId: b.image_id || null, previewUrl: null, notice: canEdit ? null : { tone: "", text: "You can view this bill. Only the person who logged it, or an admin, can change it." }, canEdit, dirty: false, problems: [] };
+  S.editor = { mode: "edit", owner, id, bill: b, phase: "edit", date: b.bill_date, billNo: b.bill_no || "", paid: isPaid(b), rows: itemRows(b.items).length ? itemRows(b.items) : [emptyRow(1)], imageId: b.image_id || null, previewUrl: null, notice: canEdit ? null : { tone: "", text: "You can view this bill. Only the person who logged it, or an admin, can change it." }, canEdit, dirty: false, problems: [] };
   renderTabs(); render(); window.scrollTo(0, 0);
 }
 function closeEditor() { if (S.editor?.previewUrl) URL.revokeObjectURL(S.editor.previewUrl); S.editor = null; renderTabs(); render(); }
@@ -760,6 +794,28 @@ async function compressImage(file) {
   const ctx = c.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, w, h); ctx.imageSmoothingQuality = "high"; ctx.drawImage(src, 0, 0, w, h); src.close?.();
   const blob = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.82));
   if (!blob) throw new Error("The photo couldn't be prepared."); return blob;
+}
+
+const PDFJS = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
+function isPdf(file) { return file.type === "application/pdf" || /\.pdf$/i.test(file.name || ""); }
+/** Turns the first pages of a PDF bill into JPEG images Claude can read. */
+async function pdfToImages(file, maxPages) {
+  await loadScript(PDFJS + "pdf.min.js");
+  const lib = window.pdfjsLib; lib.GlobalWorkerOptions.workerSrc = PDFJS + "pdf.worker.min.js";
+  let pdf;
+  try { pdf = await lib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise; }
+  catch (e) { throw new Error(e?.name === "PasswordException" ? "That PDF is password-protected." : "That PDF couldn't be opened."); }
+  const out = [];
+  for (let i = 1; i <= Math.min(pdf.numPages, maxPages); i++) {
+    const page = await pdf.getPage(i);
+    const base = page.getViewport({ scale: 1 });
+    const vp = page.getViewport({ scale: Math.min(2.5, 1600 / base.width) });
+    const c = document.createElement("canvas"); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+    const ctx = c.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+    out.push(await new Promise((r) => c.toBlob(r, "image/jpeg", 0.85)));
+  }
+  return { images: out.filter(Boolean), pages: pdf.numPages };
 }
 
 const EXTRACT_PROMPT = `You are reading a photo of a pharmacy bill (invoice / cash memo), usually from India.
@@ -800,18 +856,28 @@ function sampleErrorText(e) {
 
 async function processFile(file) {
   const ed = S.editor; if (!ed) return;
-  ed.previewUrl = URL.createObjectURL(file);
+  const pdf = isPdf(file);
+  if (!pdf) ed.previewUrl = URL.createObjectURL(file);
   const step = (s) => { if (S.editor === ed) { ed.step = s; renderEditor(); } };
-  let blob;
-  try { step("compress"); blob = await compressImage(file); }
-  catch (e) { return finishExtract(ed, null, { tone: "warn", text: (e.message || "The photo couldn't be prepared.") + " Enter the items below." }); }
+  let blob, images, pdfNote = "";
+  try {
+    step("compress");
+    if (pdf) {
+      const lim = await S.caps.sample?.limits().catch(() => null);
+      const r = await pdfToImages(file, Math.max(1, Math.min(lim?.images?.maxCount || 3, 5)));
+      if (!r.images.length) throw new Error("That PDF has no pages.");
+      images = r.images; blob = images[0]; ed.previewUrl = URL.createObjectURL(blob);
+      if (r.pages > images.length) pdfNote = ` Only the first ${images.length} of ${r.pages} pages were read.`;
+    } else { blob = await compressImage(file); images = [blob]; }
+  }
+  catch (e) { return finishExtract(ed, null, { tone: "warn", text: (e.message || "The bill couldn't be prepared.") + " Enter the items below." }); }
   step("read");
   const upload = S.caps.assets ? S.caps.assets.upload(blob, { type: "image/jpeg" }).then((r) => r.id) : Promise.resolve(null);
   const read = (async () => {
     const sample = S.caps.sample; if (!sample) throw { message: "Reading photos with Claude isn't available in this view." };
     const lim = await sample.limits().catch(() => null);
     if (!lim?.images) throw { code: "images_unavailable" };
-    return normalizeExtraction(await sample.json(EXTRACT_PROMPT, { images: [blob] }));
+    return normalizeExtraction(await sample.json(EXTRACT_PROMPT + (images.length > 1 ? `\nThe ${images.length} images are consecutive pages of one bill, in order.` : ""), { images }));
   })();
   const [up, rd] = await Promise.allSettled([upload, read]);
   if (S.editor !== ed) return;
@@ -821,7 +887,7 @@ async function processFile(file) {
   const x = rd.value;
   if (!x.is_bill) return finishExtract(ed, null, { tone: "warn", text: `This photo doesn't look like a bill. Retake it or enter the items below.${photoNote}` });
   if (!x.items.length) return finishExtract(ed, null, { tone: "warn", text: `No items could be read from this photo. Enter them below.${photoNote}` });
-  finishExtract(ed, x, { tone: x.bill_date ? "ok" : "warn", text: (x.bill_date ? `Read ${x.items.length} item${x.items.length === 1 ? "" : "s"}. Check every value against the photo before submitting.` : `Read ${x.items.length} item${x.items.length === 1 ? "" : "s"}, but no date was found. Set the bill date.`) + photoNote });
+  finishExtract(ed, x, { tone: x.bill_date && !pdfNote ? "ok" : "warn", text: (x.bill_date ? `Read ${x.items.length} item${x.items.length === 1 ? "" : "s"}. Check every value against the bill before submitting.` : `Read ${x.items.length} item${x.items.length === 1 ? "" : "s"}, but no date was found. Set the bill date.`) + pdfNote + photoNote });
 }
 function finishExtract(ed, x, notice) {
   if (x) { ed.rows = itemRows(x.items); if (x.bill_date) ed.date = x.bill_date; if (x.bill_no) ed.billNo = x.bill_no; }
@@ -835,7 +901,7 @@ function renderEditor() {
   const ed = S.editor; const main = $("#main");
   if (ed.phase === "working") {
     const order = ["compress", "read"]; const idx = order.indexOf(ed.step);
-    const labels = { compress: "Preparing photo", read: S.caps.assets ? "Saving photo and reading the bill with Claude" : "Reading the bill with Claude" };
+    const labels = { compress: "Preparing the bill", read: S.caps.assets ? "Saving photo and reading the bill with Claude" : "Reading the bill with Claude" };
     main.innerHTML = `<h1>New bill</h1><div class="card">
       ${ed.previewUrl ? `<img class="preview" src="${ed.previewUrl}" alt="Bill being read">` : ""}
       <ol class="steps">${order.map((s, i) => `<li class="${i < idx ? "done" : i > idx ? "todo" : ""}">${i < idx ? '<span class="dot">✓</span>' : i === idx ? '<span class="spin" aria-hidden="true"></span>' : '<span class="dot"></span>'}${labels[s]}</li>`).join("")}</ol>
@@ -859,6 +925,14 @@ function renderEditor() {
       <label class="field"><span>Bill date</span><input class="inp date" type="date" id="ed-date" value="${esc(ed.date)}" ${ro ? "disabled" : ""}></label>
     </div>
     ${hasPhoto ? `<button class="thumb" data-act="photo" aria-label="View bill photo"><img src="${esc(photoSrc)}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'small muted',textContent:'No photo'}))"></button>` : ""}
+  </div>
+  <div class="card pay-row">
+    <span class="field-lbl">Payment status</span>
+    <div class="seg" role="group" aria-label="Payment status">
+      <button data-act="ed-pay" data-v="unpaid" aria-pressed="${!ed.paid}" ${ro ? "disabled" : ""}>Unpaid</button>
+      <button data-act="ed-pay" data-v="paid" aria-pressed="${ed.paid}" ${ro ? "disabled" : ""}>Paid</button>
+    </div>
+    ${ed.mode === "edit" && isPaid(ed.bill) && ed.bill.paid_at ? `<span class="small muted">Marked paid ${esc(fmtDT(ed.bill.paid_at))} by <span data-uid="${esc(ed.bill.paid_by || "")}"></span></span>` : ""}
   </div>
   ${ed.notice ? `<div class="note ${ed.notice.tone}">${esc(ed.notice.text)}</div>` : ""}
   <div class="note warn" id="mm-note" hidden></div>
@@ -949,10 +1023,10 @@ async function submit(force) {
     let owner, id, before = null, body;
     if (ed.mode === "new") {
       owner = S.uid; id = newId();
-      body = { bill_no: ed.billNo.trim(), bill_date: ed.date, items: v.items, image_id: ed.imageId || null, logged_by: S.uid, logged_at: now, updated_at: now, updated_by: S.uid };
+      body = { ...payFields(null, ed.paid, now), bill_no: ed.billNo.trim(), bill_date: ed.date, items: v.items, image_id: ed.imageId || null, logged_by: S.uid, logged_at: now, updated_at: now, updated_by: S.uid };
     } else {
       owner = ed.owner; id = ed.id; before = stripBill(ed.bill);
-      body = { ...stripBill(ed.bill), bill_no: ed.billNo.trim(), bill_date: ed.date, items: v.items, updated_at: now, updated_by: S.uid };
+      body = { ...stripBill(ed.bill), ...payFields(ed.bill, ed.paid, now), bill_no: ed.billNo.trim(), bill_date: ed.date, items: v.items, updated_at: now, updated_by: S.uid };
     }
     await db.doc(`bills/${owner}/list/${id}`).set(body);          // bill and all its items in one write
     if (ed.mode === "new") await db.doc(`bills/${owner}`).set({ updated_at: now });
@@ -965,6 +1039,22 @@ async function submit(force) {
     btn.disabled = false; btn.textContent = ed.mode === "new" ? "Submit" : "Save changes";
     box.innerHTML = `<div class="note bad">${esc(dbErrorText(e))}</div>`;
   }
+}
+function payFields(prev, paid, now) {
+  if (paid) return prev && isPaid(prev) ? { payment_status: "paid", paid_at: prev.paid_at || now, paid_by: prev.paid_by || S.uid } : { payment_status: "paid", paid_at: now, paid_by: S.uid };
+  return { payment_status: "unpaid", paid_at: null, paid_by: null };
+}
+function canChange(b) { return S.isAdmin || (b.owner === S.uid && S.canWrite); }
+/** Quick Paid / Unpaid toggle from the Bills list. */
+async function markPaid(owner, id, paid, btn) {
+  const b = (S.bills.get(owner) || []).find((x) => x.id === id); if (!b || !canChange(b)) return;
+  btn.disabled = true; btn.textContent = "Saving…";
+  const now = new Date().toISOString(); const fields = payFields(b, paid, now);
+  try {
+    await S.caps.db.doc(`bills/${owner}/list/${id}`).update({ ...fields, updated_at: now, updated_by: S.uid });
+    writeAudit(paid ? "bill.paid" : "bill.unpaid", owner, id, { ...stripBill(b) }, { ...stripBill(b), ...fields });
+    flash(paid ? `Bill${b.bill_no ? " No. " + b.bill_no : ""} marked paid.` : "Bill marked unpaid."); render();
+  } catch (e) { btn.disabled = false; btn.textContent = paid ? "Paid" : "Mark unpaid"; flash(dbErrorText(e)); render(); }
 }
 function normNo(v) { return String(v || "").trim().toLowerCase().replace(/\s+/g, ""); }
 function duplicateOf(ed) {
@@ -1041,11 +1131,13 @@ document.addEventListener("click", (e) => {
   const t = e.target.closest("[data-act]"); if (!t) return;
   const act = t.dataset.act; const ed = S.editor;
   switch (act) {
-    case "camera": $("#camera").click(); break;
-    case "gallery": $("#gallery").click(); break;
+    case "scan-menu": S.scanMenu = !S.scanMenu; render(); if (S.scanMenu) $("#scan-sheet .sheet-opt")?.focus(); break;
+    case "camera": S.scanMenu = false; $("#camera").click(); break;
+    case "gallery": S.scanMenu = false; $("#gallery").click(); break;
     case "manual": openNew(null); break;
     case "open": openBill(t.dataset.owner, t.dataset.id); break;
     case "scope": S.filters.scope = t.dataset.v; render(); break;
+    case "sum-pay": S.summary.pay = t.dataset.v; render(); break;
     case "sort": { const k = t.dataset.k; S.summary.dir = S.summary.sort === k ? -S.summary.dir : (k === "item_name" || k === "logged_by" ? 1 : -1); S.summary.sort = k; render(); break; }
     case "rep-field": rep().field = t.dataset.v; rep().rows = null; render(); break;
     case "rep-preview": runReport(); render(); break;
@@ -1074,6 +1166,8 @@ document.addEventListener("click", (e) => {
     case "submit": submit(false); break;
     case "submit-force": submit(true); break;
     case "submit-dup": submit("dup"); break;
+    case "ed-pay": ed.paid = t.dataset.v === "paid"; ed.dirty = true; t.parentElement.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === t))); break;
+    case "mark-paid": markPaid(t.dataset.owner, t.dataset.id, t.dataset.v === "paid", t); break;
     case "del-bill": {
       const slot = $("#del-slot");
       slot.innerHTML = `<div class="note bad confirm"><span>Delete this bill and all its items? This can't be undone.</span><button class="btn btn-danger" data-act="del-yes">Delete</button><button class="btn btn-ghost" data-act="del-no">Keep</button></div>`; slot.scrollIntoView({ block: "end", behavior: "smooth" }); break;
@@ -1099,7 +1193,7 @@ document.addEventListener("input", (e) => {
 });
 document.addEventListener("change", (e) => {
   const t = e.target; const act = t.dataset.act;
-  if (t.id === "camera" || t.id === "gallery") { const f = t.files?.[0]; t.value = ""; if (f) openNew(f); return; }
+  if (t.id === "camera" || t.id === "gallery") { const f = t.files?.[0]; t.value = ""; S.scanMenu = false; if (f) openNew(f); return; }
   if (act === "bf-date") { S.filters.from = $("#bf-from").value; S.filters.to = $("#bf-to").value; render(); }
   if (act === "sf-date") { S.summary.from = $("#sf-from").value; S.summary.to = $("#sf-to").value; render(); }
   if (act === "rf-date") { rep().from = $("#rf-from").value; rep().to = $("#rf-to").value; rep().rows = null; render(); }
