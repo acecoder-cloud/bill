@@ -6,6 +6,12 @@ const DIR = new URL(".", import.meta.url).pathname;
 const URL_ = "file://" + DIR + "page.html";
 const browser = await chromium.launch();
 let pass = 0, fail = 0;
+/** Bills, Summary and Reports live inside the Pharmacy tab. */
+async function nav(pg, name) {
+  if (["Bills", "Summary", "Reports"].includes(name)) { await pg.getByRole("link", { name: /Pharmacy$/ }).click(); await pg.getByRole("tab", { name, exact: true }).click(); }
+  else await pg.getByRole("link", { name: new RegExp(name + "$") }).click();
+}
+
 const step = async (n, f) => { try { await f(); pass++; console.log("ok - " + n); } catch (e) { fail++; console.log("FAIL - " + n + "\n   " + e.message.split("\n").slice(0, 5).join("\n   ")); } };
 const LIBS = { "jspdf/2.5.1/jspdf.umd.min.js": "jspdf/dist/jspdf.umd.min.js", "jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js": "jspdf-autotable/dist/jspdf.plugin.autotable.min.js" };
 const ctx = await browser.newContext({ ...devices["Pixel 7"] });
@@ -55,7 +61,7 @@ await step("ordered items show their expected delivery; stopped items and low st
   assert.ok(await page.locator(".inv-card.is-stopped", { hasText: "Resodim 15mg" }).count());
   await page.getByRole("button", { name: "Active", exact: true }).click();
   const badge = await page.locator(".tab-badge").innerText();
-  assert.ok(Number(badge) >= 6, "badge " + badge);
+  assert.equal(Number(badge), 4, "badge = low items not yet ordered (Room Spray, Gauze… minus ordered) " + badge);
 });
 await step("search, category, low-only, expiring filter and sort", async () => {
   await page.getByLabel("Search by name").fill("syringe");
@@ -79,6 +85,7 @@ await step("search, category, low-only, expiring filter and sort", async () => {
 await step("register grid: copy yesterday, tap a cell, low highlight updates instantly", async () => {
   await page.getByRole("button", { name: "Daily register" }).click();
   await page.getByText("Current Stock November 01.11.2026 – 30.11.2026").waitFor();
+  assert.match(await page.locator('#reg tr[data-row="p016"] .s2').innerText(), /Delivery Date 12 Nov/);
   assert.equal(await page.locator("#reg thead th").count(), 4 + 30);
   await page.locator("#inv-day").selectOption("5");
   await page.getByRole("button", { name: "Copy day 4 → day 5" }).click();
@@ -109,8 +116,10 @@ await step("register grid: copy yesterday, tap a cell, low highlight updates ins
 });
 await step("reorder list suggests monthly use minus current stock", async () => {
   await page.getByRole("button", { name: /Reorder/ }).click();
-  const row = page.locator("tr", { hasText: "Gloves Box" });
-  assert.match(await row.innerText(), /8\s*Box/);          // 9 - 1
+  assert.equal(await page.locator("tbody tr", { hasText: "Gloves Box" }).count(), 0, "Gloves Box is low but already ordered");
+  assert.equal(await page.locator("tbody tr", { hasText: "Syringe 50ml" }).count(), 0, "Syringe 50ml is low but already ordered");
+  await page.getByText(/low items are already ordered and not listed: .*Gloves Box \(delivery 6 Nov\)/).waitFor();
+  assert.match(await page.locator("tbody tr", { hasText: "Room Spray" }).innerText(), /Marked low/);
   const bat = page.locator("tr", { hasText: "Battery" });
   assert.match(await bat.innerText(), /7\s*Pcs/);          // 10 - 3
   assert.equal(await page.locator("tr", { hasText: "Resodim" }).count(), 0);
@@ -229,6 +238,14 @@ await step("optional billing link subtracts billed quantities (off by default)",
   const u = (await log()).filter((x) => x[0] === "update" && x[1] === "inventory/months/list/2026-11").at(-1)[2];
   assert.ok(u.counts.p015[d] != null, JSON.stringify(u));
 });
+await step("Home dashboard shows stock to reorder and orders on the way", async () => {
+  await page.getByRole("link", { name: /Home$/ }).click();
+  const card = page.locator(".dash-card", { hasText: "Inventory" });
+  assert.match(await card.innerText(), /To reorder\s+\d+\s+low, not ordered/);
+  assert.match(await card.innerText(), /On order\s+[45]/);
+  await card.getByRole("button", { name: /To reorder/ }).click();
+  await page.getByRole("heading", { name: "Reorder list" }).waitFor();
+});
 await step("permissions: Staff can count but not add products", async () => {
   const p2 = await ctx.newPage();
   await p2.goto(URL_ + "?role=staff&persist=1#inventory");
@@ -240,7 +257,7 @@ await step("permissions: Staff can count but not add products", async () => {
   await p2.close();
 });
 await step("existing billing screens still work", async () => {
-  for (const t of ["Bills", "Summary", "Reports", "Admin", "Home"]) { await page.getByRole("link", { name: t, exact: true }).click(); await page.waitForTimeout(150); }
+  for (const t of ["Bills", "Summary", "Reports", "Admin", "Home"]) { await nav(page, t); await page.waitForTimeout(150); }
   await page.getByRole("button", { name: "Scan Bill" }).waitFor();
   assert.ok(!(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)), "no sideways page scroll");
 });

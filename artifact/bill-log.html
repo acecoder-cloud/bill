@@ -113,6 +113,23 @@ p { margin: 0; }
 .sheet-opt svg { width: 28px; height: 28px; color: var(--brand); flex: none; }
 .sheet-opt span { display: flex; flex-direction: column; }
 .sheet-opt small { color: var(--muted); font-size: .85rem; }
+.pharm-tabs { margin-bottom: -4px; }
+.dash { display: grid; gap: 12px; }
+@media (min-width: 680px) { .dash { grid-template-columns: 1fr 1fr; } .dash > :first-child { grid-column: 1 / -1; } }
+.dash-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.dash-head { display: flex; justify-content: space-between; align-items: center; }
+.dash-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.dash-stat { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 10px; border-radius: 12px; background: var(--surface-2); border: 1px solid transparent; color: var(--fg); text-align: left; min-width: 0; cursor: pointer; font: inherit; }
+.dash-stat.static { cursor: default; }
+.dash-stat span { font-size: .75rem; font-weight: 700; color: var(--muted); }
+.dash-stat b { font-size: 1.2rem; line-height: 1.2; overflow-wrap: anywhere; }
+.dash-stat small { font-size: .72rem; color: var(--muted); }
+.dash-stat.warn { background: var(--warn-bg); border-color: var(--warn-line); }
+.dash-stat.warn span, .dash-stat.warn small { color: var(--warn-ink); }
+.dash-stat.bad { background: var(--bad-bg); border-color: var(--bad-line); }
+.dash-stat.bad span, .dash-stat.bad small, .dash-stat.bad b { color: var(--bad-ink); }
+.dash-balance { display: flex; flex-direction: column; }
+.dash-balance b { font-size: 2rem; color: var(--brand); line-height: 1.1; }
 .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .duo .btn { min-height: 56px; }
 
@@ -320,7 +337,7 @@ table.reg { border-collapse: separate; border-spacing: 0; font-size: .85rem; wid
 .reg td.editing { outline: 3px solid var(--brand); outline-offset: -3px; }
 .reg tr.stopped td { color: var(--muted); background: var(--surface-2); }
 .reg tr.stopped .s2 span { text-decoration: line-through; }
-.reg em { font-style: normal; font-size: .62rem; font-weight: 800; padding: 1px 4px; border-radius: 4px; letter-spacing: .03em; }
+.reg em { font-style: normal; font-size: .62rem; font-weight: 800; padding: 1px 4px; border-radius: 4px; letter-spacing: .02em; white-space: nowrap; }
 .stop-tag { background: var(--line); color: var(--fg); }
 .low-tag { background: var(--warn-bg); color: var(--warn-ink); }
 .exp-tag { background: var(--bad-bg); color: var(--bad-ink); }
@@ -645,15 +662,20 @@ async function paintNames(root = document) {
 function syncOnline() { $("#offline").hidden = navigator.onLine; }
 const TABS = [
   { id: "home", label: "Home", icon: '<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>' },
-  { id: "bills", label: "Bills", icon: '<path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 7h6M9 11h6M9 15h4"/>' },
-  { id: "summary", label: "Summary", perm: "summary", icon: '<path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18"/>' },
-  { id: "reports", label: "Reports", perm: "reports", icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/>' },
+  { id: "pharmacy", label: "Pharmacy", icon: '<path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M12 7v6M9 10h6M9 16h6"/>' },
   { id: "inventory", label: "Inventory", perm: "inv_view", icon: '<path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>' },
   { id: "accounts", label: "Accounts", perm: "acc_view", icon: '<rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20M16 15h2"/><path d="M6 6V5a2 2 0 0 1 2-2h8"/>' },
   { id: "admin", label: "Admin", admin: true, icon: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>' },
 ];
 function tabAllowed(id) { const t = TABS.find((x) => x.id === id); if (!t) return false; if (t.admin) return appAdmin(); return !t.perm || S.dbState === "none" || allowed(t.perm); }
-function tabFromHash() { const h = location.hash.replace("#", ""); return TABS.some((t) => t.id === h) ? h : "home"; }
+const PHARM_SECTIONS = [["bills", "Bills"], ["summary", "Summary"], ["reports", "Reports"]];
+function pharmAllowed(sec) { return sec === "bills" || S.dbState === "none" || allowed(sec); }
+/** #bills, #summary and #reports (old links) open that section of the Pharmacy tab. */
+function tabFromHash() {
+  const h = location.hash.replace("#", "");
+  if (PHARM_SECTIONS.some(([k]) => k === h)) { S.pharm = h; return "pharmacy"; }
+  return TABS.some((t) => t.id === h) ? h : "home";
+}
 function onHash() {
   const t = tabFromHash();
   if (S.editor && S.editor.dirty) { location.hash = S.tab; askDiscard(() => { closeEditor(); location.hash = t; }); return; }
@@ -678,7 +700,7 @@ function render() {
   if (S.editor) { renderEditor(); return; }
   if (S.dbState === "none") { main.innerHTML = signedOutView(); return; }
   if (S.dbState === "error") { main.innerHTML = `<div class="note bad">The bill log couldn't be loaded${S.dbError === "revoked" ? " because your access changed" : ""}. Reload the page to try again.</div>`; return; }
-  const views = { home: homeView, bills: billsView, summary: summaryView, reports: reportsView, inventory: inventoryView, accounts: accountsView, admin: adminView };
+  const views = { home: homeView, pharmacy: pharmacyView, inventory: inventoryView, accounts: accountsView, admin: adminView };
   if (!tabAllowed(S.tab)) { main.innerHTML = `<div class="note warn">Your role doesn't include this screen. Ask an admin if you need it.</div>`; return; }
   main.innerHTML = (S.dbState === "slow" ? `<div class="note warn">The bill log is taking a while to load. Check your connection; it will appear as soon as it arrives.</div>` : "") + (views[S.tab] || homeView)();
   paintNames(main);
@@ -701,6 +723,53 @@ function signedOutView() {
 }
 
 /* ---------------- home ---------------- */
+/** Home dashboard: one card per area this person may see; each card opens its tab. */
+function dashboardView() {
+  const cards = [];
+  const today = todayISO(); const month = today.slice(0, 7);
+  // Pharmacy
+  const bills = allBills(); const monthBills = bills.filter((b) => (b.bill_date || "").startsWith(month));
+  const unpaid = bills.filter((b) => !isPaid(b)); const toCheck = bills.filter((b) => (b.items || []).some((i) => hasMismatch(i.qty, i.rate, i.total_amount)));
+  cards.push(`<section class="dash-card">
+    <div class="dash-head"><h2>Pharmacy</h2><button class="btn-link" data-act="dash-go" data-tab="pharmacy" data-sec="bills">Open</button></div>
+    <div class="dash-stats">
+      <button class="dash-stat" data-act="dash-go" data-tab="pharmacy" data-sec="bills"><span>Bills this month</span><b class="num">${monthBills.length}</b><small class="num">${inr(sum(monthBills.map(billTotal)))}</small></button>
+      <button class="dash-stat ${unpaid.length ? "warn" : ""}" data-act="dash-go" data-tab="pharmacy" data-sec="${pharmAllowed("summary") ? "summary" : "bills"}" data-pay="unpaid"><span>Unpaid</span><b class="num">${inr(sum(unpaid.map(billTotal)))}</b><small>${unpaid.length} bill${unpaid.length === 1 ? "" : "s"}</small></button>
+      <button class="dash-stat ${toCheck.length ? "warn" : ""}" data-act="dash-go" data-tab="pharmacy" data-sec="bills"><span>Bills to check</span><b class="num">${toCheck.length}</b><small>Qty × Rate ≠ Tot. Amt.</small></button>
+    </div></section>`);
+  // Inventory
+  if (allowed("inv_view") && INV.products.size) {
+    const all = sortedProducts().map(([pid]) => invStatus(pid)).filter((s) => !s.stopped);
+    const toOrder = reorderRows(); const onOrder = all.filter((s) => s.due); const late = onOrder.filter((s) => s.order === "overdue");
+    cards.push(`<section class="dash-card">
+      <div class="dash-head"><h2>Inventory</h2><button class="btn-link" data-act="dash-go" data-tab="inventory" data-inv="list">Open</button></div>
+      <div class="dash-stats">
+        <button class="dash-stat ${toOrder.length ? "bad" : ""}" data-act="dash-go" data-tab="inventory" data-inv="reorder"><span>To reorder</span><b class="num">${toOrder.length}</b><small>low, not ordered</small></button>
+        <button class="dash-stat" data-act="dash-go" data-tab="inventory" data-inv="list"><span>On order</span><b class="num">${onOrder.length}</b><small>${late.length ? `${late.length} late` : "none late"}</small></button>
+        <button class="dash-stat" data-act="dash-go" data-tab="inventory" data-inv="register"><span>Counted today</span><b class="num">${all.filter((s) => s.cur?.mk === month && s.cur?.day === Number(today.slice(8, 10))).length}</b><small>of ${all.length} items</small></button>
+      </div>
+      ${toOrder.length ? `<p class="small"><b>Reorder:</b> ${toOrder.slice(0, 5).map(({ s }) => esc(s.p.name)).join(", ")}${toOrder.length > 5 ? ` and ${toOrder.length - 5} more` : ""}</p>` : ""}
+      ${late.length ? `<p class="small" style="color:var(--bad-ink)"><b>Delivery late:</b> ${late.map((s) => esc(s.p.name)).join(", ")}</p>` : ""}
+    </section>`);
+  }
+  // Accounts
+  if (allowed("acc_view") && ACC.tx.size) {
+    const per = periodOf(today); const t = totalsBetween(per.start, per.end); const bal = availableNow();
+    const last = txList().at(-1); const review = [...ACC.tx.values()].filter((x) => x.review).length;
+    cards.push(`<section class="dash-card">
+      <div class="dash-head"><h2>Accounts</h2><button class="btn-link" data-act="dash-go" data-tab="accounts">Open</button></div>
+      <div class="dash-balance"><span class="small muted">Available balance</span><b class="num ${bal < 0 ? "neg" : ""}">${inr(bal)}</b></div>
+      <div class="dash-stats">
+        <div class="dash-stat static"><span>Spent this period</span><b class="num">${inr(t.spent)}</b><small>${esc(shortDm(per.start))}–${esc(shortDm(per.end))}</small></div>
+        <div class="dash-stat static"><span>Received</span><b class="num pos">${inr(t.received)}</b><small>this period</small></div>
+        <button class="dash-stat ${review ? "warn" : ""}" data-act="dash-go" data-tab="accounts"><span>Needs review</span><b class="num">${review}</b><small>entries</small></button>
+      </div>
+      ${last ? `<p class="small muted">Last entry: ${esc(txTitle(last))} ${last.type === "received" ? "+" : ""}${inr(last.amount)} on ${esc(dmy(last.date))}</p>` : ""}
+      ${canAccEdit() ? `<button class="btn btn-ghost btn-block" data-act="acc-add-expense-home">+ Add expense</button>` : ""}
+    </section>`);
+  }
+  return `<div class="dash">${cards.join("")}</div>`;
+}
 function homeView() {
   const mine = allBills().filter((b) => b.owner === S.uid).sort((a, b) => (b.logged_at || "").localeCompare(a.logged_at || "")).slice(0, 5);
   const loading = S.dbState === "loading";
@@ -718,14 +787,21 @@ function homeView() {
   </div>` : !S.canWrite ? `<div class="note warn">Your access is view only. To log bills, ask the owner to invite you in the <b>Share</b> menu: <b>Contributor</b> if you're in their organization, otherwise <b>Editor</b> (with "Anyone with the link" turned off).</div>`
     : myRole() !== "none" ? `<div class="note">Your role is <b>${ROLES[myRole()].label}</b>, which doesn't include logging bills. Ask an admin if you need to.</div>`
     : `<div class="note warn">You're not on the team yet. Ask an admin to add you in the Admin tab, then reopen this page.</div>`}
+  ${dashboardView()}
   <section class="card">
-    <div class="row-between"><h2>Your recent bills</h2><a class="btn-link" href="#bills">See all</a></div>
+    <div class="row-between"><h2>Your recent bills</h2><button class="btn-link" data-act="dash-go" data-tab="pharmacy" data-sec="bills">See all</button></div>
     ${loading ? `<div class="row-between"><span class="spin"></span><span class="muted">Loading bills…</span></div>`
       : mine.length ? `<div class="bills">${mine.map(billCard).join("")}</div>`
       : `<p class="muted">No bills yet. Tap <b>Scan Bill</b>, photograph a pharmacy bill, and Claude reads the items for you to check.</p>`}
   </section>`;
 }
 
+function pharmacyView() {
+  if (!pharmAllowed(S.pharm || "bills")) S.pharm = "bills";
+  const sec = S.pharm || "bills"; const secs = PHARM_SECTIONS.filter(([k]) => pharmAllowed(k));
+  const body = sec === "summary" ? summaryView() : sec === "reports" ? reportsView() : billsView();
+  return `${secs.length > 1 ? `<div class="seg pharm-tabs" role="tablist" aria-label="Pharmacy sections">${secs.map(([k, l]) => `<button role="tab" data-act="pharm-sec" data-v="${k}" aria-selected="${sec === k}" aria-pressed="${sec === k}">${l}</button>`).join("")}</div>` : ""}${body}`;
+}
 function billCard(b, opts = {}) {
   const items = b.items || [];
   const mm = items.filter((i) => hasMismatch(i.qty, i.rate, i.total_amount)).length;
@@ -954,7 +1030,7 @@ async function saveReport() {
   } catch (e) {
     const code = e?.code;
     r.msg = code === "declined" ? null : { tone: "bad", text: code === "rate_limited" ? "A save is already waiting for your answer." : code ? "This file couldn't be saved here." : (e?.message || "The report couldn't be made.") };
-  } finally { r.busy = false; if (S.tab === "reports" && !S.editor) render(); }
+  } finally { r.busy = false; if (S.tab === "pharmacy" && S.pharm === "reports" && !S.editor) render(); }
 }
 
 /* ---------------- admin ---------------- */
@@ -1491,6 +1567,8 @@ document.addEventListener("click", (e) => {
     case "manual": openNew(null); break;
     case "open": openBill(t.dataset.owner, t.dataset.id); break;
     case "scope": S.filters.scope = t.dataset.v; render(); break;
+    case "pharm-sec": S.pharm = t.dataset.v; render(); window.scrollTo(0, 0); break;
+    case "dash-go": S.pharm = t.dataset.sec || S.pharm; if (t.dataset.pay) S.summary.pay = t.dataset.pay; if (t.dataset.inv) INV.view = t.dataset.inv; location.hash = t.dataset.tab; if (location.hash === "#" + t.dataset.tab) onHash(); break;
     case "sum-pay": S.summary.pay = t.dataset.v; render(); break;
     case "sort": { const k = t.dataset.k; S.summary.dir = S.summary.sort === k ? -S.summary.dir : (k === "item_name" || k === "logged_by" ? 1 : -1); S.summary.sort = k; render(); break; }
     case "rep-field": rep().field = t.dataset.v; rep().rows = null; render(); break;
@@ -1830,7 +1908,7 @@ function latestMonths(n) { return knownMonths().slice(-n); }
 let invQueued = false;
 function invChanged() {
   if (invQueued) return; invQueued = true;
-  requestAnimationFrame(() => { invQueued = false; renderTabs(); if (S.tab === "inventory" && !S.editor && !invBusy()) render(); else if (S.tab === "inventory") invRefreshLive(); });
+  requestAnimationFrame(() => { invQueued = false; renderTabs(); if (S.tab === "inventory" && !S.editor && !invBusy()) render(); else if (S.tab === "inventory") invRefreshLive(); else if (S.tab === "home" && !S.editor) render(); });
 }
 function invBusy() { return !!(INV.form || INV.importPreview || INV.confirm || document.activeElement?.closest?.("#inv-cellbar, .inv-filters")); }
 function invRefresh() { if (S.tab === "inventory" && !S.editor) render(); else renderTabs(); }
@@ -1862,7 +1940,7 @@ function invStatus(pid) {
 }
 function invAlertCount() {
   let n = 0;
-  for (const pid of INV.products.keys()) { const s = invStatus(pid); if (!s.archived && !s.stopped && (s.low || s.order === "overdue")) n++; }
+  for (const pid of INV.products.keys()) { const s = invStatus(pid); if (!s.archived && !s.stopped && ((s.low && !s.due) || s.order === "overdue")) n++; }  // needs ordering, or a delivery is late
   return n;
 }
 function sortedProducts(includeArchived = false) {
@@ -2070,7 +2148,7 @@ function regRow(mk, pid, p, n, day) {
   const s = invStatus(pid); const c = monthCounts(mk, pid);
   return `<tr data-row="${esc(pid)}" class="${s.stopped ? "stopped" : ""}">
     <td class="s1 num">${esc(p.sno)}</td>
-    <td class="s2"><span>${esc(p.name)}</span>${s.stopped ? ' <em class="stop-tag">STOP</em>' : ""}${s.manLow ? ' <em class="low-tag">LOW</em>' : ""}${s.due ? ` <em class="${s.order === "overdue" ? "exp-tag" : "order-tag"}">${s.order === "overdue" ? "OVERDUE " : "DUE "}${esc(fmtDate(s.due).replace(/ \d{4}$/, ""))}</em>` : ""}</td>
+    <td class="s2"><span>${esc(p.name)}</span>${s.stopped ? ' <em class="stop-tag">STOP</em>' : ""}${s.manLow ? ' <em class="low-tag">LOW</em>' : ""}${s.due ? ` <em class="${s.order === "overdue" ? "exp-tag" : "order-tag"}">Delivery Date ${esc(fmtDate(s.due).replace(/ \d{4}$/, ""))}${s.order === "overdue" ? " (late)" : ""}</em>` : ""}</td>
     <td class="num">${p.min_level != null ? fmtCount(p.min_level) : ""}</td><td class="num">${p.monthly_use != null ? fmtCount(p.monthly_use) : ""}</td>
     ${Array.from({ length: n }, (_, i) => { const d = i + 1; const v = c[d]; const low = !s.stopped && typeof v === "number" && p.min_level != null && v <= p.min_level;
       return `<td class="cell num ${low ? "low" : ""} ${d === day ? "today" : ""} ${INV.cell?.pid === pid && INV.cell?.day === d ? "editing" : ""}" data-act="inv-cell" data-pid="${esc(pid)}" data-day="${d}" ${canInvCount() ? 'tabindex="0" role="button"' : ""} aria-label="${esc(p.name)}, day ${d}: ${v == null ? "empty" : fmtCount(v)}">${v == null ? "" : esc(fmtCount(v))}</td>`; }).join("")}
@@ -2173,20 +2251,23 @@ async function startMonth(target) {
 }
 
 /* --- reorder --- */
+/** Low-stock items that still need ordering: anything with a delivery date set has already been ordered. */
+function lowOnOrder() { return sortedProducts().map(([pid]) => invStatus(pid)).filter((s) => !s.stopped && s.low && s.due); }
 function reorderRows() {
-  return sortedProducts().map(([pid]) => invStatus(pid)).filter((s) => !s.stopped && s.low)
+  return sortedProducts().map(([pid]) => invStatus(pid)).filter((s) => !s.stopped && s.low && !s.due)
     .map((s) => ({ s, suggest: s.p.monthly_use != null ? Math.max(0, Number((s.p.monthly_use - (s.cur?.value || 0)).toFixed(3))) : null }));
 }
 function reorderView() {
   const rows = reorderRows();
   return `<section class="card">
     <div class="row-between"><h2>Reorder list</h2>${rows.length && S.caps.downloads ? `<button class="btn btn-ghost" data-act="inv-reorder-csv">Save CSV</button>` : ""}</div>
-    <p class="small muted">Active products at or below their minimum level, or marked low. Suggested order = monthly use − current stock. Items already ordered show their expected delivery date.</p>
+    <p class="small muted">Active products at or below their minimum level, or marked low, that haven't been ordered yet. Suggested order = monthly use − current stock.</p>
     ${rows.length ? `<div class="tbl-wrap"><table><thead><tr><th>Product</th><th class="r">Current</th><th class="r">Min</th><th class="r">Monthly use</th><th class="r">Suggested order</th></tr></thead>
-      <tbody>${rows.map(({ s, suggest }) => `<tr><td class="wrap"><button class="link" data-act="inv-open" data-pid="${esc(sortedProducts().find(([, p]) => p === s.p)?.[0] || "")}">${esc(s.p.name)}</button>${s.manLow ? ' <span class="pill low">Marked low</span>' : ""}${s.due ? ` <span class="pill ${s.order === "overdue" ? "unpaid" : "order"}">${s.order === "overdue" ? "Overdue" : "On order"} · ${esc(fmtDate(s.due))}</span>` : ""}</td>
+      <tbody>${rows.map(({ s, suggest }) => `<tr><td class="wrap"><button class="link" data-act="inv-open" data-pid="${esc(sortedProducts().find(([, p]) => p === s.p)?.[0] || "")}">${esc(s.p.name)}</button>${s.manLow ? ' <span class="pill low">Marked low</span>' : ""}</td>
         <td class="r num">${s.cur ? esc(fmtCount(s.cur.value)) : "—"}</td><td class="r num">${s.p.min_level != null ? fmtCount(s.p.min_level) : "—"}</td><td class="r num">${s.p.monthly_use != null ? fmtCount(s.p.monthly_use) : "—"}</td>
         <td class="r num"><b>${suggest == null ? "set monthly use" : esc(fmtCount(suggest)) + " " + esc(s.p.unit || "")}</b></td></tr>`).join("")}</tbody></table></div>`
       : `<p class="muted">Nothing to reorder right now.</p>`}
+    ${(() => { const on = lowOnOrder(); return on.length ? `<p class="small muted">${on.length} low item${on.length === 1 ? " is" : "s are"} already ordered and not listed: ${on.map((s) => `${esc(s.p.name)} (${s.order === "overdue" ? "late, was due" : "delivery"} ${esc(fmtDate(s.due).replace(/ \d{4}$/, ""))})`).join(", ")}.</p>` : ""; })()}
   </section>`;
 }
 
@@ -2226,11 +2307,11 @@ async function registerPdf(mk) {
   const n = daysIn(mk); const days = Array.from({ length: n }, (_, i) => i + 1);
   const doc = new window.jspdf.jsPDF({ orientation: "landscape", unit: "pt", format: "a3" });
   doc.setFontSize(15); doc.text(registerTitle(mk), 30, 32);
-  doc.setFontSize(8); doc.setTextColor(100); doc.text(`Printed ${fmtDT(new Date().toISOString())} · amber = at or below minimum · grey = STOP · due = ordered, expected delivery date`, 30, 46);
+  doc.setFontSize(8); doc.setTextColor(100); doc.text(`Printed ${fmtDT(new Date().toISOString())} · amber = at or below minimum · grey = STOP · delivery date = ordered, expected to arrive`, 30, 46);
   const rows = sortedProducts(); const lowCell = new Set();
   const body = rows.map(([pid, p], r) => { const c = monthCounts(mk, pid); const s = invStatus(pid);
     days.forEach((d) => { const v = c[d]; if (!s.stopped && typeof v === "number" && p.min_level != null && v <= p.min_level) lowCell.add(`${r}:${d + 3}`); });
-    return [p.sno, p.name + (s.stopped ? " (STOP)" : "") + (dueOf(p) ? `  due ${dueOf(p).split("-").reverse().join(".")}` : ""), p.min_level ?? "", p.monthly_use ?? "", ...days.map((d) => (c[d] == null ? "" : fmtCount(c[d])))]; });
+    return [p.sno, p.name + (s.stopped ? " (STOP)" : "") + (dueOf(p) ? `  delivery date ${dueOf(p).split("-").reverse().join(".")}` : ""), p.min_level ?? "", p.monthly_use ?? "", ...days.map((d) => (c[d] == null ? "" : fmtCount(c[d])))]; });
   doc.autoTable({
     startY: 56, head: [["S.No", "Stock Name", "Min", "Use", ...days.map(String)]], body, theme: "grid",
     styles: { fontSize: 6.5, cellPadding: 2, halign: "center", lineColor: 120, lineWidth: 0.3 }, headStyles: { fillColor: [15, 110, 102], textColor: 255 },
@@ -2745,7 +2826,7 @@ function accStart() {
 let accQueued = false;
 function accChanged() {
   if (accQueued) return; accQueued = true;
-  requestAnimationFrame(() => { accQueued = false; renderTabs(); if (S.tab === "accounts" && !S.editor && !accBusy()) render(); });
+  requestAnimationFrame(() => { accQueued = false; renderTabs(); if (S.tab === "accounts" && !S.editor && !accBusy()) render(); else if (S.tab === "home" && !S.editor) render(); });
 }
 function accBusy() { return !!(ACC.form || ACC.itemForm || ACC.importPreview || ACC.confirm || document.activeElement?.closest?.(".acc-filters, #acc-check")); }
 function accRefresh() { if (S.tab === "accounts" && !S.editor) render(); else renderTabs(); }
@@ -3275,6 +3356,7 @@ document.addEventListener("click", async (e) => {
     case "acc-view": ACC.view = t.dataset.v; ACC.copied = null; render(); break;
     case "acc-range": ACC.range = t.dataset.v; render(); break;
     case "acc-add-expense": openExpense(null); break;
+    case "acc-add-expense-home": location.hash = "accounts"; setTimeout(() => openExpense(null), 0); break;
     case "acc-add-received": openReceived(null); break;
     case "acc-form-cancel": ACC.form = null; render(); break;
     case "acc-quick": t.disabled = true; quickAdd(id); break;

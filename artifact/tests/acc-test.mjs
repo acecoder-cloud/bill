@@ -6,6 +6,12 @@ const DIR = new URL(".", import.meta.url).pathname;
 const URL_ = "file://" + DIR + "page.html";
 const browser = await chromium.launch();
 let pass = 0, fail = 0;
+/** Bills, Summary and Reports live inside the Pharmacy tab. */
+async function nav(pg, name) {
+  if (["Bills", "Summary", "Reports"].includes(name)) { await pg.getByRole("link", { name: /Pharmacy$/ }).click(); await pg.getByRole("tab", { name, exact: true }).click(); }
+  else await pg.getByRole("link", { name: new RegExp(name + "$") }).click();
+}
+
 const step = async (n, f) => { try { await f(); pass++; console.log("ok - " + n); } catch (e) { fail++; console.log("FAIL - " + n + "\n   " + e.message.split("\n").slice(0, 6).join("\n   ")); } };
 const LIBS = { "jspdf/2.5.1/jspdf.umd.min.js": "jspdf/dist/jspdf.umd.min.js", "jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js": "jspdf-autotable/dist/jspdf.plugin.autotable.min.js" };
 const ctx = await browser.newContext({ ...devices["Pixel 7"], permissions: ["clipboard-read", "clipboard-write"] });
@@ -213,6 +219,14 @@ await step("export CSV and period statement; import CSV", async () => {
   await page.getByText("Imported 2 entries.").waitFor();
   assert.equal(await available(), "₹8,731");
 });
+await step("Home dashboard shows the available balance", async () => {
+  await page.getByRole("link", { name: /Home$/ }).click();
+  const card = page.locator(".dash-card", { hasText: "Accounts" });
+  assert.match(await card.innerText(), /Available balance\s+₹8,731/);
+  await card.getByRole("button", { name: "+ Add expense" }).click();
+  await page.getByRole("heading", { name: "Add expense" }).waitFor();
+  await page.getByRole("button", { name: "‹ Cancel" }).click();
+});
 await step("Staff can add expenses but not change accounts settings or import", async () => {
   const p2 = await ctx.newPage();
   await p2.goto(URL_ + "?role=staff&persist=1#accounts");
@@ -222,7 +236,7 @@ await step("Staff can add expenses but not change accounts settings or import", 
   await p2.close();
 });
 await step("existing tabs still work and the page never scrolls sideways", async () => {
-  for (const t of ["Bills", "Summary", "Reports", "Inventory", "Admin", "Home"]) { await page.getByRole("link", { name: new RegExp(t + "$") }).click(); await page.waitForTimeout(120); }
+  for (const t of ["Bills", "Summary", "Reports", "Inventory", "Admin", "Home"]) { await nav(page, t); await page.waitForTimeout(120); }
   await page.getByRole("button", { name: "Scan Bill" }).waitFor();
   await page.getByRole("link", { name: "Accounts", exact: true }).click();
   assert.ok(!(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)));

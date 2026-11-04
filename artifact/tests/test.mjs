@@ -5,6 +5,12 @@ const DIR = new URL(".", import.meta.url).pathname;
 const URL_ = "file://" + DIR + "page.html";
 const browser = await chromium.launch({ proxy: process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY } : undefined, args: ["--ignore-certificate-errors"] });
 let pass = 0, fail = 0;
+/** Bills, Summary and Reports live inside the Pharmacy tab. */
+async function nav(pg, name) {
+  if (["Bills", "Summary", "Reports"].includes(name)) { await pg.getByRole("link", { name: /Pharmacy$/ }).click(); await pg.getByRole("tab", { name, exact: true }).click(); }
+  else await pg.getByRole("link", { name: new RegExp(name + "$") }).click();
+}
+
 const step = async (n, f) => { try { await f(); pass++; console.log("ok - " + n); } catch (e) { fail++; console.log("FAIL - " + n + "\n   " + e.message.split("\n").slice(0, 4).join("\n   ")); } };
 const ctx = await browser.newContext({ ...devices["Pixel 7"] });
 const LIBS = { "pdf.js/3.11.174/pdf.min.js": "pdfjs-dist/build/pdf.min.js", "pdf.js/3.11.174/pdf.worker.min.js": "pdfjs-dist/build/pdf.worker.min.js", "xlsx/0.18.5/xlsx.full.min.js": "xlsx/dist/xlsx.full.min.js", "jspdf/2.5.1/jspdf.umd.min.js": "jspdf/dist/jspdf.umd.min.js", "jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js": "jspdf-autotable/dist/jspdf.plugin.autotable.min.js" };
@@ -34,6 +40,16 @@ await step("Scan Bill offers Take photo and Upload a bill", async () => {
   await page.screenshot({ path: DIR + "a0-scan-menu.png" });
   await page.getByRole("button", { name: "Scan Bill" }).click();
   assert.equal(await page.getByRole("button", { name: /Take photo/ }).count(), 0);
+});
+await step("Home dashboard shows Pharmacy figures; old #summary link opens Pharmacy > Summary", async () => {
+  const dash = await page.locator(".dash").innerText();
+  assert.match(dash, /Pharmacy/); assert.match(dash, /Unpaid\s+₹230\s+1 bill/);
+  await page.evaluate(() => { location.hash = "summary"; });
+  await page.getByRole("tab", { name: "Summary", selected: true }).waitFor();
+  assert.match(await page.locator('.tabs a[aria-current="page"]').innerText(), /Pharmacy/);
+  await page.evaluate(() => { location.hash = "home"; });
+  await page.getByRole("button", { name: "Scan Bill" }).waitFor();
+  await page.screenshot({ path: DIR + "d1-home.png", fullPage: true });
 });
 await step("photo -> compress -> upload + Claude read -> review with mismatch", async () => {
   await page.locator("#gallery").setInputFiles(DIR + "sample-bill.png");
@@ -75,7 +91,7 @@ await step("fix mismatch, edit, add & delete row, submit saves one document + au
   assert.ok((await log()).some((x) => x[0] === "set" && /^audit\/u_admin\/log\//.test(x[1]) && x[2].action === "bill.create"));
 });
 await step("bills list shows both people's bills with names", async () => {
-  await page.getByRole("link", { name: "Bills" }).click();
+  await nav(page, "Bills");
   await page.getByText("2 bills").waitFor();
   assert.equal(await page.getByText("No. 4471").count(), 2);
   await page.getByLabel("Find by Bill No.").fill("9999");
@@ -93,7 +109,7 @@ await step("bills list shows both people's bills with names", async () => {
   await page.screenshot({ path: DIR + "a3-bills.png", fullPage: true });
 });
 await step("summary: total, sort, search, sideways scroll only inside table", async () => {
-  await page.getByRole("link", { name: "Summary" }).click();
+  await nav(page, "Summary");
   await page.locator(".total-band").getByText("₹ 699.00").waitFor();
   assert.ok(await page.locator(".tbl-wrap").evaluate((el) => el.scrollWidth > el.clientWidth));
   assert.ok(!(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)));
@@ -118,7 +134,7 @@ await step("summary: total, sort, search, sideways scroll only inside table", as
   await page.screenshot({ path: DIR + "a4-summary.png", fullPage: true });
 });
 await step("reports: preview + CSV, Excel, PDF saves", async () => {
-  await page.getByRole("link", { name: "Reports" }).click();
+  await nav(page, "Reports");
   await page.getByLabel("Logged at").uncheck();
   await page.getByRole("button", { name: "Preview report" }).click();
   await page.getByText("5 rows").waitFor();
@@ -209,11 +225,11 @@ await step("admin: role permission table saves changes", async () => {
   assert.ok(await page.getByLabel("Staff: Open Reports and save files").isChecked());
 });
 await step("Bills list has Edit and Delete buttons on each bill", async () => {
-  await page.getByRole("link", { name: "Bills" }).click();
+  await nav(page, "Bills");
   await page.getByRole("button", { name: /^Edit bill No\. 4471 of 2 Nov 2026/ }).click();
   await page.getByRole("heading", { name: "Edit bill" }).waitFor();
   await page.getByRole("button", { name: "‹ Back" }).click();
-  await page.getByRole("link", { name: "Bills" }).click();
+  await nav(page, "Bills");
   await page.getByRole("button", { name: /^Delete bill No\. 4471 of 28 Oct 2026/ }).click();
   await page.getByText("and all its items? This can't be undone.").waitFor();
   await page.getByRole("button", { name: "Keep" }).click();
@@ -221,7 +237,7 @@ await step("Bills list has Edit and Delete buttons on each bill", async () => {
   await page.screenshot({ path: DIR + "a14-bill-actions.png", fullPage: true });
 });
 await step("admin can edit and delete another person's bill", async () => {
-  await page.getByRole("link", { name: "Bills" }).click();
+  await nav(page, "Bills");
   await page.getByRole("button", { name: /^28 Oct 2026/ }).click();
   await page.getByRole("heading", { name: "Edit bill" }).waitFor();
   await page.getByRole("button", { name: "Delete bill" }).click();
@@ -256,7 +272,7 @@ await step("staff: no Admin tab, other's bill is read-only", async () => {
   await p2.goto(URL_ + "?role=staff");
   await p2.getByRole("button", { name: "Scan Bill" }).waitFor();
   assert.equal(await p2.getByRole("link", { name: "Admin" }).count(), 0);
-  await p2.getByRole("link", { name: "Bills" }).click();
+  await nav(p2, "Bills");
   await p2.getByRole("button", { name: /^28 Oct 2026/ }).click();
   await p2.getByText("You can view this bill").waitFor();
   assert.equal(await p2.getByRole("button", { name: "Save changes" }).count(), 0);
@@ -280,7 +296,7 @@ await step("an Editor given the Staff role gets Staff features only", async () =
   await p2.getByRole("button", { name: "Scan Bill" }).waitFor();
   await p2.waitForTimeout(200);
   assert.equal(await p2.getByRole("link", { name: "Admin" }).count(), 0);
-  await p2.getByRole("link", { name: "Bills" }).click();
+  await nav(p2, "Bills");
   await p2.getByRole("button", { name: /^28 Oct 2026/ }).click();
   await p2.getByText("You can view this bill").waitFor();
 });
@@ -294,8 +310,9 @@ await step("permissions change what Staff can do", async () => {
   const perms = (o) => encodeURIComponent(JSON.stringify({ staff: o }));
   await p2.goto(URL_ + "?role=staff&team=staff&perms=" + perms({ reports: false, summary: false }));
   await p2.getByRole("button", { name: "Scan Bill" }).waitFor(); await p2.waitForTimeout(150);
-  assert.equal(await p2.getByRole("link", { name: "Reports" }).count(), 0);
-  assert.equal(await p2.getByRole("link", { name: "Summary" }).count(), 0);
+  await p2.getByRole("link", { name: /Pharmacy$/ }).click();
+  assert.equal(await p2.getByRole("tab", { name: "Reports" }).count(), 0);
+  assert.equal(await p2.getByRole("tab", { name: "Summary" }).count(), 0);
   await p2.goto(URL_ + "?role=staff&team=staff&perms=" + perms({ log: false }) + "#home");
   await p2.getByText("which doesn't include logging bills").waitFor();
   await p2.goto(URL_ + "?role=staff&team=staff&perms=" + perms({ view_all: false }) + "#bills");
