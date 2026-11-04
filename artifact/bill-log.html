@@ -114,6 +114,7 @@ p { margin: 0; }
 .sheet-opt span { display: flex; flex-direction: column; }
 .sheet-opt small { color: var(--muted); font-size: .85rem; }
 .pharm-tabs { margin-bottom: -4px; }
+.scan-block { display: flex; flex-direction: column; gap: 10px; }
 .dash { display: grid; gap: 12px; }
 @media (min-width: 680px) { .dash { grid-template-columns: 1fr 1fr; } .dash > :first-child { grid-column: 1 / -1; } }
 .dash-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
@@ -775,6 +776,18 @@ function homeView() {
   const loading = S.dbState === "loading";
   return `
   <div><p class="muted">Hello,</p><h1>${esc(S.me?.name || "there")}</h1></div>
+  ${dashboardView()}
+  <section class="card">
+    <div class="row-between"><h2>Your recent bills</h2><button class="btn-link" data-act="dash-go" data-tab="pharmacy" data-sec="bills">See all</button></div>
+    ${loading ? `<div class="row-between"><span class="spin"></span><span class="muted">Loading bills…</span></div>`
+      : mine.length ? `<div class="bills">${mine.map(billCard).join("")}</div>`
+      : `<p class="muted">No bills yet. Open <b>Pharmacy</b> and tap <b>Scan Bill</b>: photograph a pharmacy bill, and Claude reads the items for you to check.</p>`}
+  </section>`;
+}
+
+/** Scan Bill / Upload a bill / Enter manually, or a note explaining why this person can't log bills. */
+function scanBlock() {
+  return `<div class="scan-block">
   ${canLog() ? `
   <button class="scan" data-act="scan-menu" aria-expanded="${S.scanMenu ? "true" : "false"}" aria-controls="scan-sheet">${ICON.cam}Scan Bill</button>
   ${S.scanMenu ? `<div class="sheet" id="scan-sheet" role="group" aria-label="Scan Bill options">
@@ -787,20 +800,13 @@ function homeView() {
   </div>` : !S.canWrite ? `<div class="note warn">Your access is view only. To log bills, ask the owner to invite you in the <b>Share</b> menu: <b>Contributor</b> if you're in their organization, otherwise <b>Editor</b> (with "Anyone with the link" turned off).</div>`
     : myRole() !== "none" ? `<div class="note">Your role is <b>${ROLES[myRole()].label}</b>, which doesn't include logging bills. Ask an admin if you need to.</div>`
     : `<div class="note warn">You're not on the team yet. Ask an admin to add you in the Admin tab, then reopen this page.</div>`}
-  ${dashboardView()}
-  <section class="card">
-    <div class="row-between"><h2>Your recent bills</h2><button class="btn-link" data-act="dash-go" data-tab="pharmacy" data-sec="bills">See all</button></div>
-    ${loading ? `<div class="row-between"><span class="spin"></span><span class="muted">Loading bills…</span></div>`
-      : mine.length ? `<div class="bills">${mine.map(billCard).join("")}</div>`
-      : `<p class="muted">No bills yet. Tap <b>Scan Bill</b>, photograph a pharmacy bill, and Claude reads the items for you to check.</p>`}
-  </section>`;
+  </div>`;
 }
-
 function pharmacyView() {
   if (!pharmAllowed(S.pharm || "bills")) S.pharm = "bills";
   const sec = S.pharm || "bills"; const secs = PHARM_SECTIONS.filter(([k]) => pharmAllowed(k));
   const body = sec === "summary" ? summaryView() : sec === "reports" ? reportsView() : billsView();
-  return `${secs.length > 1 ? `<div class="seg pharm-tabs" role="tablist" aria-label="Pharmacy sections">${secs.map(([k, l]) => `<button role="tab" data-act="pharm-sec" data-v="${k}" aria-selected="${sec === k}" aria-pressed="${sec === k}">${l}</button>`).join("")}</div>` : ""}${body}`;
+  return `${scanBlock()}${secs.length > 1 ? `<div class="seg pharm-tabs" role="tablist" aria-label="Pharmacy sections">${secs.map(([k, l]) => `<button role="tab" data-act="pharm-sec" data-v="${k}" aria-selected="${sec === k}" aria-pressed="${sec === k}">${l}</button>`).join("")}</div>` : ""}${body}`;
 }
 function billCard(b, opts = {}) {
   const items = b.items || [];

@@ -226,7 +226,7 @@ await step("optional billing link subtracts billed quantities (off by default)",
   assert.ok(!(await page.getByLabel(/Subtract billed quantities/).isChecked()));
   await page.getByLabel(/Subtract billed quantities/).check();
   await page.getByText("Billed quantities will now be subtracted").waitFor();
-  await page.getByRole("link", { name: "Home" }).click();
+  await nav(page, "Pharmacy");
   await page.getByRole("button", { name: "Enter manually" }).click();
   await page.getByLabel("Item name, row 1").fill("Easy Bath");
   await page.getByLabel("Qty, row 1").fill("2");
@@ -258,6 +258,8 @@ await step("permissions: Staff can count but not add products", async () => {
 });
 await step("existing billing screens still work", async () => {
   for (const t of ["Bills", "Summary", "Reports", "Admin", "Home"]) { await nav(page, t); await page.waitForTimeout(150); }
+  await page.locator(".dash").waitFor();
+  await nav(page, "Pharmacy");
   await page.getByRole("button", { name: "Scan Bill" }).waitFor();
   assert.ok(!(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)), "no sideways page scroll");
 });

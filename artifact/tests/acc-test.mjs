@@ -237,6 +237,8 @@ await step("Staff can add expenses but not change accounts settings or import", 
 });
 await step("existing tabs still work and the page never scrolls sideways", async () => {
   for (const t of ["Bills", "Summary", "Reports", "Inventory", "Admin", "Home"]) { await nav(page, t); await page.waitForTimeout(120); }
+  await page.locator(".dash").waitFor();
+  await nav(page, "Pharmacy");
   await page.getByRole("button", { name: "Scan Bill" }).waitFor();
   await page.getByRole("link", { name: "Accounts", exact: true }).click();
   assert.ok(!(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)));

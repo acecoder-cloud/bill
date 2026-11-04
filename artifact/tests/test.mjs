@@ -24,10 +24,12 @@ const page = await ctx.newPage();
 const errs = []; page.on("pageerror", (e) => errs.push(String(e))); page.on("console", (m) => m.type() === "error" && errs.push(m.text()));
 const log = () => page.evaluate(() => window.__log);
 
-await step("home opens with Scan Bill and recent bills", async () => {
+await step("Home shows the dashboard and recent bills; Scan Bill is in the Pharmacy tab", async () => {
   await page.goto(URL_ + "?role=admin");
-  await page.getByRole("button", { name: "Scan Bill" }).waitFor();
   await page.getByText("No bills yet").waitFor();
+  assert.equal(await page.getByRole("button", { name: "Scan Bill" }).count(), 0, "Scan Bill moved off Home");
+  await nav(page, "Pharmacy");
+  await page.getByRole("button", { name: "Scan Bill" }).waitFor();
   assert.equal(await page.getByRole("link", { name: "Admin" }).count(), 1);
   assert.equal(await page.locator("#camera").getAttribute("capture"), "environment");
   await page.screenshot({ path: DIR + "a1-home.png" });
@@ -42,14 +44,16 @@ await step("Scan Bill offers Take photo and Upload a bill", async () => {
   assert.equal(await page.getByRole("button", { name: /Take photo/ }).count(), 0);
 });
 await step("Home dashboard shows Pharmacy figures; old #summary link opens Pharmacy > Summary", async () => {
+  await page.getByRole("link", { name: /Home$/ }).click();
   const dash = await page.locator(".dash").innerText();
   assert.match(dash, /Pharmacy/); assert.match(dash, /Unpaid\s+₹230\s+1 bill/);
   await page.evaluate(() => { location.hash = "summary"; });
   await page.getByRole("tab", { name: "Summary", selected: true }).waitFor();
   assert.match(await page.locator('.tabs a[aria-current="page"]').innerText(), /Pharmacy/);
   await page.evaluate(() => { location.hash = "home"; });
-  await page.getByRole("button", { name: "Scan Bill" }).waitFor();
+  await page.locator(".dash").waitFor();
   await page.screenshot({ path: DIR + "d1-home.png", fullPage: true });
+  await nav(page, "Pharmacy");
 });
 await step("photo -> compress -> upload + Claude read -> review with mismatch", async () => {
   await page.locator("#gallery").setInputFiles(DIR + "sample-bill.png");
@@ -246,7 +250,7 @@ await step("admin can edit and delete another person's bill", async () => {
   assert.ok((await log()).some((x) => x[0] === "delete" && x[1] === "bills/u_staff/list/bseed"));
 });
 await step("upload a PDF bill: pages turned into images for Claude", async () => {
-  await page.getByRole("link", { name: "Home" }).click();
+  await nav(page, "Pharmacy");
   await page.locator("#gallery").setInputFiles(DIR + "bill.pdf");
   await page.getByRole("heading", { name: "Review bill" }).waitFor({ timeout: 20000 });
   const s = (await log()).filter((x) => x[0] === "sample").at(-1);
@@ -257,7 +261,7 @@ await step("upload a PDF bill: pages turned into images for Claude", async () =>
   await page.getByRole("button", { name: "Discard" }).click();
 });
 await step("manual entry + Claude failure falls back to empty table", async () => {
-  await page.getByRole("link", { name: "Home" }).click();
+  await nav(page, "Pharmacy");
   await page.evaluate(() => { window.__failSample = true; });
   await page.locator("#gallery").setInputFiles(DIR + "sample-bill.png");
   await page.getByText("Claude couldn't read this photo").waitFor();
@@ -269,7 +273,7 @@ await step("manual entry + Claude failure falls back to empty table", async () =
 // staff
 const p2 = await ctx.newPage(); p2.on("pageerror", (e) => errs.push(String(e)));
 await step("staff: no Admin tab, other's bill is read-only", async () => {
-  await p2.goto(URL_ + "?role=staff");
+  await p2.goto(URL_ + "?role=staff#pharmacy");
   await p2.getByRole("button", { name: "Scan Bill" }).waitFor();
   assert.equal(await p2.getByRole("link", { name: "Admin" }).count(), 0);
   await nav(p2, "Bills");
@@ -282,17 +286,17 @@ await step("staff: no Admin tab, other's bill is read-only", async () => {
   await p2.screenshot({ path: DIR + "a7-staff-readonly.png", fullPage: true });
 });
 await step("team roles change what people can do", async () => {
-  await p2.goto(URL_ + "?role=staff&team=viewer");
+  await p2.goto(URL_ + "?role=staff&team=viewer#pharmacy");
   await p2.getByText("Your role is").waitFor();
   assert.equal(await p2.getByRole("button", { name: "Scan Bill" }).count(), 0);
-  await p2.goto(URL_ + "?role=staff&team=none");
+  await p2.goto(URL_ + "?role=staff&team=none#pharmacy");
   await p2.getByText("You're not on the team yet").waitFor();
   assert.equal(await p2.getByRole("button", { name: "Scan Bill" }).count(), 0);
-  await p2.goto(URL_ + "?role=staff&team=staff");
+  await p2.goto(URL_ + "?role=staff&team=staff#pharmacy");
   await p2.getByRole("button", { name: "Scan Bill" }).waitFor();
 });
 await step("an Editor given the Staff role gets Staff features only", async () => {
-  await p2.goto(URL_ + "?role=admin&owner=0&team=staff&adminrole=staff");
+  await p2.goto(URL_ + "?role=admin&owner=0&team=staff&adminrole=staff#pharmacy");
   await p2.getByRole("button", { name: "Scan Bill" }).waitFor();
   await p2.waitForTimeout(200);
   assert.equal(await p2.getByRole("link", { name: "Admin" }).count(), 0);
@@ -308,12 +312,12 @@ await step("view-only visitor sees how to get access", async () => {
 });
 await step("permissions change what Staff can do", async () => {
   const perms = (o) => encodeURIComponent(JSON.stringify({ staff: o }));
-  await p2.goto(URL_ + "?role=staff&team=staff&perms=" + perms({ reports: false, summary: false }));
+  await p2.goto(URL_ + "?role=staff&team=staff&perms=" + perms({ reports: false, summary: false }) + "#pharmacy");
   await p2.getByRole("button", { name: "Scan Bill" }).waitFor(); await p2.waitForTimeout(150);
   await p2.getByRole("link", { name: /Pharmacy$/ }).click();
   assert.equal(await p2.getByRole("tab", { name: "Reports" }).count(), 0);
   assert.equal(await p2.getByRole("tab", { name: "Summary" }).count(), 0);
-  await p2.goto(URL_ + "?role=staff&team=staff&perms=" + perms({ log: false }) + "#home");
+  await p2.goto(URL_ + "?role=staff&team=staff&perms=" + perms({ log: false }) + "#pharmacy");
   await p2.getByText("which doesn't include logging bills").waitFor();
   await p2.goto(URL_ + "?role=staff&team=staff&perms=" + perms({ view_all: false }) + "#bills");
   await p2.getByText("No bills have been logged yet.").waitFor();   // the only bill is someone else's
@@ -331,11 +335,11 @@ await step("permissions change what Staff can do", async () => {
 const dark = await browser.newContext({ ...devices["Pixel 7"], colorScheme: "dark" });
 await dark.route("https://fonts.*/**", (r) => r.abort());
 const p3 = await dark.newPage();
-await step("dark theme renders", async () => { await p3.goto(URL_ + "?role=admin"); await p3.getByRole("button", { name: "Scan Bill" }).waitFor(); await p3.screenshot({ path: DIR + "a8-dark.png" }); });
+await step("dark theme renders", async () => { await p3.goto(URL_ + "?role=admin#pharmacy"); await p3.getByRole("button", { name: "Scan Bill" }).waitFor(); await p3.screenshot({ path: DIR + "a8-dark.png" }); });
 const wide = await browser.newContext({ viewport: { width: 1100, height: 900 } });
 const p4 = await wide.newPage();
 await step("wide screen editor shows table layout", async () => {
-  await p4.goto(URL_ + "?role=admin"); await p4.getByRole("button", { name: "Scan Bill" }).waitFor();
+  await p4.goto(URL_ + "?role=admin#pharmacy"); await p4.getByRole("button", { name: "Scan Bill" }).waitFor();
   await p4.locator("#gallery").setInputFiles(DIR + "sample-bill.png");
   await p4.getByRole("heading", { name: "Review bill" }).waitFor();
   assert.ok(await p4.locator(".rows-head").isVisible());
