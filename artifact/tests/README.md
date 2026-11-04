@@ -8,6 +8,7 @@ bash build.sh            # wraps ../bill-log.html with the stand-in into page.ht
 node test.mjs            # bills, summary, reports, team, roles (22 checks)
 node inv-test.mjs        # inventory (16 checks)
 node acc-test.mjs        # accounts (17 checks, including the WhatsApp-ledger totals)
+node rou-test.mjs        # routine / visitors (15 checks, including the visitor-log totals and WhatsApp text)
 ```
 
 Needs Playwright with Chromium, `sample-bill.png` next to the scripts, and the report/PDF libraries

@@ -15,6 +15,7 @@
   --brand: #0f6e66;
   --brand-ink: #ffffff;
   --brand-soft: #d9efec;
+  --v-in: #008a7d; --v-call: #c26a12; --v-voice: #6a4fc2;
   --warn-bg: #fff4d6;
   --warn-line: #e9b949;
   --warn-ink: #7a4d00;
@@ -30,7 +31,7 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0d1614; --surface: #15211e; --surface-2: #1b2a26; --line: #2b3d38; --fg: #e4efec; --muted: #9db1ab;
-    --brand: #3fb9ab; --brand-ink: #062320; --brand-soft: #173a35;
+    --brand: #3fb9ab; --brand-ink: #062320; --brand-soft: #173a35; --v-in: #1ea595; --v-call: #cc7f22; --v-voice: #9b85e0;
     --warn-bg: #3a2d0c; --warn-line: #a17a1c; --warn-ink: #f6d58a;
     --bad-bg: #3d1614; --bad-line: #a3433c; --bad-ink: #ffb4ad;
     --ok-bg: #12301f; --ok-ink: #8fdcaf;
@@ -39,7 +40,7 @@
 }
 :root[data-theme="dark"] {
   --bg: #0d1614; --surface: #15211e; --surface-2: #1b2a26; --line: #2b3d38; --fg: #e4efec; --muted: #9db1ab;
-  --brand: #3fb9ab; --brand-ink: #062320; --brand-soft: #173a35;
+  --brand: #3fb9ab; --brand-ink: #062320; --brand-soft: #173a35; --v-in: #1ea595; --v-call: #cc7f22; --v-voice: #9b85e0;
   --warn-bg: #3a2d0c; --warn-line: #a17a1c; --warn-ink: #f6d58a;
   --bad-bg: #3d1614; --bad-line: #a3433c; --bad-ink: #ffb4ad;
   --ok-bg: #12301f; --ok-ink: #8fdcaf;
@@ -383,6 +384,42 @@ pre.wa { margin: 0; padding: 12px; border-radius: 12px; background: var(--surfac
 .acc-total-line b { font-size: 1.4rem; }
 .acc-checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .acc-checks li { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: space-between; font-size: .9rem; }
+.vbadge { display: inline-flex; align-items: center; gap: 4px; font-size: .74rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; vertical-align: middle; border: 1px solid transparent; }
+.vbadge svg { width: 14px; height: 14px; }
+.v-in_person { background: color-mix(in srgb, var(--v-in) 14%, var(--surface)); color: var(--fg); border-color: color-mix(in srgb, var(--v-in) 45%, transparent); }
+.v-in_person svg { color: var(--v-in); }
+.v-video { background: color-mix(in srgb, var(--v-call) 14%, var(--surface)); color: var(--fg); border-color: color-mix(in srgb, var(--v-call) 45%, transparent); }
+.v-video svg { color: var(--v-call); }
+.v-voice { background: color-mix(in srgb, var(--v-voice) 14%, var(--surface)); color: var(--fg); border-color: color-mix(in srgb, var(--v-voice) 45%, transparent); }
+.v-voice svg { color: var(--v-voice); }
+.visit { border-left: 4px solid var(--v-in); }
+.visit.v-row-video { border-left-color: var(--v-call); }
+.visit.v-row-voice { border-left-color: var(--v-voice); }
+.visit-time { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.visitors { display: flex; flex-direction: column; gap: 2px; }
+.acc-row-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.name-row { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 8px; }
+.rou-totals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 560px) { .rou-totals { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.top-list { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; }
+.top-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 10px; }
+.top-list li .small { grid-column: 1; }
+.top-list .link { justify-self: start; text-align: left; }
+.top-list li b { grid-row: 1 / span 2; grid-column: 2; align-self: center; }
+.legend { display: flex; gap: 14px; font-size: .84rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.sw-v, .seg-v { background: var(--v-in); }
+.sw-c, .seg-c { background: var(--v-call); }
+.vchart { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px; height: 170px; }
+.vchart-axis { display: flex; flex-direction: column; justify-content: space-between; font-size: .72rem; color: var(--muted); padding-bottom: 18px; }
+.vchart-bars { display: flex; gap: 2px; align-items: stretch; overflow: hidden; padding-right: 16px; border-bottom: 1px solid var(--line); }
+.vcol { flex: 1 1 0; display: flex; flex-direction: column; min-width: 3px; cursor: pointer; outline: none; }
+.vcol:hover .vstack, .vcol:focus-visible .vstack { background: var(--surface-2); }
+.vstack { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 2px; border-radius: 4px 4px 0 0; }
+.vstack i { display: block; border-radius: 4px 4px 0 0; min-height: 3px; }
+.vstack i.seg-v:not(:first-child) { border-radius: 0; }
+.vlab { height: 18px; font-size: .66rem; color: var(--muted); white-space: nowrap; overflow: visible; }
 .audit { display: flex; flex-direction: column; gap: 8px; }
 .audit details { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
 .audit summary { padding: 10px 12px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
@@ -433,6 +470,7 @@ pre.wa { margin: 0; padding: 12px; border-radius: 12px; background: var(--surfac
 </main>
 <nav class="tabs" aria-label="Sections"><div class="tabs-in" id="tabs"></div></nav>
 <input id="camera" type="file" accept="image/*" capture="environment" hidden>
+<input id="rou-import-file" type="file" accept=".csv,text/csv" hidden>
 <input id="acc-import-file" type="file" accept=".csv,text/csv" hidden>
 <input id="inv-import-file" type="file" accept=".csv,text/csv" hidden>
 <input id="gallery" type="file" accept="image/jpeg,image/png,image/webp,application/pdf,.pdf" hidden>
@@ -525,11 +563,14 @@ const PERMS = [
   { k: "acc_view", label: "Open Accounts", group: "Accounts" },
   { k: "acc_edit", label: "Add, edit and delete expenses and money received; add items", group: "Accounts" },
   { k: "acc_manage", label: "Accounts settings, CSV import, WhatsApp ledger import", group: "Accounts", editor: true },
+  { k: "rou_view", label: "See the Routine tab (visitors log)", group: "Routine" },
+  { k: "rou_edit", label: "Add, edit and delete visits; add and edit people", group: "Routine" },
+  { k: "rou_manage", label: "Merge people, CSV import, visitor log import", group: "Routine", editor: true },
 ];
 const DEFAULT_PERMS = {
   admin: Object.fromEntries(PERMS.map((p) => [p.k, true])),
-  staff: { log: true, view_all: true, edit_own: true, edit_all: false, delete_own: true, delete_all: false, pay_own: true, pay_all: false, summary: true, reports: true, admin: false, inv_view: true, inv_count: true, inv_manage: false, acc_view: true, acc_edit: true, acc_manage: false },
-  viewer: { log: false, view_all: true, edit_own: false, edit_all: false, delete_own: false, delete_all: false, pay_own: false, pay_all: false, summary: true, reports: true, admin: false, inv_view: true, inv_count: false, inv_manage: false, acc_view: true, acc_edit: false, acc_manage: false },
+  staff: { log: true, view_all: true, edit_own: true, edit_all: false, delete_own: true, delete_all: false, pay_own: true, pay_all: false, summary: true, reports: true, admin: false, inv_view: true, inv_count: true, inv_manage: false, acc_view: true, acc_edit: true, acc_manage: false, rou_view: true, rou_edit: true, rou_manage: false },
+  viewer: { log: false, view_all: true, edit_own: false, edit_all: false, delete_own: false, delete_all: false, pay_own: false, pay_all: false, summary: true, reports: true, admin: false, inv_view: true, inv_count: false, inv_manage: false, acc_view: true, acc_edit: false, acc_manage: false, rou_view: true, rou_edit: false, rou_manage: false },
 };
 function rolePerms(role) {
   const saved = S.rolePerms?.[role];
@@ -596,6 +637,7 @@ function startWatching() {
   notePresence();
   invStart();
   accStart();
+  rouStart();
   db.collection("bills").onSnapshot((snap) => {
     clearTimeout(slow);
     if (!snap.metadata.fromCache || S.dbState !== "ready") S.dbState = "ready";
@@ -626,7 +668,7 @@ function watchPerson(uid) {
 let renderQueued = false;
 function scheduleRender() {
   if (renderQueued) return; renderQueued = true;
-  requestAnimationFrame(() => { renderQueued = false; if (S.tab === "inventory" || S.tab === "accounts") { renderTabs(); return; } if (!S.editor) render(); else refreshEditorReadonlyBits(); });
+  requestAnimationFrame(() => { renderQueued = false; if (S.tab === "inventory" || S.tab === "accounts" || S.tab === "routine") { renderTabs(); return; } if (!S.editor) render(); else refreshEditorReadonlyBits(); });
 }
 
 function allBills() {
@@ -666,6 +708,7 @@ const TABS = [
   { id: "pharmacy", label: "Pharmacy", icon: '<path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M12 7v6M9 10h6M9 16h6"/>' },
   { id: "inventory", label: "Inventory", perm: "inv_view", icon: '<path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>' },
   { id: "accounts", label: "Accounts", perm: "acc_view", icon: '<rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20M16 15h2"/><path d="M6 6V5a2 2 0 0 1 2-2h8"/>' },
+  { id: "routine", label: "Routine", perm: "rou_view", icon: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' },
   { id: "admin", label: "Admin", admin: true, icon: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>' },
 ];
 function tabAllowed(id) { const t = TABS.find((x) => x.id === id); if (!t) return false; if (t.admin) return appAdmin(); return !t.perm || S.dbState === "none" || allowed(t.perm); }
@@ -701,13 +744,14 @@ function render() {
   if (S.editor) { renderEditor(); return; }
   if (S.dbState === "none") { main.innerHTML = signedOutView(); return; }
   if (S.dbState === "error") { main.innerHTML = `<div class="note bad">The bill log couldn't be loaded${S.dbError === "revoked" ? " because your access changed" : ""}. Reload the page to try again.</div>`; return; }
-  const views = { home: homeView, pharmacy: pharmacyView, inventory: inventoryView, accounts: accountsView, admin: adminView };
+  const views = { home: homeView, pharmacy: pharmacyView, inventory: inventoryView, accounts: accountsView, routine: routineView, admin: adminView };
   if (!tabAllowed(S.tab)) { main.innerHTML = `<div class="note warn">Your role doesn't include this screen. Ask an admin if you need it.</div>`; return; }
   main.innerHTML = (S.dbState === "slow" ? `<div class="note warn">The bill log is taking a while to load. Check your connection; it will appear as soon as it arrives.</div>` : "") + (views[S.tab] || homeView)();
   paintNames(main);
   if (S.tab === "admin") paintAdmin();
   if (S.tab === "inventory") { invAfterRender(); maybeAutoSeed(); }
   if (S.tab === "accounts") accMaybeSeed();
+  if (S.tab === "routine") rouMaybeSeed();
 }
 
 function signedOutView() {
@@ -1164,7 +1208,7 @@ function paintAdmin() {
   const team = $("#team"); if (team) paintNames(team).then(() => showLabelBoxes(team));
   const a = S.audit; const box = $("#audit-list"); if (!box || !a?.rows) return;
   if (!a.rows.length) { box.innerHTML = `<p class="muted">No activity yet.</p>`; return; }
-  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed", "roles.update": "Role permissions changed", "inventory.seed": "Stock register loaded", "inventory.add": "Product added", "inventory.edit": "Product edited", "inventory.archive": "Product archived", "inventory.restore": "Product restored", "inventory.delete": "Product deleted", "inventory.month": "Stock month started", "inventory.import": "Stock CSV imported", "inventory.delivered": "Order delivered", "accounts.add": "Account entry added", "accounts.edit": "Account entry edited", "accounts.delete": "Account entry deleted", "accounts.seed": "WhatsApp ledger imported", "accounts.import": "Account entries imported" };
+  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed", "roles.update": "Role permissions changed", "inventory.seed": "Stock register loaded", "inventory.add": "Product added", "inventory.edit": "Product edited", "inventory.archive": "Product archived", "inventory.restore": "Product restored", "inventory.delete": "Product deleted", "inventory.month": "Stock month started", "inventory.import": "Stock CSV imported", "inventory.delivered": "Order delivered", "accounts.add": "Account entry added", "accounts.edit": "Account entry edited", "accounts.delete": "Account entry deleted", "accounts.seed": "WhatsApp ledger imported", "accounts.import": "Account entries imported", "routine.add": "Visit logged", "routine.edit": "Visit edited", "routine.delete": "Visit deleted", "routine.merge": "People merged", "routine.seed": "Visitor log imported", "routine.import": "Visits imported" };
   box.innerHTML = a.rows.map((r, i) => `<details><summary><b>${esc(label[r.action] || r.action)}</b>
     <span class="small muted">by <span data-uid="${esc(r.actor)}"></span> · ${esc(fmtDT(r.at))} · ${r.action === "roles.update" ? "Admin / Staff / Viewer permissions" : r.action.startsWith("inventory.") ? esc((r.after || r.before || {}).name || (r.after || {}).month || "Inventory") : r.action.startsWith("accounts.") ? (() => { const x = r.after || r.before || {}; return x.amount != null ? esc(`${x.type === "received" ? "received" : (x.lines || []).map((l) => l.name).join(" & ")} ${inr(x.amount)} on ${dmy(x.date)}`) : "Accounts"; })() : r.action.startsWith("team.") ? `<span data-uid="${esc((r.after || r.before || {}).member || "")}"></span>${r.after?.role ? " → " + esc(ROLES[r.after.role]?.label || r.after.role) : ""}` : `bill ${(r.after || r.before || {}).bill_no ? "No. " + esc((r.after || r.before).bill_no) + " of " : "of "}${esc(fmtDate((r.after || r.before || {}).bill_date))}`}</span></summary>
     <div class="pair"><div><div class="small muted">Before</div><pre data-json="b${i}"></pre></div><div><div class="small muted">After</div><pre data-json="a${i}"></pre></div></div></details>`).join("");
@@ -1836,8 +1880,10 @@ function saveOutbox(q) { try { localStorage.setItem(OUTBOX_KEY, JSON.stringify(q
 function applyLocal(op, path, data) {
   const seg = path.split("/"); const id = seg.at(-1); const col = seg.slice(0, -1).join("/");
   const map = col === INV_PRODUCTS ? INV.products : col === INV_MONTHS ? INV.months
-    : col === "accounts/items/list" ? ACC.items : col === "accounts/tx/list" ? ACC.tx : col === "accounts/checks/list" ? ACC.checks : null;
+    : col === "accounts/items/list" ? ACC.items : col === "accounts/tx/list" ? ACC.tx : col === "accounts/checks/list" ? ACC.checks
+    : col === "routine/people/list" ? ROU.people : col === "routine/visits/list" ? ROU.visits : null;
   if (path === "inventory/settings") { INV.settings = op === "set" ? clone(data) : deepMerge(clone(INV.settings) || {}, data); return; }
+  if (path === "routine/settings") { ROU.settings = op === "set" ? clone(data) : deepMerge(clone(ROU.settings) || {}, data); return; }
   if (path === "accounts/settings") { ACC.settings = op === "set" ? clone(data) : deepMerge(clone(ACC.settings) || {}, data); return; }
   if (!map) return;
   if (op === "delete") map.delete(id);
@@ -1870,7 +1916,7 @@ async function flushOutbox() {
       catch (e) { if (e?.code === "unavailable") break; console.warn("dropped an inventory change the store refused", e?.code); }
       q = q.slice(1); saveOutbox(q);
     }
-  } finally { syncing = false; if (S.tab === "inventory") invRefresh(); if (S.tab === "accounts") accRefresh(); }
+  } finally { syncing = false; if (S.tab === "inventory") invRefresh(); if (S.tab === "accounts") accRefresh(); if (S.tab === "routine") rouRefresh(); }
 }
 let syncTimer = null;
 function invSyncSoon() { clearTimeout(syncTimer); syncTimer = setTimeout(flushOutbox, 1500); }
@@ -3463,6 +3509,617 @@ document.addEventListener("submit", (e) => {
   if (e.target.id === "acc-exp-form") { e.preventDefault(); saveExpense(false); }
   if (e.target.id === "acc-rec-form") { e.preventDefault(); saveReceived(); }
   if (e.target.id === "acc-item-form") { e.preventDefault(); saveItem(); }
+});
+
+/* ================= Routine (Father's daily routine during the hospital stay) ================= */
+/* Sections: only "Visitors" for now. More (meals, medicines, sleep) plug into ROUTINE_SECTIONS later.
+   Storage (same claude.ai page storage):
+   routine/settings                 {seeded_at}
+   routine/people/list/<pid>        {title, name, place, relation, phone, archived, merged_into, quick: {type} | null}
+   routine/visits/list/<vid>        {date, time "HH:MM", end_time, type: in_person|video|voice,
+                                     visitors: [{person_id, title, name, place}], note, review, seq} */
+const ROUTINE_SECTIONS = [["visitors", "Visitors"]];
+const ROU = {
+  people: new Map(), visits: new Map(), settings: {}, loaded: { people: false, visits: false, settings: false },
+  section: "visitors", view: "timeline", range: "all", from: "", to: "", q: "", type: "all", person: "all",
+  form: null, personForm: null, detail: null, confirm: null, personDetail: null, merge: null, lastQuick: null,
+  seeding: null, importPreview: null, busy: false, copied: null, showArchived: false, chartTable: false, pq: "",
+};
+const ROU_PEOPLE = "routine/people/list", ROU_VISITS = "routine/visits/list", ROU_SETTINGS = "routine/settings";
+const VISIT_TYPES = { in_person: { label: "In person", wa: "", icon: '<circle cx="12" cy="7" r="4"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/>' },
+  video: { label: "Video call", wa: "Video call", icon: '<rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3z"/>' },
+  voice: { label: "Voice call", wa: "Voice call", icon: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>' } };
+const TITLES = ["", "Mr", "Mrs", "Ms", "Dr"];
+const ROU_SEED = `visit_id,date,time,end_time,title,name,place,type,note
+V01,05/09/2026,12:27 PM,,,Thirupati Chettiar,,In person,
+V02,13/09/2026,08:00 AM,,Mr,Kannan,Pudukkottai,In person,
+V03,13/09/2026,04:17 PM,,Mr,Velu,Thiruvarur,In person,
+V03,13/09/2026,04:17 PM,,Mr,Rao,Chennai,In person,
+V04,13/09/2026,04:25 PM,,Mr,Saravanan,,Video call,Written as 4:25; PM assumed
+V05,13/09/2026,07:35 PM,,Mrs,Adaikkammai,,Video call,Written as 7:35; PM assumed
+V06,16/09/2026,02:40 PM,,Mr,Somu,Palani,In person,
+V06,16/09/2026,02:40 PM,,Mrs,Meena,Palani,In person,
+V07,16/09/2026,04:30 PM,,Mr,Manikandan,,In person,"Written as ""Mr.Manikandan sir"""
+V08,22/09/2026,11:00 AM,,Mrs,Adaikkammai,,In person,"Written as ""Adaikammai Akka"""
+V09,23/09/2026,10:30 AM,,Mrs,Adaikkammai,,In person,
+V10,24/09/2026,10:00 AM,,Mrs,Adaikkammai,,In person,
+V11,24/09/2026,01:10 PM,,,Sundari,Pudukkottai,In person,
+V12,24/09/2026,01:10 PM,,Mr,Velu,Thiruvarur,In person,Same time as Sundari; may be one visit
+V12,24/09/2026,01:10 PM,,Mr,Rao,Chennai,In person,
+V13,24/09/2026,01:10 PM,,Mr,Chidambaram,,Video call,Joint call with Adaikkammai
+V13,24/09/2026,01:10 PM,,Mrs,Adaikkammai,,Video call,
+V14,25/09/2026,10:30 AM,,Mrs,Adaikkammai,,In person,
+V15,26/09/2026,10:40 AM,,Mrs,Adaikkammai,,In person,
+V15,26/09/2026,10:40 AM,,,Sundari,Singapore,In person,Place given as Pudukkottai on 24/09
+V16,27/09/2026,09:40 AM,,Mrs,Adaikkammai,,In person,
+V17,28/09/2026,10:20 AM,,Mrs,Adaikkammai,,In person,
+V18,29/09/2026,02:30 PM,,Mrs,Adaikkammai,,In person,
+V19,30/09/2026,11:30 AM,,Mrs,Adaikkammai,,In person,
+V20,30/09/2026,03:25 PM,,,Thirupati Chettiar,,In person,
+V21,01/10/2026,03:00 PM,,Mrs,Adaikkammai,,Video call,
+V22,04/10/2026,07:30 PM,,Mrs,Adaikkammai,,In person,
+V23,05/10/2026,05:55 PM,,Mr,Srinivasan,Madurai,In person,
+V23,05/10/2026,05:55 PM,,Mr,Gayaparam,Madurai,In person,
+V23,05/10/2026,05:55 PM,,Mr,Lakshmanan,Madurai,In person,
+V24,05/10/2026,06:00 PM,,Mrs,Adaikkammai,,Video call,
+V25,07/10/2026,03:15 PM,,Mrs,Adaikkammai,,Video call,
+V26,08/10/2026,03:55 PM,,Mr,Selva,Palani,In person,
+V27,08/10/2026,07:15 PM,,Mrs,Adaikkammai,,Video call,Date written as 08/10/2027
+V28,09/10/2026,12:00 PM,,Mr,Manikandan,Pudukkottai,In person,Listed twice; duplicate or two people with the same name
+V29,09/10/2026,12:50 PM,,Mrs,Adaikkammai,,Video call,
+V30,09/10/2026,04:36 PM,,Mrs,Adaikkammai,,Video call,
+V31,14/10/2026,04:23 PM,,Mrs,Adaikkammai,,Video call,
+V32,19/10/2026,03:47 PM,,Mr,Ramu,,Video call,
+V33,20/10/2026,11:45 AM,11:50 AM,Mrs,Lakshmi,O. Siruvayal,In person,
+V34,20/10/2026,06:30 PM,,Mr,Saravanan,Singapore,In person,Type not written
+V35,26/10/2026,03:20 PM,,Mr,Rajesh,Pudukkottai,In person,
+V35,26/10/2026,03:20 PM,,Mr,Ramesh,Pudukkottai,In person,
+V36,28/10/2026,11:59 AM,,Mr,Arunachalam,,Video call,
+V37,28/10/2026,12:03 PM,,Mrs,Adaikkammai,Singapore,Video call,
+V38,28/10/2026,12:50 PM,,Mrs,Adaikkammai,Singapore,Voice call,
+V39,29/10/2026,02:03 PM,,Mr,Vijay,Pudukkottai,In person,
+V40,30/10/2026,04:00 PM,,Mr,Vijay,Pudukkottai,In person,
+V41,31/10/2026,01:00 PM,,Mr,Arunachalam,Singapore,In person,Type not written; check whether this was a call
+V41,31/10/2026,01:00 PM,,,Kalyani,Singapore,In person,
+V41,31/10/2026,01:00 PM,,,Haridaash,Singapore,In person,
+V41,31/10/2026,01:00 PM,,,Abirami,Singapore,In person,
+V42,02/11/2026,12:05 PM,,Mrs,Adaikkammai,Singapore,Video call,`;
+
+/* ---------- helpers ---------- */
+/** Key for matching people: ignores case, titles, "sir"/"akka", doubled letters and y/i (Adaikammai = Adaikkammai = Adaikkamai). */
+function personKey(name) { return fuzzyKey(String(name || "").replace(/^\s*(mr|mrs|ms|miss|dr)\.?\s*/i, "").replace(/\b(sir|akka|amma|anna|madam)\b/gi, "")); }
+function lev(a, b) { const m = a.length, n = b.length; if (Math.abs(m - n) > 2) return 3; const d = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]); for (let j = 1; j <= n; j++) d[0][j] = j;
+  for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); return d[m][n]; }
+function to24(t) { const m = /^(\d{1,2})[:.](\d{2})\s*([ap])\.?m?\.?$/i.exec(String(t || "").trim()); if (!m) return /^\d{2}:\d{2}$/.test(t || "") ? t : null; let h = Number(m[1]) % 12; if (/p/i.test(m[3])) h += 12; return `${String(h).padStart(2, "0")}:${m[2]}`; }
+function fmtTime(t) { if (!t) return ""; const [h, m] = t.split(":").map(Number); return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`; }
+function nowHM() { const d = new Date(); return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; }
+function minutesBetween(a, b) { if (!a || !b) return null; const [h1, m1] = a.split(":").map(Number); const [h2, m2] = b.split(":").map(Number); const d = h2 * 60 + m2 - (h1 * 60 + m1); return d >= 0 ? d : null; }
+function canRouEdit() { return S.canWrite && allowed("rou_edit"); }
+function canRouManage() { return (S.isAdmin || S.me?.isOwner) && allowed("rou_manage"); }
+function rouWrite(op, path, data) { return invWrite(op, path, data); }   // same instant-on-screen + offline queue
+const isCall = (v) => v.type === "video" || v.type === "voice";
+function personOf(pid) { let p = ROU.people.get(pid); let hops = 0; while (p?.merged_into && hops++ < 5) { pid = p.merged_into; p = ROU.people.get(pid); } return p ? { id: pid, ...p } : null; }
+function visitorLabel(v) { const p = v.person_id ? personOf(v.person_id) : null; const title = p ? p.title : v.title; const name = p ? p.name : v.name; return `${title ? title + " " : ""}${name}`; }
+
+/* ---------- loading ---------- */
+function rouStart() {
+  const db = S.caps.db;
+  db.collection(ROU_PEOPLE).onSnapshot((snap) => { ROU.people = new Map(snap.docs.map((d) => [d.id, clone(d.data())])); reapplyOutbox(ROU_PEOPLE); if (!snap.metadata.fromCache) ROU.loaded.people = true; rouChanged(); }, () => { ROU.loaded.people = true; rouChanged(); });
+  db.collection(ROU_VISITS).onSnapshot((snap) => { ROU.visits = new Map(snap.docs.map((d) => [d.id, clone(d.data())])); reapplyOutbox(ROU_VISITS); if (!snap.metadata.fromCache) ROU.loaded.visits = true; rouChanged(); }, () => { ROU.loaded.visits = true; rouChanged(); });
+  db.doc(ROU_SETTINGS).onSnapshot((snap) => { ROU.settings = snap.exists ? clone(snap.data()) : {}; reapplyOutbox(ROU_SETTINGS); if (!snap.metadata.fromCache) ROU.loaded.settings = true; rouChanged(); }, () => { ROU.loaded.settings = true; rouChanged(); });
+}
+let rouQueued = false;
+function rouChanged() {
+  if (rouQueued) return; rouQueued = true;
+  requestAnimationFrame(() => { rouQueued = false; if (S.tab === "routine" && !S.editor && !rouBusy()) render(); });
+}
+function rouBusy() { return !!(ROU.form || ROU.personForm || ROU.importPreview || ROU.confirm || ROU.merge || document.activeElement?.closest?.(".rou-filters")); }
+function rouRefresh() { if (S.tab === "routine" && !S.editor) render(); }
+function rouMaybeSeed() {
+  if (!ROU.loaded.people || !ROU.loaded.visits || !ROU.loaded.settings || ROU.seeding || ROU.settings.seeded_at || ROU.visits.size || ROU.people.size) return;
+  if (S.tab === "routine" && S.me?.isOwner && canRouManage()) rouSeed(true);   // runs when the owner first opens Routine
+}
+
+/* ---------- people & stats ---------- */
+function activePeople() { return [...ROU.people.entries()].filter(([, p]) => !p.archived && !p.merged_into).map(([id, p]) => ({ id, ...p })); }
+function findPerson(name) { const k = personKey(name); if (!k) return null; return activePeople().find((p) => personKey(p.name) === k) || null; }
+function similarPerson(name) { const k = personKey(name); if (k.length < 4) return null; return activePeople().find((p) => { const pk = personKey(p.name); return pk !== k && lev(pk, k) <= 1; }) || null; }
+function visitList() { return [...ROU.visits.entries()].map(([id, v]) => ({ id, ...v })).sort((a, b) => a.date.localeCompare(b.date) || (a.time || "").localeCompare(b.time || "") || (a.seq || 0) - (b.seq || 0)); }
+function peopleStats(list = visitList()) {
+  const st = new Map();
+  for (const v of list) for (const x of v.visitors || []) {
+    const p = x.person_id ? personOf(x.person_id) : null; const id = p ? p.id : "name:" + personKey(x.name);
+    const s = st.get(id) || { visits: 0, calls: 0, in_person: 0, video: 0, voice: 0, first: null, last: null };
+    s[v.type] = (s[v.type] || 0) + 1; if (isCall(v)) s.calls++; else s.visits++;
+    if (!s.first || v.date < s.first) s.first = v.date; if (!s.last || v.date > s.last) s.last = v.date; st.set(id, s);
+  }
+  return st;
+}
+
+/* ---------- ranges & filters ---------- */
+function rouRange() {
+  const t = todayISO();
+  if (ROU.range === "today") return { start: t, end: t };
+  if (ROU.range === "week") { const d = new Date(t + "T00:00:00"); const back = (d.getDay() + 6) % 7; const start = addDays(t, -back); return { start, end: addDays(start, 6) }; }
+  if (ROU.range === "month") return { start: t.slice(0, 8) + "01", end: monthEnd(t) };
+  if (ROU.range === "custom") return { start: ROU.from || "", end: ROU.to || "" };
+  return { start: "", end: "" };
+}
+function filteredVisits() {
+  const r = rouRange(); const q = normName(ROU.q);
+  return visitList().filter((v) => (!r.start || v.date >= r.start) && (!r.end || v.date <= r.end) &&
+    (ROU.type === "all" || (ROU.type === "calls" ? isCall(v) : v.type === ROU.type)) &&
+    (ROU.person === "all" || (v.visitors || []).some((x) => (personOf(x.person_id)?.id || "") === ROU.person)) &&
+    (!q || (v.visitors || []).some((x) => normName(`${visitorLabel(x)} ${x.place || ""}`).includes(q))));
+}
+
+/* ---------- WhatsApp text (same style as the hand-written log) ---------- */
+function visitsWhatsapp(list) {
+  const blocks = list.map((v) => {
+    const head = `${dmy(v.date)} - ${fmtTime(v.time)}${v.end_time ? ` to ${fmtTime(v.end_time)}` : ""}`;
+    const lines = (v.visitors || []).map((x) => [visitorLabel(x), x.place, VISIT_TYPES[v.type]?.wa].filter(Boolean).join(" - "));
+    return [head, ...lines].join("\n");
+  });
+  return ["Visitors", blocks.join("\n\n")].join("\n");
+}
+
+/* ---------- seed (first run or button; never overwrites) ---------- */
+async function rouSeed(auto) {
+  if (ROU.seeding || !canRouManage()) return;
+  if (ROU.settings.seeded_at) { flash("The visitor log was already imported."); rouRefresh(); return; }
+  ROU.seeding = { done: 0, total: 0 }; rouRefresh();
+  try {
+    if (auto) {
+      const lease = await S.caps.db.doc(ROU_SETTINGS).acquire({ holder: S.uid, ttlMs: 60000 }).catch(() => ({ acquired: true }));
+      if (!lease.acquired) return;
+      const fresh = await S.caps.db.doc(ROU_SETTINGS).get().catch(() => null);
+      if (fresh?.exists && fresh.data().seeded_at) return;
+    }
+    const rows = parseCsv(ROU_SEED).slice(1).map(([visit_id, date, time, end_time, title, name, place, type, note]) => ({ visit_id, date: ddmmyyyyToISO(date), time: to24(time), end_time: to24(end_time), title, name: name.trim(), place: place.trim(), type: type === "Video call" ? "video" : type === "Voice call" ? "voice" : "in_person", note: note.trim() }));
+    const res = importRows(rows, "seed");
+    ROU.seeding.total = res.people.length + res.visits.length; rouRefresh();
+    for (const [id, doc] of res.people) { await rouWrite("set", `${ROU_PEOPLE}/${id}`, doc); ROU.seeding.done++; if (ROU.seeding.done % 10 === 0) rouRefresh(); }
+    for (const [id, doc] of res.visits) { await rouWrite("set", `${ROU_VISITS}/${id}`, doc); ROU.seeding.done++; if (ROU.seeding.done % 10 === 0) rouRefresh(); }
+    await rouWrite("set", ROU_SETTINGS, { ...ROU.settings, seeded_at: new Date().toISOString() });
+    writeAudit("routine.seed", null, "routine", null, { visits: res.visits.length, people: res.people.length });
+    flash(`Imported the visitor log: ${res.visits.length} visits and calls, ${res.people.length} new people.`);
+  } catch (e) { flash(dbErrorText(e).replace("save this bill", "import the visitor log")); }
+  finally { ROU.seeding = null; rouRefresh(); }
+}
+/** Turns visitor rows (one per person, grouped by visit_id) into new people + visit documents. Existing people are matched by name. */
+function importRows(rows, source) {
+  const now = new Date().toISOString(); const people = []; const byKey = new Map(activePeople().map((p) => [personKey(p.name), p.id]));
+  const latestPlace = new Map();
+  for (const r of rows) if (r.place) { const k = personKey(r.name); const prev = latestPlace.get(k); if (!prev || r.date >= prev.date) latestPlace.set(k, { date: r.date, place: r.place }); }
+  let n = 0;
+  for (const r of rows) {
+    const k = personKey(r.name); if (!k || byKey.has(k)) continue;
+    const id = "p" + Date.now().toString(36) + String(++n).padStart(3, "0");
+    const akka = k === personKey("Adaikkammai") && source === "seed";
+    people.push([id, { title: r.title || "", name: r.name, place: latestPlace.get(k)?.place || "", relation: akka ? "Akka" : "", phone: "", archived: false,
+      quick: akka ? { type: "video" } : null, created_at: now, created_by: S.uid }]);
+    byKey.set(k, id);
+  }
+  const groups = new Map(); for (const r of rows) { const g = r.visit_id || `${r.date}|${r.time}|${r.type}`; if (!groups.has(g)) groups.set(g, []); groups.get(g).push(r); }
+  const visits = []; let seq = 0;
+  for (const [, list] of groups) {
+    const f = list[0]; seq++; const notes = [...new Set(list.map((x) => x.note).filter(Boolean))];
+    visits.push(["v" + f.date.replaceAll("-", "") + (f.time || "0000").replace(":", "") + Date.now().toString(36).slice(-4) + String(seq).padStart(3, "0"), {
+      date: f.date, time: f.time, end_time: f.end_time || null, type: f.type, note: notes.join("; "), review: source === "seed" ? notes.length > 0 : false,
+      visitors: list.map((x) => ({ person_id: byKey.get(personKey(x.name)) || null, title: x.title || "", name: x.name, place: x.place || "" })),
+      seq: (source === "seed" ? 0 : Date.now()) + seq, source, created_at: now, created_by: S.uid }]);
+  }
+  return { people, visits };
+}
+
+/* ---------- views ---------- */
+function routineView() {
+  if (!ROU.loaded.visits && !ROU.visits.size) return `<h1>Routine</h1><div class="card"><div class="row-between"><span class="spin"></span><span class="muted">Loading…</span></div></div>`;
+  if (ROU.form) return visitFormView();
+  if (ROU.personForm) return personFormView();
+  const pending = outbox().filter((w) => w.path.startsWith("routine/")).length;
+  return `<h1>Routine</h1>
+  ${ROUTINE_SECTIONS.length > 1 ? `<div class="seg" role="tablist" aria-label="Routine sections">${ROUTINE_SECTIONS.map(([k, l]) => `<button role="tab" data-act="rou-section" data-v="${k}" aria-selected="${ROU.section === k}" aria-pressed="${ROU.section === k}">${l}</button>`).join("")}</div>` : `<p class="section-label">Visitors</p>`}
+  ${pending ? `<div class="note warn">${pending} change${pending === 1 ? "" : "s"} saved on this phone, waiting for a connection to sync.</div>` : ""}
+  ${ROU.seeding ? `<div class="note">Importing the visitor log… ${ROU.seeding.done} of ${ROU.seeding.total}</div>` : ""}
+  ${visitorsTop()}
+  <div class="seg" role="group" aria-label="Visitors view">${[["timeline", "Timeline"], ["people", "People"], ["summary", "Summary"]].map(([v, l]) => `<button data-act="rou-view" data-v="${v}" aria-pressed="${ROU.view === v}">${l}</button>`).join("")}</div>
+  ${ROU.view === "people" ? peopleView() : ROU.view === "summary" ? visitSummaryView() : timelineView()}
+  ${rouToolsView()}`;
+}
+function typeBadge(type) { const t = VISIT_TYPES[type] || VISIT_TYPES.in_person; return `<span class="vbadge v-${type}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${t.icon}</svg>${t.label}</span>`; }
+function visitorsTop() {
+  const chips = activePeople().filter((p) => p.quick);
+  return `<section class="card">
+    ${!ROU.visits.size && !ROU.seeding ? `<p class="muted">No visits logged yet.</p>${canRouManage() && !ROU.settings.seeded_at ? `<button class="btn btn-ghost btn-block" data-act="rou-seed">Import visitor log (Sep–Nov 2026)</button>` : ""}` : ""}
+    ${canRouEdit() ? `<button class="btn btn-primary btn-block" data-act="rou-add">+ Add visit</button>
+      ${chips.length ? `<div><div class="small muted" style="font-weight:600;margin-bottom:6px">Quick log for now</div><div class="chips">${chips.map((p) => `<button class="chip" data-act="rou-quick" data-id="${esc(p.id)}">${esc(p.name)}, ${esc(VISIT_TYPES[p.quick.type]?.label.toLowerCase() || "in person")}</button>`).join("")}</div></div>` : ""}
+      ${ROU.lastQuick ? `<div class="note ok confirm" role="status"><span>Logged ${esc(ROU.lastQuick.label)} at ${esc(fmtTime(ROU.lastQuick.time))}.</span><button class="btn btn-ghost btn-sm" data-act="rou-undo">Undo</button></div>` : ""}` : ""}
+  </section>`;
+}
+function rangeSeg() {
+  return `<div class="seg rou-filters" role="group" aria-label="Date range">${[["today", "Today"], ["week", "This week"], ["month", "This month"], ["custom", "Custom"], ["all", "All"]].map(([v, l]) => `<button data-act="rou-range" data-v="${v}" aria-pressed="${ROU.range === v}">${l}</button>`).join("")}</div>
+  ${ROU.range === "custom" ? `<div class="dates rou-filters"><label class="field"><span>From</span><input class="inp" type="date" id="rou-from" data-act="rou-dates" value="${esc(ROU.from)}"></label><label class="field"><span>To</span><input class="inp" type="date" id="rou-to" data-act="rou-dates" value="${esc(ROU.to)}"></label></div>` : ""}`;
+}
+function timelineView() {
+  const list = filteredVisits(); const groups = new Map();
+  for (const v of [...list].reverse()) { if (!groups.has(v.date)) groups.set(v.date, []); groups.get(v.date).push(v); }
+  const people = activePeople().sort((a, b) => a.name.localeCompare(b.name));
+  const review = visitList().filter((v) => v.review).length;
+  return `<div class="card rou-filters">
+    ${rangeSeg()}
+    <label class="field"><span>Search name or place</span><input class="inp" type="search" id="rou-q" data-act="rou-q" placeholder="e.g. Velu or Palani" value="${esc(ROU.q)}" autocomplete="off"></label>
+    <div class="dates">
+      <label class="field"><span>Type</span><select class="inp" id="rou-type" data-act="rou-type">${[["all", "All types"], ["in_person", "In person"], ["video", "Video call"], ["voice", "Voice call"], ["calls", "All calls"]].map(([v, l]) => `<option value="${v}" ${ROU.type === v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+      <label class="field"><span>Person</span><select class="inp" id="rou-person" data-act="rou-person"><option value="all">Everyone</option>${people.map((p) => `<option value="${esc(p.id)}" ${ROU.person === p.id ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select></label>
+    </div>
+    <button class="btn btn-ghost btn-block" data-act="rou-wa">Copy for WhatsApp (${list.length} shown)</button>
+    ${ROU.copied ? `<div class="note ok">${esc(ROU.copied)}</div>` : ""}
+  </div>
+  <p class="small muted">${list.length === 1 ? "1 visit or call" : `${list.length} visits and calls`}${review ? ` · ${review} need review` : ""}</p>
+  ${[...groups.entries()].map(([date, vs]) => { const nv = vs.filter((v) => !isCall(v)).length; const nc = vs.length - nv;
+    return `<section class="acc-day"><div class="acc-day-head"><b>${esc(fmtDate(date))}</b><span class="small muted">${[nv ? `${nv} visit${nv === 1 ? "" : "s"}` : "", nc ? `${nc} call${nc === 1 ? "" : "s"}` : ""].filter(Boolean).join(", ")}</span></div>${vs.map(visitCard).join("")}</section>`; }).join("") || `<div class="card"><p class="muted">No visits match.</p></div>`}`;
+}
+function visitCard(v) {
+  const open = ROU.detail === v.id; const dur = minutesBetween(v.time, v.end_time);
+  return `<div class="acc-row visit v-row-${v.type} ${open ? "open" : ""}">
+    <button class="acc-row-btn" data-act="rou-open" data-id="${esc(v.id)}" aria-expanded="${open}">
+      <span class="acc-row-main">
+        <span class="visit-time"><b class="num">${esc(fmtTime(v.time))}</b>${v.end_time ? `<span class="small muted"> to ${esc(fmtTime(v.end_time))}${dur != null ? ` (${dur} min)` : ""}</span>` : ""} ${typeBadge(v.type)}</span>
+        <span class="visitors">${(v.visitors || []).map((x) => `<span><b>${esc(visitorLabel(x))}</b>${x.place ? ` <span class="muted">· ${esc(x.place)}</span>` : ""}</span>`).join("")}</span>
+        ${v.note ? `<span class="small muted">${esc(v.note)}</span>` : ""}
+        ${v.review ? '<span class="pill warn">Needs review</span>' : ""}
+      </span>
+    </button>
+    ${open ? `<div class="acc-detail">
+      ${canRouEdit() ? `<div class="inv-actions">${v.review ? `<button class="btn btn-ghost" data-act="rou-reviewed" data-id="${esc(v.id)}">Mark reviewed</button>` : ""}<button class="btn btn-ghost" data-act="rou-edit" data-id="${esc(v.id)}">Edit</button><button class="btn btn-danger" data-act="rou-del" data-id="${esc(v.id)}">Delete</button></div>` : `<p class="small muted">Your role can view visits only.</p>`}
+      ${ROU.confirm === v.id ? `<div class="note bad confirm"><span>Delete this ${esc(VISIT_TYPES[v.type].label.toLowerCase())} on ${esc(dmy(v.date))} at ${esc(fmtTime(v.time))}?</span><button class="btn btn-danger" data-act="rou-del-yes" data-id="${esc(v.id)}">Delete</button><button class="btn btn-ghost" data-act="rou-del-no">Keep</button></div>` : ""}
+    </div>` : ""}
+  </div>`;
+}
+
+/* --- people --- */
+function peopleView() {
+  const st = peopleStats(); const q = normName(ROU.pq);
+  const list = [...ROU.people.entries()].map(([id, p]) => ({ id, ...p })).filter((p) => !p.merged_into && (ROU.showArchived ? p.archived : !p.archived) && (!q || normName(`${p.name} ${p.place} ${p.relation}`).includes(q)))
+    .sort((a, b) => (st.get(b.id)?.last || "").localeCompare(st.get(a.id)?.last || "") || a.name.localeCompare(b.name));
+  const sel = ROU.personDetail && ROU.people.has(ROU.personDetail) ? personDetailView(ROU.personDetail, st) : "";
+  return `${sel}<section class="card">
+    <div class="row-between"><h2>People</h2>${canRouEdit() ? `<button class="btn btn-primary" data-act="rou-person-new">+ Add person</button>` : ""}</div>
+    <label class="field rou-filters"><span>Search people</span><input class="inp" type="search" id="rou-pq" data-act="rou-pq" value="${esc(ROU.pq)}" autocomplete="off"></label>
+    <div class="chips"><button class="chip" data-act="rou-arch" aria-pressed="${ROU.showArchived}">Archived</button></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Usual place</th><th>Relation</th><th class="r">Visits</th><th class="r">Calls</th><th>First</th><th>Last</th></tr></thead>
+      <tbody>${list.map((p) => { const s = st.get(p.id) || {}; return `<tr><td class="wrap"><button class="link" data-act="rou-person-open" data-id="${esc(p.id)}">${esc(`${p.title ? p.title + " " : ""}${p.name}`)}</button>${p.quick ? ' <span class="pill">Quick log</span>' : ""}</td>
+        <td>${esc(p.place || "—")}</td><td>${esc(p.relation || "—")}</td><td class="r num">${s.visits || 0}</td><td class="r num">${s.calls || 0}</td><td>${s.first ? esc(dmy(s.first)) : "—"}</td><td>${s.last ? esc(dmy(s.last)) : "—"}</td></tr>`; }).join("") || `<tr><td colspan="7" class="muted">No people.</td></tr>`}</tbody></table></div>
+  </section>`;
+}
+function personDetailView(pid, st) {
+  const p = { id: pid, ...ROU.people.get(pid) }; const s = st.get(pid) || {}; const hist = visitList().filter((v) => (v.visitors || []).some((x) => personOf(x.person_id)?.id === pid)).reverse();
+  const m = ROU.merge?.from === pid ? ROU.merge : null;
+  return `<section class="card" id="rou-person-detail">
+    <div class="row-between"><h2>${esc(`${p.title ? p.title + " " : ""}${p.name}`)}</h2><button class="btn-link" data-act="rou-person-close">Close</button></div>
+    <dl class="kv"><dt>Usual place</dt><dd>${esc(p.place || "—")}</dd><dt>Relation</dt><dd>${esc(p.relation || "—")}</dd><dt>Phone</dt><dd>${esc(p.phone || "—")}</dd>
+      <dt>Contacts</dt><dd>${s.in_person || 0} in person · ${s.video || 0} video · ${s.voice || 0} voice</dd><dt>First / last</dt><dd>${s.first ? esc(dmy(s.first)) : "—"} / ${s.last ? esc(dmy(s.last)) : "—"}</dd></dl>
+    ${canRouEdit() ? `<div class="inv-actions"><button class="btn btn-ghost" data-act="rou-person-edit" data-id="${esc(pid)}">Edit</button>
+      ${canRouManage() ? `<button class="btn btn-ghost" data-act="rou-merge" data-id="${esc(pid)}">Merge into…</button>` : ""}
+      <button class="btn btn-ghost" data-act="rou-person-archive" data-id="${esc(pid)}">${p.archived ? "Restore" : "Archive"}</button></div>` : ""}
+    ${m ? `<div class="note warn confirm"><label class="field" style="flex:1 1 100%"><span>Merge ${esc(p.name)} into</span><select class="inp" id="rou-merge-to">${activePeople().filter((x) => x.id !== pid).sort((a, b) => a.name.localeCompare(b.name)).map((x) => `<option value="${esc(x.id)}" ${m.suggest === x.id ? "selected" : ""}>${esc(`${x.title ? x.title + " " : ""}${x.name}${x.place ? " · " + x.place : ""}`)}</option>`).join("")}</select></label>
+      <span class="small">All of ${esc(p.name)}'s visits move to the person you pick. This can't be undone.</span><button class="btn btn-primary" data-act="rou-merge-yes" data-id="${esc(pid)}">Merge</button><button class="btn btn-ghost" data-act="rou-merge-no">Cancel</button></div>` : ""}
+    <div class="small muted" style="font-weight:600">Visit history (${hist.length})</div>
+    <ul class="acc-checks">${hist.map((v) => `<li><span>${esc(dmy(v.date))} ${esc(fmtTime(v.time))}</span>${typeBadge(v.type)}<span class="small muted">${esc((v.visitors || []).find((x) => personOf(x.person_id)?.id === pid)?.place || "")}</span></li>`).join("") || "<li class='muted'>No visits yet.</li>"}</ul>
+  </section>`;
+}
+
+/* --- summary --- */
+function visitSummaryView() {
+  const list = filteredVisits(); const r = rouRange();
+  const n = { in_person: 0, video: 0, voice: 0 }; for (const v of list) n[v.type]++;
+  const st = peopleStats(list); const top = [...st.entries()].map(([id, s]) => ({ id, total: s.visits + s.calls, ...s })).sort((a, b) => b.total - a.total).slice(0, 5);
+  const nameFor = (id) => (id.startsWith("name:") ? id.slice(5) : (() => { const p = personOf(id); return p ? `${p.title ? p.title + " " : ""}${p.name}` : "Unknown"; })());
+  // per-day series
+  const start = r.start || list[0]?.date; const end = r.end && r.end < todayISO() ? r.end : list.at(-1)?.date > todayISO() ? list.at(-1).date : (r.end || todayISO());
+  const days = []; if (start) for (let d = start, i = 0; d <= end && i < 400; d = addDays(d, 1), i++) days.push(d);
+  const per = new Map(days.map((d) => [d, { v: 0, c: 0 }])); for (const v of list) { const x = per.get(v.date); if (x) isCall(v) ? x.c++ : x.v++; }
+  const max = Math.max(1, ...[...per.values()].map((x) => x.v + x.c));
+  return `<section class="card">
+    <div class="rou-filters">${rangeSeg()}</div>
+    <div class="acc-totals rou-totals">
+      <div><span class="small muted">In person</span><b class="num">${n.in_person}</b></div>
+      <div><span class="small muted">Video calls</span><b class="num">${n.video}</b></div>
+      <div><span class="small muted">Voice calls</span><b class="num">${n.voice}</b></div>
+      <div><span class="small muted">People</span><b class="num">${st.size}</b></div>
+    </div>
+  </section>
+  <section class="card"><h2>Most frequent</h2>
+    <ol class="top-list">${top.map((t) => `<li><button class="link" data-act="rou-person-open" data-id="${esc(t.id)}">${esc(nameFor(t.id))}</button><span class="small muted">${t.in_person || 0} in person · ${t.video || 0} video · ${t.voice || 0} voice</span><b class="num">${t.total}</b></li>`).join("") || "<li class='muted'>No visits in this range.</li>"}</ol>
+  </section>
+  <section class="card"><div class="row-between"><h2>Visits and calls per day</h2><button class="btn-link" data-act="rou-chart-table">${ROU.chartTable ? "Show chart" : "Show as table"}</button></div>
+    <div class="legend" aria-hidden="${ROU.chartTable}"><span><i class="sw sw-v"></i>In person</span><span><i class="sw sw-c"></i>Calls</span></div>
+    ${!days.length ? `<p class="muted">No visits in this range.</p>` : ROU.chartTable
+      ? `<div class="tbl-wrap"><table><thead><tr><th>Date</th><th class="r">In person</th><th class="r">Calls</th></tr></thead><tbody>${days.filter((d) => per.get(d).v + per.get(d).c).map((d) => `<tr><td>${esc(dmy(d))}</td><td class="r num">${per.get(d).v}</td><td class="r num">${per.get(d).c}</td></tr>`).join("")}</tbody></table></div>`
+      : `<div class="vchart" role="img" aria-label="Visits and calls per day from ${esc(dmy(days[0]))} to ${esc(dmy(days.at(-1)))}. Switch to the table for exact numbers.">
+        <div class="vchart-axis num"><span>${max}</span><span>0</span></div>
+        <div class="vchart-bars" id="vchart">${days.map((d) => { const x = per.get(d); const tip = `${dmy(d)}: ${x.v} in person, ${x.c} call${x.c === 1 ? "" : "s"}`;
+          return `<div class="vcol" tabindex="0" data-tip="${esc(tip)}" title="${esc(tip)}"><div class="vstack">${x.c ? `<i class="seg-c" style="height:${(x.c / max) * 100}%"></i>` : ""}${x.v ? `<i class="seg-v" style="height:${(x.v / max) * 100}%"></i>` : ""}</div><span class="vlab">${d.slice(8) === "01" || d === days[0] ? esc(shortDm(d)) : ""}</span></div>`; }).join("")}</div>
+      </div><p class="small muted" id="vchart-tip">Tap a day to see its numbers.</p>`}
+  </section>`;
+}
+
+/* --- forms --- */
+function blankVisitor() { return { title: "", name: "", place: "", relation: "", phone: "", person_id: null }; }
+function openVisit(id) {
+  const v = id ? ROU.visits.get(id) : null; ROU.detail = null; ROU.confirm = null; ROU.copied = null;
+  ROU.form = { id: id || null, values: v ? { date: v.date, time: v.time || "", end_time: v.end_time || "", type: v.type, note: v.note || "", review: !!v.review,
+    visitors: (v.visitors || []).map((x) => { const p = personOf(x.person_id); return { title: p?.title ?? x.title ?? "", name: p?.name || x.name, place: x.place || "", relation: p?.relation || "", phone: p?.phone || "", person_id: p?.id || null }; }) }
+    : { date: todayISO(), time: nowHM(), end_time: "", type: "in_person", note: "", visitors: [blankVisitor()] } };
+  render(); window.scrollTo(0, 0);
+}
+function visitorRowHints(x) {
+  if (!x.name.trim()) return "";
+  const exact = findPerson(x.name); if (exact) return `<span class="small muted">Saved person${exact.name !== x.name.trim() ? `: <b>${esc(exact.name)}</b>` : ""}${exact.place ? ` · usual place ${esc(exact.place)}` : ""}</span>`;
+  const sim = similarPerson(x.name);
+  return sim ? `<span class="small" style="color:var(--warn-ink)">New person. Did you mean <b>${esc(sim.name)}</b>${sim.place ? ` (${esc(sim.place)})` : ""}? <button type="button" class="btn-link" data-act="rou-use-person" data-pid="${esc(sim.id)}">Use ${esc(sim.name)}</button></span>` : `<span class="small muted">New person: will be added to People.</span>`;
+}
+function visitFormView() {
+  const f = ROU.form; const v = f.values;
+  return `<div class="row-between"><button class="btn-link" data-act="rou-form-cancel">‹ Cancel</button><h1 style="flex:1">${f.id ? "Edit visit" : "Add visit"}</h1></div>
+  <datalist id="rou-people-list">${activePeople().map((p) => `<option value="${esc(p.name)}">${esc(p.place || "")}</option>`).join("")}</datalist>
+  <form class="card" id="rou-visit-form" novalidate>
+    <div class="dates"><label class="field"><span>Date</span><input class="inp" type="date" data-vf="date" value="${esc(v.date)}"></label>
+      <label class="field"><span>Time</span><input class="inp" type="time" data-vf="time" value="${esc(v.time)}"></label></div>
+    <label class="field"><span>End time (optional)</span><input class="inp" type="time" data-vf="end_time" value="${esc(v.end_time)}"></label>
+    <div class="field"><span class="small muted" style="font-weight:600">Type</span><div class="seg" role="group" aria-label="Visit type">${Object.entries(VISIT_TYPES).map(([k, t]) => `<button type="button" data-act="rou-type-pick" data-v="${k}" aria-pressed="${v.type === k}">${t.label}</button>`).join("")}</div></div>
+    <div class="acc-lines">${v.visitors.map((x, i) => `<div class="acc-line" data-vrow="${i}">
+      <div class="row-between"><b class="small">Person ${v.visitors.length > 1 ? i + 1 : ""}</b>${v.visitors.length > 1 ? `<button type="button" class="btn-link danger-text" data-act="rou-row-del" data-i="${i}">Remove</button>` : ""}</div>
+      <div class="name-row"><label class="field"><span>Title</span><select class="inp" data-row="${i}" data-xf="title" aria-label="Title ${i + 1}">${TITLES.map((t) => `<option value="${t}" ${x.title === t ? "selected" : ""}>${t || "—"}</option>`).join("")}</select></label>
+        <label class="field"><span>Name *</span><input class="inp" list="rou-people-list" data-row="${i}" data-xf="name" value="${esc(x.name)}" autocomplete="off" aria-label="Name ${i + 1}" placeholder="e.g. Adaikkammai"></label></div>
+      <div class="vhint" data-hint="${i}">${visitorRowHints(x)}</div>
+      <label class="field"><span>Place (optional)</span><input class="inp" data-row="${i}" data-xf="place" value="${esc(x.place)}" aria-label="Place ${i + 1}" placeholder="e.g. Thiruvarur"></label>
+      <div class="dates"><label class="field"><span>Relation (optional)</span><input class="inp" data-row="${i}" data-xf="relation" value="${esc(x.relation)}" aria-label="Relation ${i + 1}" placeholder="relative, friend…"></label>
+        <label class="field"><span>Phone (optional)</span><input class="inp" type="tel" data-row="${i}" data-xf="phone" value="${esc(x.phone)}" aria-label="Phone ${i + 1}"></label></div>
+    </div>`).join("")}</div>
+    <button type="button" class="btn btn-ghost btn-block" data-act="rou-row-add" style="border-style:dashed">+ Add another person</button>
+    <label class="field"><span>Note (optional)</span><input class="inp" data-vf="note" value="${esc(v.note)}" maxlength="200"></label>
+    ${f.id && v.review ? `<label class="pick"><input type="checkbox" data-vf="clearReview" ${v.clearReview ? "checked" : ""}> This entry is correct now (clear "Needs review")</label>` : ""}
+    <div id="vf-err">${f.err ? `<div class="note bad">${esc(f.err)}</div>` : ""}</div>
+    <button class="btn btn-primary btn-block" type="submit">${f.id ? "Save changes" : "Save visit"}</button>
+  </form>`;
+}
+function personFormView() {
+  const f = ROU.personForm; const v = f.values;
+  const dup = v.name.trim() && activePeople().find((p) => p.id !== f.id && (personKey(p.name) === personKey(v.name) || lev(personKey(p.name), personKey(v.name)) <= 1));
+  return `<div class="row-between"><button class="btn-link" data-act="rou-person-cancel">‹ Cancel</button><h1 style="flex:1">${f.id ? "Edit person" : "Add person"}</h1></div>
+  <form class="card" id="rou-person-form" novalidate>
+    <div class="name-row"><label class="field"><span>Title</span><select class="inp" data-pf2="title">${TITLES.map((t) => `<option value="${t}" ${v.title === t ? "selected" : ""}>${t || "—"}</option>`).join("")}</select></label>
+      <label class="field"><span>Name *</span><input class="inp" id="pp-name" data-pf2="name" value="${esc(v.name)}" maxlength="60" autocomplete="off"></label></div>
+    <div id="pp-dup">${dup ? `<div class="note warn small">This looks like <b>${esc(dup.name)}</b>, who is already saved. Use Merge later if they turn out to be the same person.</div>` : ""}</div>
+    <label class="field"><span>Usual place</span><input class="inp" data-pf2="place" value="${esc(v.place)}" maxlength="60"></label>
+    <div class="dates"><label class="field"><span>Relation</span><input class="inp" data-pf2="relation" value="${esc(v.relation)}" maxlength="40"></label>
+      <label class="field"><span>Phone</span><input class="inp" type="tel" data-pf2="phone" value="${esc(v.phone)}" maxlength="20"></label></div>
+    <label class="field"><span>Quick-log chip</span><select class="inp" data-pf2="quick"><option value="">No chip</option>${Object.entries(VISIT_TYPES).map(([k, t]) => `<option value="${k}" ${v.quick === k ? "selected" : ""}>Chip: ${t.label}</option>`).join("")}</select></label>
+    <div id="pp-err"></div>
+    <button class="btn btn-primary btn-block" type="submit">${f.id ? "Save person" : "Add person"}</button>
+  </form>`;
+}
+async function saveVisit() {
+  const f = ROU.form; const v = f.values; const err = (m) => { $("#vf-err").innerHTML = `<div class="note bad">${esc(m)}</div>`; };
+  if (!isISODate(v.date)) return err("Pick the date.");
+  if (!/^\d{2}:\d{2}$/.test(v.time || "")) return err("Pick the time.");
+  if (v.end_time && v.end_time < v.time) return err("The end time is before the start time.");
+  const rows = v.visitors.filter((x) => x.name.trim());
+  if (!rows.length) return err("Add at least one person's name.");
+  const now = new Date().toISOString(); const visitors = [];
+  try {
+    for (const x of rows) {
+      const name = x.name.trim(); let p = x.person_id ? personOf(x.person_id) : findPerson(name);
+      if (!p) {
+        const id = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+        const doc = { title: x.title, name, place: x.place.trim(), relation: x.relation.trim(), phone: x.phone.trim(), archived: false, quick: null, created_at: now, created_by: S.uid };
+        await rouWrite("set", `${ROU_PEOPLE}/${id}`, doc); p = { id, ...doc };
+      } else {
+        const upd = {};
+        if (x.title && x.title !== p.title) upd.title = x.title;
+        if (x.place.trim() && x.place.trim() !== p.place) upd.place = x.place.trim();
+        if (x.relation.trim() && x.relation.trim() !== p.relation) upd.relation = x.relation.trim();
+        if (x.phone.trim() && x.phone.trim() !== p.phone) upd.phone = x.phone.trim();
+        if (Object.keys(upd).length) await rouWrite("update", `${ROU_PEOPLE}/${p.id}`, upd);
+      }
+      visitors.push({ person_id: p.id, title: x.title || p.title || "", name: p.name, place: x.place.trim() });
+    }
+    const doc = { date: v.date, time: v.time, end_time: v.end_time || null, type: v.type, note: v.note.trim(), visitors, updated_at: now, updated_by: S.uid };
+    if (f.id) { const before = ROU.visits.get(f.id); await rouWrite("update", `${ROU_VISITS}/${f.id}`, { ...doc, ...(v.clearReview ? { review: false } : {}) }); writeAudit("routine.edit", null, f.id, before, { ...before, ...doc }); }
+    else { const id = "v" + v.date.replaceAll("-", "") + v.time.replace(":", "") + Date.now().toString(36); await rouWrite("set", `${ROU_VISITS}/${id}`, { ...doc, review: false, seq: Date.now(), created_at: now, created_by: S.uid }); writeAudit("routine.add", null, id, null, doc); }
+    flash(`${f.id ? "Visit updated" : "Visit saved"}: ${visitors.map((x) => x.name).join(", ")}.`);
+    ROU.form = null; ROU.view = "timeline";
+  } catch (e) { return err(dbErrorText(e).replace("save this bill", "save this visit")); }
+  render(); window.scrollTo(0, 0);
+}
+async function quickVisit(pid) {
+  const p = personOf(pid); if (!p) return; const now = new Date().toISOString(); const date = todayISO(); const time = nowHM();
+  const id = "v" + date.replaceAll("-", "") + time.replace(":", "") + Date.now().toString(36);
+  const doc = { date, time, end_time: null, type: p.quick?.type || "in_person", note: "", visitors: [{ person_id: p.id, title: p.title || "", name: p.name, place: p.place || "" }], review: false, seq: Date.now(), created_at: now, created_by: S.uid };
+  try {
+    await rouWrite("set", `${ROU_VISITS}/${id}`, doc); writeAudit("routine.add", null, id, null, doc);
+    const token = Symbol(); ROU.lastQuick = { id, token, time, label: `${p.name}, ${VISIT_TYPES[doc.type].label.toLowerCase()}` };
+    setTimeout(() => { if (ROU.lastQuick?.token === token) { ROU.lastQuick = null; rouRefresh(); } }, 5000);   // Undo stays for 5 seconds
+  } catch (e) { flash(dbErrorText(e).replace("save this bill", "log this visit")); }
+  render();
+}
+async function savePerson() {
+  const f = ROU.personForm; const v = f.values; const name = v.name.trim();
+  if (!name) { $("#pp-err").innerHTML = `<div class="note bad">Enter the name.</div>`; return; }
+  const now = new Date().toISOString();
+  const doc = { title: v.title, name, place: v.place.trim(), relation: v.relation.trim(), phone: v.phone.trim(), quick: v.quick ? { type: v.quick } : null, updated_at: now };
+  try {
+    if (f.id) await rouWrite("update", `${ROU_PEOPLE}/${f.id}`, doc);
+    else await rouWrite("set", `${ROU_PEOPLE}/${"p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5)}`, { ...doc, archived: false, created_at: now, created_by: S.uid });
+    flash(`${name} ${f.id ? "saved" : "added"}.${v.quick ? " A quick-log chip is on the Visitors screen." : ""}`); ROU.personForm = null;
+  } catch (e) { $("#pp-err").innerHTML = `<div class="note bad">${esc(dbErrorText(e).replace("save this bill", "save this person"))}</div>`; return; }
+  render();
+}
+async function mergePeople(from, to) {
+  if (!to || from === to) return;
+  try {
+    for (const [id, v] of ROU.visits) if ((v.visitors || []).some((x) => x.person_id === from)) await rouWrite("update", `${ROU_VISITS}/${id}`, { visitors: v.visitors.map((x) => (x.person_id === from ? { ...x, person_id: to } : x)) });
+    const a = ROU.people.get(from); const b = ROU.people.get(to);
+    const fill = {}; for (const k of ["place", "relation", "phone", "title"]) if (!b[k] && a[k]) fill[k] = a[k]; if (!b.quick && a.quick) fill.quick = a.quick;
+    if (Object.keys(fill).length) await rouWrite("update", `${ROU_PEOPLE}/${to}`, fill);
+    await rouWrite("update", `${ROU_PEOPLE}/${from}`, { merged_into: to, archived: true, quick: null });
+    writeAudit("routine.merge", null, from, { name: a.name }, { name: b.name, merged_into: to });
+    flash(`${a.name} merged into ${b.name}.`); ROU.merge = null; ROU.personDetail = to;
+  } catch (e) { flash(dbErrorText(e).replace("save this bill", "merge")); }
+  render();
+}
+
+/* --- export / import --- */
+function rouToolsView() {
+  const ip = ROU.importPreview;
+  return `<section class="card"><h2>Export and import</h2>
+    ${S.caps.downloads ? `<div class="duo"><button class="btn btn-ghost" data-act="rou-csv">Export CSV</button><button class="btn btn-ghost" data-act="rou-pdf">Printable list (PDF)</button></div><p class="small muted">Exports use the date range and filters on the Timeline.</p>` : `<p class="small muted">Saving files isn't available in this view.</p>`}
+    ${canRouManage() ? `<button class="btn btn-ghost btn-block" data-act="rou-import">Import visits from CSV…</button>
+      <p class="small muted">One row per person: visit_id, date (DD/MM/YYYY), time (e.g. 4:17 PM), end_time, title, name, place, type (In person / Video call / Voice call), note. Rows with the same visit_id are one visit.</p>
+      ${ip ? `<div class="add-panel"><b>Import preview</b><p class="small">${ip.visits.length} visit${ip.visits.length === 1 ? "" : "s"} with ${ip.rows} people rows; ${ip.people.length} new ${ip.people.length === 1 ? "person" : "people"}.</p>
+        ${ip.errors.length ? `<div class="note warn small">${ip.errors.slice(0, 5).map(esc).join("<br>")}${ip.errors.length > 5 ? `<br>…and ${ip.errors.length - 5} more skipped` : ""}</div>` : ""}
+        <div class="duo"><button class="btn btn-primary" data-act="rou-import-apply" ${ROU.busy ? "disabled" : ""}>${ROU.busy ? "Importing…" : "Apply import"}</button><button class="btn btn-ghost" data-act="rou-import-cancel">Cancel</button></div></div>` : ""}
+      ${!ROU.settings.seeded_at && ROU.visits.size ? `<button class="btn-link" data-act="rou-seed">Import visitor log (Sep–Nov 2026)</button>` : ""}` : ""}
+  </section>`;
+}
+function rouCsv(list) {
+  const lines = [["visit_id", "date", "time", "end_time", "title", "name", "place", "type", "note", "relation", "phone"]];
+  for (const v of list) for (const x of v.visitors || []) { const p = personOf(x.person_id); lines.push([v.id, dmy(v.date), fmtTime(v.time), fmtTime(v.end_time), p?.title ?? x.title, p?.name || x.name, x.place || "", VISIT_TYPES[v.type].label, v.note || "", p?.relation || "", p?.phone || ""]); }
+  return "﻿" + lines.map((l) => l.map(csvCell).join(",")).join("\r\n") + "\r\n";
+}
+async function rouPdf(list) {
+  await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+  await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js");
+  const doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" }); const r = rouRange();
+  doc.setFontSize(15); doc.text("Visitors", 40, 42); doc.setFontSize(10); doc.setTextColor(90);
+  doc.text(`${r.start ? dmy(r.start) : "All dates"}${r.end ? " – " + dmy(r.end) : ""} · ${list.length} visits and calls`, 40, 58);
+  doc.autoTable({ startY: 70, head: [["Date", "Time", "Type", "Visitors", "Note"]], styles: { fontSize: 9, cellPadding: 4 }, headStyles: { fillColor: [15, 110, 102] },
+    body: list.map((v) => [dmy(v.date), `${fmtTime(v.time)}${v.end_time ? " – " + fmtTime(v.end_time) : ""}`, VISIT_TYPES[v.type].label, (v.visitors || []).map((x) => [visitorLabel(x), x.place].filter(Boolean).join(" – ")).join("\n"), v.note || ""]) });
+  return doc.output("blob");
+}
+function buildRouImport(text) {
+  const rows = parseCsv(text); if (rows.length < 2) throw new Error("That file has no visits.");
+  const head = rows[0].map((h) => h.trim().toLowerCase().replace(/[^a-z]+/g, "_")); const ix = (n) => head.indexOf(n);
+  const miss = ["date", "time", "name"].filter((n) => ix(n) < 0); if (miss.length) throw new Error(`Missing column${miss.length > 1 ? "s" : ""}: ${miss.join(", ")}.`);
+  const out = []; const errors = [];
+  rows.slice(1).forEach((r, k) => {
+    const line = k + 2; const g = (n) => (ix(n) >= 0 ? (r[ix(n)] || "").trim() : "");
+    const date = ddmmyyyyToISO(g("date")); const time = to24(g("time")); const name = g("name");
+    if (!name) return errors.push(`Line ${line}: no name.`);
+    if (!date) return errors.push(`Line ${line}: date "${g("date")}" isn't DD/MM/YYYY.`);
+    if (!time) return errors.push(`Line ${line}: time "${g("time")}" isn't like 4:17 PM.`);
+    const ty = g("type").toLowerCase(); const type = ty.startsWith("video") ? "video" : ty.startsWith("voice") ? "voice" : "in_person";
+    out.push({ visit_id: g("visit_id"), date, time, end_time: to24(g("end_time")), title: g("title"), name, place: g("place"), type, note: g("note") });
+  });
+  const res = importRows(out, "csv"); return { ...res, rows: out.length, errors };
+}
+async function applyRouImport() {
+  const ip = ROU.importPreview; ROU.busy = true; rouRefresh();
+  try {
+    for (const [id, doc] of ip.people) await rouWrite("set", `${ROU_PEOPLE}/${id}`, doc);
+    for (const [id, doc] of ip.visits) await rouWrite("set", `${ROU_VISITS}/${id}`, doc);
+    writeAudit("routine.import", null, "routine", null, { visits: ip.visits.length });
+    flash(`Imported ${ip.visits.length} visits.`); ROU.importPreview = null;
+  } catch (e) { flash(dbErrorText(e).replace("save this bill", "import")); }
+  finally { ROU.busy = false; rouRefresh(); }
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click", async (e) => {
+  const t = e.target.closest("[data-act]"); if (!t || !t.dataset.act.startsWith("rou-")) return;
+  const a = t.dataset.act; const id = t.dataset.id;
+  switch (a) {
+    case "rou-section": ROU.section = t.dataset.v; render(); break;
+    case "rou-view": ROU.view = t.dataset.v; ROU.copied = null; render(); break;
+    case "rou-range": ROU.range = t.dataset.v; ROU.copied = null; render(); break;
+    case "rou-add": openVisit(null); break;
+    case "rou-form-cancel": ROU.form = null; render(); break;
+    case "rou-quick": t.disabled = true; quickVisit(id); break;
+    case "rou-undo": { const q = ROU.lastQuick; ROU.lastQuick = null; if (q) { try { await rouWrite("delete", `${ROU_VISITS}/${q.id}`); flash(`Removed ${q.label}.`); } catch (err) { flash(dbErrorText(err)); } } render(); break; }
+    case "rou-open": ROU.detail = ROU.detail === id ? null : id; ROU.confirm = null; render(); break;
+    case "rou-edit": openVisit(id); break;
+    case "rou-del": ROU.confirm = id; render(); break;
+    case "rou-del-no": ROU.confirm = null; render(); break;
+    case "rou-del-yes": { const before = ROU.visits.get(id); ROU.confirm = null; ROU.detail = null;
+      try { await rouWrite("delete", `${ROU_VISITS}/${id}`); writeAudit("routine.delete", null, id, before, null); flash("Visit deleted."); } catch (err) { flash(dbErrorText(err).replace("save this bill", "delete this visit")); }
+      render(); break; }
+    case "rou-reviewed": try { await rouWrite("update", `${ROU_VISITS}/${id}`, { review: false, reviewed_at: new Date().toISOString(), reviewed_by: S.uid }); flash("Marked as reviewed."); } catch (err) { flash(dbErrorText(err)); } render(); break;
+    case "rou-type-pick": ROU.form.values.type = t.dataset.v; t.parentElement.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === t))); break;
+    case "rou-row-add": ROU.form.values.visitors.push(blankVisitor()); render(); document.querySelector(`[data-row="${ROU.form.values.visitors.length - 1}"][data-xf="name"]`)?.focus(); break;
+    case "rou-row-del": ROU.form.values.visitors.splice(Number(t.dataset.i), 1); render(); break;
+    case "rou-use-person": { const row = Number(t.closest("[data-vrow]").dataset.vrow); const p = personOf(t.dataset.pid); const x = ROU.form.values.visitors[row];
+      Object.assign(x, { person_id: p.id, name: p.name, title: p.title || x.title, place: x.place || p.place || "", relation: x.relation || p.relation || "", phone: x.phone || p.phone || "" }); render(); break; }
+    case "rou-wa": {
+      const text = visitsWhatsapp(filteredVisits());
+      if (navigator.share && matchMedia("(pointer: coarse)").matches) {   // phones: share sheet straight to WhatsApp
+        try { await navigator.share({ text }); ROU.copied = "Shared."; render(); break; } catch (err) { if (err?.name === "AbortError") break; }
+      }
+      try { await navigator.clipboard.writeText(text); ROU.copied = `Copied ${filteredVisits().length} visits. Paste them into WhatsApp.`; }
+      catch { ROU.copied = null; flash("Copying isn't allowed here. Use Export CSV, or copy from the printable list."); }
+      render(); break;
+    }
+    case "rou-person-new": ROU.personForm = { id: null, values: { title: "", name: "", place: "", relation: "", phone: "", quick: "" } }; render(); $("#pp-name")?.focus(); break;
+    case "rou-person-edit": { const p = ROU.people.get(id); ROU.personForm = { id, values: { title: p.title || "", name: p.name, place: p.place || "", relation: p.relation || "", phone: p.phone || "", quick: p.quick?.type || "" } }; render(); break; }
+    case "rou-person-cancel": ROU.personForm = null; render(); break;
+    case "rou-person-open": ROU.view = "people"; ROU.personDetail = id.startsWith("name:") ? null : id; ROU.merge = null; render(); $("#rou-person-detail")?.scrollIntoView({ block: "start" }); break;
+    case "rou-person-close": ROU.personDetail = null; ROU.merge = null; render(); break;
+    case "rou-person-archive": { const p = ROU.people.get(id); try { await rouWrite("update", `${ROU_PEOPLE}/${id}`, { archived: !p.archived }); flash(p.archived ? `${p.name} restored.` : `${p.name} archived. Their visits stay.`); } catch (err) { flash(dbErrorText(err)); } render(); break; }
+    case "rou-arch": ROU.showArchived = !ROU.showArchived; render(); break;
+    case "rou-merge": { const p = ROU.people.get(id); const sug = activePeople().find((x) => x.id !== id && lev(personKey(x.name), personKey(p.name)) <= 2); ROU.merge = { from: id, suggest: sug?.id }; render(); break; }
+    case "rou-merge-no": ROU.merge = null; render(); break;
+    case "rou-merge-yes": mergePeople(id, $("#rou-merge-to").value); break;
+    case "rou-chart-table": ROU.chartTable = !ROU.chartTable; render(); break;
+    case "rou-csv": saveFile(`visitors-${ROU.range}.csv`, rouCsv(filteredVisits())); break;
+    case "rou-pdf": t.disabled = true; t.textContent = "Preparing…"; try { saveFile(`visitors-${ROU.range}.pdf`, await rouPdf(filteredVisits())); } catch (err) { flash(err.message || "The list couldn't be made."); rouRefresh(); } break;
+    case "rou-import": $("#rou-import-file").click(); break;
+    case "rou-import-cancel": ROU.importPreview = null; render(); break;
+    case "rou-import-apply": applyRouImport(); break;
+    case "rou-seed": rouSeed(false); break;
+  }
+});
+document.addEventListener("click", (e) => {   // per-day chart: tap a day to read its numbers
+  const col = e.target.closest(".vcol"); if (!col) return; const tip = $("#vchart-tip"); if (tip) tip.textContent = col.dataset.tip;
+});
+document.addEventListener("focusin", (e) => { const col = e.target.closest?.(".vcol"); if (col) { const tip = $("#vchart-tip"); if (tip) tip.textContent = col.dataset.tip; } });
+document.addEventListener("input", (e) => {
+  const t = e.target; const f = ROU.form;
+  if (f && t.dataset.xf) {
+    const i = Number(t.dataset.row); const x = f.values.visitors[i]; x[t.dataset.xf] = t.value;
+    if (t.dataset.xf === "name") {
+      x.person_id = null; const p = findPerson(t.value); const box = document.querySelector(`[data-vrow="${i}"]`);
+      if (p) { x.person_id = p.id; if (!x.place) { x.place = p.place || ""; box.querySelector('[data-xf="place"]').value = x.place; }
+        if (!x.title && p.title) { x.title = p.title; box.querySelector('[data-xf="title"]').value = x.title; }
+        if (!x.relation && p.relation) { x.relation = p.relation; box.querySelector('[data-xf="relation"]').value = x.relation; } }
+      document.querySelector(`[data-hint="${i}"]`).innerHTML = visitorRowHints(x);
+    }
+    return;
+  }
+  if (f && t.dataset.vf && t.type !== "checkbox") { f.values[t.dataset.vf] = t.value; return; }
+  if (ROU.personForm && t.dataset.pf2) {
+    ROU.personForm.values[t.dataset.pf2] = t.value;
+    if (t.dataset.pf2 === "name") { const dup = t.value.trim() && activePeople().find((p) => p.id !== ROU.personForm.id && (personKey(p.name) === personKey(t.value) || lev(personKey(p.name), personKey(t.value)) <= 1)); $("#pp-dup").innerHTML = dup ? `<div class="note warn small">This looks like <b>${esc(dup.name)}</b>, who is already saved. Use Merge later if they turn out to be the same person.</div>` : ""; }
+    return;
+  }
+  const deb = (key, fn) => { clearTimeout(t._d); t._d = setTimeout(() => { const pos = t.selectionStart; fn(); render(); const n = $("#" + t.id); n?.focus(); n?.setSelectionRange(pos, pos); }, 250); };
+  if (t.dataset.act === "rou-q") deb("q", () => { ROU.q = t.value; ROU.copied = null; });
+  if (t.dataset.act === "rou-pq") deb("pq", () => { ROU.pq = t.value; });
+});
+document.addEventListener("change", async (e) => {
+  const t = e.target; const f = ROU.form;
+  if (f && t.dataset.xf === "title") { f.values.visitors[Number(t.dataset.row)].title = t.value; return; }
+  if (f && t.dataset.vf === "clearReview") { f.values.clearReview = t.checked; return; }
+  if (ROU.personForm && t.dataset.pf2) { ROU.personForm.values[t.dataset.pf2] = t.value; return; }
+  const a = t.dataset.act;
+  if (a === "rou-type") { ROU.type = t.value; ROU.copied = null; render(); }
+  if (a === "rou-person") { ROU.person = t.value; ROU.copied = null; render(); }
+  if (a === "rou-dates") { ROU.from = $("#rou-from").value; ROU.to = $("#rou-to").value; render(); }
+  if (t.id === "rou-import-file") { const file = t.files?.[0]; t.value = ""; if (!file) return; try { ROU.importPreview = buildRouImport(await file.text()); } catch (err) { flash(err.message || "That CSV couldn't be read."); } render(); }
+});
+document.addEventListener("submit", (e) => {
+  if (e.target.id === "rou-visit-form") { e.preventDefault(); saveVisit(); }
+  if (e.target.id === "rou-person-form") { e.preventDefault(); savePerson(); }
 });
 
 boot();

@@ -1,0 +1,251 @@
+import { createRequire } from "node:module";
+import assert from "node:assert/strict";
+import { writeFileSync } from "node:fs";
+const { chromium, devices } = createRequire(import.meta.url)("playwright");
+const DIR = new URL(".", import.meta.url).pathname;
+const URL_ = "file://" + DIR + "page.html";
+const browser = await chromium.launch();
+let pass = 0, fail = 0;
+const step = async (n, f) => { try { await f(); pass++; console.log("ok - " + n); } catch (e) { fail++; console.log("FAIL - " + n + "\n   " + e.message.split("\n").slice(0, 8).join("\n   ")); } };
+const LIBS = { "jspdf/2.5.1/jspdf.umd.min.js": "jspdf/dist/jspdf.umd.min.js", "jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js": "jspdf-autotable/dist/jspdf.plugin.autotable.min.js" };
+const ctx = await browser.newContext({ ...devices["Pixel 7"], permissions: ["clipboard-read", "clipboard-write"] });
+await ctx.addInitScript(() => { try { Object.defineProperty(navigator, "share", { value: undefined, configurable: true }); } catch {} });
+await ctx.route("https://cdnjs.cloudflare.com/ajax/libs/**", (route) => { const k = Object.keys(LIBS).find((x) => route.request().url().endsWith(x)); return k ? route.fulfill({ path: DIR + "libs/node_modules/" + LIBS[k], contentType: "text/javascript" }) : route.abort(); });
+await ctx.route("https://fonts.*/**", (r) => r.abort());
+const page = await ctx.newPage();
+const errs = []; page.on("pageerror", (e) => errs.push(String(e)));
+const log = () => page.evaluate(() => window.__log);
+const clip = () => page.evaluate(() => navigator.clipboard.readText());
+const store = async () => new Map(await page.evaluate(() => JSON.parse(localStorage.getItem("mock-store") || "[]")));
+const visits = async () => [...(await store()).entries()].filter(([k]) => k.startsWith("routine/visits/list/")).map(([, v]) => v);
+const people = async () => [...(await store()).entries()].filter(([k]) => k.startsWith("routine/people/list/")).map(([id, v]) => ({ id: id.split("/").at(-1), ...v }));
+const view = (n) => page.getByRole("button", { name: n, exact: true }).click();
+const range = (n) => page.locator('[data-act="rou-range"]', { hasText: new RegExp("^" + n + "$") }).first().click();
+const totals = async () => (await page.locator(".rou-totals").innerText()).replace(/\s+/g, " ");
+await page.goto(URL_ + "?role=admin&persist=1");
+await page.evaluate(() => localStorage.clear());
+await page.goto(URL_ + "?role=admin&persist=1#routine");
+
+await step("Routine tab is in the navigation and the visitor log imports on first run", async () => {
+  await page.getByRole("link", { name: /Routine$/ }).waitFor();
+  await page.getByText("Imported the visitor log: 42 visits and calls, 24 new people.").waitFor({ timeout: 60000 });
+  const v = await visits();
+  assert.equal(v.length, 42, "visits and calls");
+  assert.equal(v.reduce((n, x) => n + x.visitors.length, 0), 53, "visitor rows");
+  assert.equal(v.filter((x) => x.review).length, 11, "entries with a note need review");
+  const types = { in_person: 0, video: 0, voice: 0 }; v.forEach((x) => types[x.type]++);
+  assert.deepEqual(types, { in_person: 27, video: 14, voice: 1 });
+  const pp = await people(); assert.equal(pp.length, 24, "unique people");
+  const akka = pp.find((p) => p.name === "Adaikkammai");
+  assert.deepEqual([akka.title, akka.place, akka.relation, akka.quick?.type], ["Mrs", "Singapore", "Akka", "video"]);
+  assert.ok(v.every((x) => /^\d{4}-\d{2}-\d{2}$/.test(x.date) && /^\d{2}:\d{2}$/.test(x.time)));
+  assert.equal(v.find((x) => x.visitors.some((y) => y.name === "Velu")).time, "16:17");
+});
+await step("summary totals match exactly; Adaikkammai is the top visitor with 22 contacts", async () => {
+  await view("Summary"); await range("All");
+  assert.equal(await totals(), "In person 27 Video calls 14 Voice calls 1 People 24");
+  const first = (await page.locator(".top-list li").first().innerText()).replace(/\s+/g, " ");
+  assert.match(first, /Mrs Adaikkammai 10 in person · 11 video · 1 voice 22/);
+  assert.equal(await page.locator(".top-list li").count(), 5);
+  await page.locator(".vcol").first().waitFor();
+  await page.getByRole("button", { name: "Show as table" }).click();
+  const rows = await page.locator("table tbody tr").allInnerTexts();
+  const sum = rows.reduce((a, r) => { const c = r.split("\t").map((x) => x.trim()); return [a[0] + Number(c[1]), a[1] + Number(c[2])]; }, [0, 0]);
+  assert.deepEqual(sum, [27, 15]);
+  await page.getByRole("button", { name: "Show chart" }).click();
+  await page.screenshot({ path: DIR + "r1-summary.png", fullPage: true });
+});
+const DAY = ["Visitors", "13/09/2026 - 8:00 AM", "Mr Kannan - Pudukkottai", "", "13/09/2026 - 4:17 PM", "Mr Velu - Thiruvarur", "Mr Rao - Chennai", "", "13/09/2026 - 4:25 PM", "Mr Saravanan - Video call", "", "13/09/2026 - 7:35 PM", "Mrs Adaikkammai - Video call"].join("\n");
+await step("timeline groups by date with a daily summary; Copy for WhatsApp matches the format", async () => {
+  await view("Timeline"); await range("Custom");
+  await page.locator("#rou-from").fill("2026-09-13"); await page.locator("#rou-to").fill("2026-09-13"); await page.locator("#rou-to").dispatchEvent("change");
+  await page.getByText("4 visits and calls").waitFor();
+  assert.match(await page.locator(".acc-day-head").first().innerText(), /2 visits, 2 calls/);
+  await page.getByRole("button", { name: /Copy for WhatsApp/ }).click();
+  await page.getByText("Copied 4 visits. Paste them into WhatsApp.").waitFor();
+  assert.equal(await clip(), DAY);
+  const card = page.locator(".visit").filter({ hasText: "Velu" });
+  assert.match(await card.innerText(), /4:17 PM[\s\S]*In person[\s\S]*Mr Velu[\s\S]*Thiruvarur[\s\S]*Mr Rao/);
+  assert.equal(await page.locator(".visit .vbadge.v-video").count(), 2);
+  await page.screenshot({ path: DIR + "r2-timeline.png", fullPage: true });
+});
+await step("search, type, person and range filters update instantly", async () => {
+  await range("All");
+  await page.getByLabel("Search name or place").fill("singapore");
+  await page.getByText("6 visits and calls").waitFor();
+  await page.getByLabel("Search name or place").fill("");
+  await page.getByText("42 visits and calls").waitFor();
+  await page.locator("#rou-type").selectOption("video"); await page.getByText("14 visits and calls").waitFor();
+  await page.locator("#rou-type").selectOption("calls"); await page.getByText("15 visits and calls").waitFor();
+  await page.locator("#rou-type").selectOption("all");
+  const akka = (await people()).find((p) => p.name === "Adaikkammai");
+  await page.locator("#rou-person").selectOption(akka.id); await page.getByText("22 visits and calls").waitFor();
+  await page.locator("#rou-person").selectOption("all");
+  await range("This month"); await page.getByText("1 visit or call", { exact: false }).waitFor();   // 02/11 call (today is 04/11)
+  await range("All");
+});
+await step("group visit: existing person fills title and place, new name is added to People, fuzzy duplicate is flagged", async () => {
+  await page.getByRole("button", { name: "+ Add visit" }).click();
+  await page.getByRole("heading", { name: "Add visit" }).waitFor();
+  assert.match(await page.locator('[data-vf="date"]').inputValue(), /^\d{4}-\d{2}-\d{2}$/);
+  assert.match(await page.locator('[data-vf="time"]').inputValue(), /^\d{2}:\d{2}$/);
+  await page.locator('[data-vf="date"]').fill("2026-11-03"); await page.locator('[data-vf="time"]').fill("17:10"); await page.locator('[data-vf="end_time"]').fill("17:40");
+  await page.getByLabel("Name 1").fill("Velu");
+  assert.equal(await page.getByLabel("Place 1").inputValue(), "Thiruvarur");
+  assert.equal(await page.getByLabel("Title 1").inputValue(), "Mr");
+  await page.getByRole("button", { name: "+ Add another person" }).click();
+  await page.getByLabel("Name 2").fill("Adaikamai");
+  await page.getByText("Saved person: Adaikkammai").waitFor();   // same person after ignoring spelling
+  await page.getByLabel("Name 2").fill("Saravanen");
+  await page.getByText("Did you mean Saravanan").waitFor();
+  await page.getByLabel("Name 2").fill("Muthu Kumar");
+  await page.getByText("New person: will be added to People.").waitFor();
+  await page.getByLabel("Title 2").selectOption("Mr"); await page.getByLabel("Place 2").fill("Karaikudi");
+  await page.locator('[data-vf="note"]').fill("Brought fruits");
+  await page.getByRole("button", { name: "Save visit" }).click();
+  await page.getByText("Visit saved: Velu, Muthu Kumar.").waitFor();
+  const v = (await visits()).find((x) => x.note === "Brought fruits");
+  assert.equal(v.visitors.length, 2); assert.equal(v.end_time, "17:40");
+  assert.ok((await people()).some((p) => p.name === "Muthu Kumar" && p.place === "Karaikudi" && p.title === "Mr"));
+  assert.match(await page.locator(".visit").filter({ hasText: "Brought fruits" }).innerText(), /5:10 PM\s+to 5:40 PM \(30 min\)/);
+});
+await step("quick-log chip logs now and can be undone within 5 seconds", async () => {
+  const n = (await visits()).length;
+  await page.getByRole("button", { name: "Adaikkammai, video call" }).click();
+  await page.getByText(/Logged Adaikkammai, video call at/).waitFor();
+  assert.equal((await visits()).length, n + 1);
+  await page.getByRole("button", { name: "Undo" }).click();
+  await page.getByText("Removed Adaikkammai, video call.").waitFor();
+  assert.equal((await visits()).length, n);
+  await page.getByRole("button", { name: "Adaikkammai, video call" }).click();
+  await page.getByText(/Logged Adaikkammai/).waitFor();
+  await page.waitForTimeout(5400);
+  assert.equal(await page.getByRole("button", { name: "Undo" }).count(), 0, "undo hides after 5 seconds");
+  assert.equal((await visits()).length, n + 1);
+});
+await step("edit a visit and delete with confirmation", async () => {
+  const row = page.locator(".visit").filter({ hasText: "Brought fruits" });
+  await row.locator(".acc-row-btn").click();
+  await row.getByRole("button", { name: "Edit" }).click();
+  await page.getByRole("heading", { name: "Edit visit" }).waitFor();
+  await page.getByRole("button", { name: "Voice call" }).click();
+  await page.locator('[data-vf="note"]').fill("Brought fruits and juice");
+  await page.getByRole("button", { name: "Save changes" }).click();
+  await page.getByText("Visit updated: Velu, Muthu Kumar.").waitFor();
+  const r2 = page.locator(".visit").filter({ hasText: "Brought fruits and juice" });
+  assert.match(await r2.innerText(), /Voice call/);
+  await r2.locator(".acc-row-btn").click();
+  await r2.getByRole("button", { name: "Delete" }).click();
+  await page.getByText(/Delete this voice call on 03\/11\/2026 at 5:10 PM\?/).waitFor();
+  await page.getByRole("button", { name: "Keep" }).click();
+  assert.equal(await page.locator(".visit").filter({ hasText: "Brought fruits and juice" }).count(), 1);
+  await r2.getByRole("button", { name: "Delete" }).click();
+  await page.locator('[data-act="rou-del-yes"]').click();
+  await page.getByText("Visit deleted.").waitFor();
+  assert.equal((await visits()).filter((x) => x.note?.startsWith("Brought")).length, 0);
+});
+await step("Needs review entries can be marked reviewed", async () => {
+  const row = page.locator(".visit").filter({ hasText: "Joint call with Adaikkammai" });
+  await row.locator(".acc-row-btn").click();
+  await row.getByRole("button", { name: "Mark reviewed" }).click();
+  await page.getByText("Marked as reviewed.").waitFor();
+  assert.equal((await visits()).filter((x) => x.review).length, 10);
+});
+await step("People list shows counts; person history; add with duplicate warning; merge; archive", async () => {
+  await view("People");
+  const akkaRow = (await page.locator("tr", { hasText: "Adaikkammai" }).innerText()).replace(/\s+/g, " ");
+  assert.match(akkaRow, /Mrs Adaikkammai Quick log Singapore Akka 10 13 13\/09\/2026 (0[2-4])\/11\/2026/);
+  await page.getByRole("button", { name: "Mrs Adaikkammai" }).click();
+  await page.getByText(/Visit history \(2[34]\)/).waitFor();
+  await page.getByRole("button", { name: "Close" }).click();
+  await page.getByRole("button", { name: "+ Add person" }).click();
+  await page.locator("#pp-name").fill("Adaikkamai");
+  await page.getByText("This looks like Adaikkammai").waitFor();
+  await page.locator("#pp-name").fill("Ravi Shankar"); await page.locator('[data-pf2="place"]').fill("Madurai");
+  await page.getByRole("button", { name: "Add person", exact: true }).click();
+  await page.getByText("Ravi Shankar added.").waitFor();
+  // merge Muthu Kumar into Velu
+  await page.getByRole("button", { name: "Mr Muthu Kumar" }).click();
+  await page.getByRole("button", { name: "Merge into…" }).click();
+  const velu = (await people()).find((p) => p.name === "Velu");
+  await page.locator("#rou-merge-to").selectOption(velu.id);
+  await page.getByRole("button", { name: "Merge", exact: true }).click();
+  await page.getByText("Muthu Kumar merged into Velu.").waitFor();
+  assert.equal(await page.locator("tr", { hasText: "Muthu Kumar" }).count(), 0);
+  await page.getByRole("button", { name: "Ravi Shankar", exact: true }).click();
+  await page.getByRole("button", { name: "Archive", exact: true }).click();
+  await page.getByText("Ravi Shankar archived.").waitFor();
+  assert.equal(await page.locator("tr", { hasText: "Ravi Shankar" }).count(), 0);
+  await page.screenshot({ path: DIR + "r3-people.png", fullPage: true });
+});
+await step("survives a reload without importing again", async () => {
+  await page.reload();
+  await page.getByRole("button", { name: "Adaikkammai, video call" }).waitFor();
+  assert.equal((await log()).filter((x) => x[0] === "set" && x[1].startsWith("routine/visits/")).length, 0);
+  assert.equal(await page.getByRole("button", { name: /Import visitor log/ }).count(), 0, "no seed button once imported");
+});
+await step("works offline: a quick log is kept on the phone and synced later", async () => {
+  const n = (await visits()).length;
+  await ctx.setOffline(true);
+  try {
+    await page.getByRole("button", { name: "Adaikkammai, video call" }).click();
+    await page.getByText(/Logged Adaikkammai/).waitFor();
+    await page.getByText("1 change saved on this phone").waitFor();
+  } finally { await ctx.setOffline(false); }
+  await page.waitForFunction(() => window.__log.some((x) => x[0] === "set" && x[1].startsWith("routine/visits/")));
+  assert.equal((await visits()).length, n + 1);
+});
+await step("CSV export, printable PDF and CSV import", async () => {
+  await page.getByRole("button", { name: "Export CSV" }).click();
+  await page.waitForFunction(() => window.__log.some((x) => x[0] === "save" && x[1].startsWith("visitors-")));
+  const csv = (await page.evaluate(() => window.__lastSave)).replace(/^﻿/, "").trim().split("\r\n");
+  assert.equal(csv[0], "visit_id,date,time,end_time,title,name,place,type,note,relation,phone");
+  const n = (await log()).filter((x) => x[0] === "save").length;
+  await page.getByRole("button", { name: "Printable list (PDF)" }).click();
+  await page.waitForFunction((k) => window.__log.filter((x) => x[0] === "save").length > k, n, { timeout: 30000 });
+  assert.match((await log()).filter((x) => x[0] === "save").at(-1)[3], /^%PDF/);
+  writeFileSync(DIR + "rou-import.csv", "visit_id,date,time,end_time,title,name,place,type,note\nX1,05/11/2026,10:00 AM,,Mr,Kannan,Pudukkottai,In person,\nX1,05/11/2026,10:00 AM,,Ms,Padmavathi,Trichy,In person,\nX2,05/11/2026,6:30 PM,,Mrs,Adaikkammai,Singapore,Video call,\nX3,31/02/2026,6:30 PM,,,Bad,,In person,\n");
+  await page.locator("#rou-import-file").setInputFiles(DIR + "rou-import.csv");
+  await page.getByText("2 visits with 3 people rows; 1 new person.").waitFor();
+  await page.getByText("Line 5: date").waitFor();
+  await page.getByRole("button", { name: "Apply import" }).click();
+  await page.getByText("Imported 2 visits.").waitFor();
+  assert.ok((await people()).some((p) => p.name === "Padmavathi"));
+});
+await step("Staff can log visits but not import or merge; Viewer can only view", async () => {
+  const p2 = await ctx.newPage();
+  await p2.goto(URL_ + "?role=staff&persist=1#routine");
+  await p2.getByRole("button", { name: "+ Add visit" }).waitFor(); await p2.waitForTimeout(800);
+  assert.equal(await p2.getByRole("button", { name: /Import visits from CSV/ }).count(), 0);
+  await p2.getByRole("button", { name: "Adaikkammai, video call" }).click();
+  await p2.getByText(/Logged Adaikkammai/).waitFor();
+  await p2.goto(URL_ + "?role=viewer&persist=1#routine");
+  await p2.getByText(/visits and calls/).first().waitFor();
+  await p2.evaluate(() => { S.team.set(S.uid, { role: "viewer" }); render(); });   // viewer listed in Team
+  await p2.locator(".visit .acc-row-btn").first().click();
+  await p2.getByText("Your role can view visits only.").waitFor();
+  assert.equal(await p2.getByRole("button", { name: "+ Add visit" }).count(), 0);
+  await p2.close();
+});
+await step("billing and other tabs still work; no sideways scroll", async () => {
+  for (const t of ["Pharmacy", "Inventory", "Accounts", "Admin", "Home", "Routine"]) { await page.getByRole("link", { name: new RegExp(t + "$") }).click(); await page.waitForTimeout(150); }
+  await page.getByRole("link", { name: /Pharmacy$/ }).click();
+  await page.getByRole("button", { name: "Scan Bill" }).waitFor();
+  await page.getByRole("link", { name: /Routine$/ }).click();
+  for (const v of ["Timeline", "People", "Summary"]) { await view(v); assert.ok(!(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)), v); }
+  await page.getByRole("link", { name: /Admin$/ }).click();
+  await page.getByText("See the Routine tab (visitors log)").first().waitFor();
+});
+const dark = await browser.newContext({ ...devices["Pixel 7"], colorScheme: "dark" });
+await dark.route("https://fonts.*/**", (r) => r.abort());
+const pd = await dark.newPage(); pd.on("pageerror", (e) => errs.push(String(e)));
+await step("dark theme", async () => {
+  await pd.goto(URL_ + "?role=admin#routine");
+  await pd.getByText(/Imported the visitor log/).waitFor({ timeout: 60000 });
+  await pd.screenshot({ path: DIR + "r4-dark.png" });
+  await pd.getByRole("button", { name: "Summary", exact: true }).click(); await pd.locator('[data-act="rou-range"]', { hasText: /^All$/ }).click();
+  await pd.screenshot({ path: DIR + "r5-dark-summary.png", fullPage: true });
+});
+console.log(errs.length ? "Page errors:\n  " + errs.join("\n  ") : "No page errors");
+console.log(`${pass}/${pass + fail} passed`);
+await browser.close();
