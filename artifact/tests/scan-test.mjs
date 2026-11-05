@@ -261,6 +261,7 @@ await step("scans and values survive a reload; printable sheet includes the scan
   assert.match((await page.evaluate(() => window.__log)).filter((x) => x[0] === "save").at(-1)[3], /^%PDF/);
 });
 await step("Staff can scan; no regressions in other tabs", async () => {
+  await page.waitForTimeout(1500);   // let the stand-in's localStorage copy reach disk before another tab reads it
   const p2 = await ctx.newPage();
   await p2.goto(URL_ + "?role=staff&persist=1#routine");
   await p2.locator('section.card [data-act="scan-open-capture"]').waitFor();

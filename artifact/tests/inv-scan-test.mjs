@@ -115,6 +115,7 @@ await step("offline: pages wait as Pending reading and are read when back online
   await page.getByRole("button", { name: "‹ Back" }).click();
 });
 await step("Staff can scan and add counts but not change products", async () => {
+  await page.waitForTimeout(1500);   // let the stand-in's localStorage copy reach disk before another tab reads it
   const p2 = await ctx.newPage();
   await p2.goto(URL_ + "?role=staff&persist=1#inventory");
   await p2.locator(".scan-row", { hasText: "Needs review" }).getByRole("button", { name: "Review" }).click();

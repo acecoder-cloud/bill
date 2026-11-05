@@ -232,6 +232,7 @@ await step("Home dashboard shows the available balance", async () => {
   await page.getByRole("button", { name: "‹ Cancel" }).click();
 });
 await step("someone without a wallet sees only the invite-code screen (staff wallets are tested in wallet-test.mjs)", async () => {
+  await page.waitForTimeout(1500);   // let the stand-in's localStorage copy reach disk before another tab reads it
   const p2 = await ctx.newPage();
   await p2.goto(URL_ + "?role=staff&persist=1#accounts");
   await p2.getByRole("heading", { name: "Link your wallet" }).waitFor();

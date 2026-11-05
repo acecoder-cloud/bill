@@ -280,6 +280,7 @@ await step("photos, notes, supplies, doctor's comment; PDF sheet and CSV export"
   await page.screenshot({ path: DIR + "d4-today.png", fullPage: true });
 });
 await step("Staff can record and add tasks; Viewer sees the day read-only", async () => {
+  await page.waitForTimeout(1500);   // let the stand-in's localStorage copy reach disk before another tab reads it
   const p2 = await ctx.newPage();
   await p2.goto(URL_ + "?role=staff&persist=1#routine");
   await p2.locator("#dr-progress").waitFor();

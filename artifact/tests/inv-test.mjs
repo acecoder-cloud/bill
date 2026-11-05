@@ -249,6 +249,7 @@ await step("Home dashboard shows stock to reorder and orders on the way", async 
   await page.getByRole("heading", { name: "Reorder list" }).waitFor();
 });
 await step("permissions: Staff can count but not add products", async () => {
+  await page.waitForTimeout(1500);   // let the stand-in's localStorage copy reach disk before another tab reads it
   const p2 = await ctx.newPage();
   await p2.goto(URL_ + "?role=staff&persist=1#inventory");
   await p2.locator(".inv-card").first().waitFor();

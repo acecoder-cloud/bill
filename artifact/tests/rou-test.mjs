@@ -9,7 +9,7 @@ let pass = 0, fail = 0;
 const step = async (n, f) => { try { await f(); pass++; console.log("ok - " + n); } catch (e) { fail++; console.log("FAIL - " + n + "\n   " + e.message.split("\n").slice(0, 8).join("\n   ")); } };
 const LIBS = { "jspdf/2.5.1/jspdf.umd.min.js": "jspdf/dist/jspdf.umd.min.js", "jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js": "jspdf-autotable/dist/jspdf.plugin.autotable.min.js" };
 const ctx = await browser.newContext({ ...devices["Pixel 7"], permissions: ["clipboard-read", "clipboard-write"] });
-await ctx.addInitScript(() => { try { Object.defineProperty(navigator, "share", { value: undefined, configurable: true }); localStorage.setItem("pbl-rou-section", "visitors"); } catch {} });   // open the Visitors menu
+await ctx.addInitScript(() => { try { Object.defineProperty(navigator, "share", { value: undefined, configurable: true }); } catch {} });   // open the Visitors menu
 await ctx.route("https://cdnjs.cloudflare.com/ajax/libs/**", (route) => { const k = Object.keys(LIBS).find((x) => route.request().url().endsWith(x)); return k ? route.fulfill({ path: DIR + "libs/node_modules/" + LIBS[k], contentType: "text/javascript" }) : route.abort(); });
 await ctx.route("https://fonts.*/**", (r) => r.abort());
 const page = await ctx.newPage();
@@ -29,6 +29,7 @@ await page.goto(URL_ + "?role=admin&persist=1#routine");
 await step("Routine tab is in the navigation and the visitor log imports on first run", async () => {
   await page.getByRole("link", { name: /Routine$/ }).waitFor();
   await page.waitForFunction(() => ROU.settings.seeded_at && !ROU.seeding && ROU.visits.size, null, { timeout: 60000 });
+  await page.getByRole("tab", { name: "Visitors" }).click();   // the Visitors menu (the page remembers it on a real phone)
   const v = await visits();
   assert.equal(v.length, 42, "visits and calls");
   assert.equal(v.reduce((n, x) => n + x.visitors.length, 0), 53, "visitor rows");
@@ -181,6 +182,7 @@ await step("People list shows counts; person history; add with duplicate warning
 await step("survives a reload without importing again", async () => {
   await page.waitForTimeout(1500);   // let the stand-in's localStorage copy reach disk (Chromium saves it in batches)
   await page.reload();
+  await page.getByRole("tab", { name: "Visitors" }).click();
   await page.getByRole("button", { name: "Adaikkammai, video call" }).waitFor();
   assert.equal((await log()).filter((x) => x[0] === "set" && x[1].startsWith("routine/visits/")).length, 0);
   assert.equal(await page.getByRole("button", { name: /Import visitor log/ }).count(), 0, "no seed button once imported");
@@ -214,13 +216,16 @@ await step("CSV export, printable PDF and CSV import", async () => {
   assert.ok((await people()).some((p) => p.name === "Padmavathi"));
 });
 await step("Staff can log visits but not import or merge; Viewer can only view", async () => {
+  await page.waitForTimeout(1500);   // let the stand-in's localStorage copy reach disk before another tab reads it
   const p2 = await ctx.newPage();
   await p2.goto(URL_ + "?role=staff&persist=1#routine");
+  await p2.getByRole("tab", { name: "Visitors" }).click();
   await p2.getByRole("button", { name: "+ Add visit" }).waitFor(); await p2.waitForTimeout(800);
   assert.equal(await p2.getByRole("button", { name: /Import visits from CSV/ }).count(), 0);
   await p2.getByRole("button", { name: "Adaikkammai, video call" }).click();
   await p2.getByText(/Logged Adaikkammai/).waitFor();
   await p2.goto(URL_ + "?role=viewer&persist=1#routine");
+  await p2.getByRole("tab", { name: "Visitors" }).click();
   await p2.getByText(/visits and calls/).first().waitFor();
   await p2.evaluate(() => { S.team.set(S.uid, { role: "viewer" }); render(); });   // viewer listed in Team
   await p2.locator(".visit .acc-row-btn").first().click();
