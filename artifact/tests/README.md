@@ -11,6 +11,7 @@ node acc-test.mjs        # accounts (17 checks, including the WhatsApp-ledger to
 node rou-test.mjs        # routine / visitors (15 checks, including the visitor-log totals and WhatsApp text)
 node dr-test.mjs         # daily routine (17 checks: sample day 42 of 64, WhatsApp text, overdue, add task, updates; clock pinned to 05/11/2026 2:10 PM IST)
 node scan-test.mjs       # notebook scan (11 checks: review, merge into the day, re-scan without duplicates, hand edits kept, offline queue, PDF)
+node repair-test.mjs     # repair of a live app whose template never loaded (3 checks)
 ```
 
 Needs Playwright with Chromium, `sample-bill.png` next to the scripts, and the report/PDF libraries

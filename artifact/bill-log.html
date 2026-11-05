@@ -1318,7 +1318,7 @@ function paintAdmin() {
   const team = $("#team"); if (team) paintNames(team).then(() => showLabelBoxes(team));
   const a = S.audit; const box = $("#audit-list"); if (!box || !a?.rows) return;
   if (!a.rows.length) { box.innerHTML = `<p class="muted">No activity yet.</p>`; return; }
-  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed", "roles.update": "Role permissions changed", "inventory.seed": "Stock register loaded", "inventory.add": "Product added", "inventory.edit": "Product edited", "inventory.archive": "Product archived", "inventory.restore": "Product restored", "inventory.delete": "Product deleted", "inventory.month": "Stock month started", "inventory.import": "Stock CSV imported", "inventory.delivered": "Order delivered", "accounts.add": "Account entry added", "accounts.edit": "Account entry edited", "accounts.delete": "Account entry deleted", "accounts.seed": "WhatsApp ledger imported", "accounts.import": "Account entries imported", "routine.add": "Visit logged", "routine.edit": "Visit edited", "routine.delete": "Visit deleted", "routine.merge": "People merged", "routine.seed": "Visitor log imported", "routine.import": "Visits imported", "routine.daily_seed": "Daily routine loaded", "routine.task_add": "Routine task added", "routine.task_delete": "Routine task deleted", "routine.plan": "Medicine/feed plan changed", "routine.scan_save": "Notebook scan saved", "routine.scan_delete": "Notebook scan deleted" };
+  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed", "roles.update": "Role permissions changed", "inventory.seed": "Stock register loaded", "inventory.add": "Product added", "inventory.edit": "Product edited", "inventory.archive": "Product archived", "inventory.restore": "Product restored", "inventory.delete": "Product deleted", "inventory.month": "Stock month started", "inventory.import": "Stock CSV imported", "inventory.delivered": "Order delivered", "accounts.add": "Account entry added", "accounts.edit": "Account entry edited", "accounts.delete": "Account entry deleted", "accounts.seed": "WhatsApp ledger imported", "accounts.import": "Account entries imported", "routine.add": "Visit logged", "routine.edit": "Visit edited", "routine.delete": "Visit deleted", "routine.merge": "People merged", "routine.seed": "Visitor log imported", "routine.import": "Visits imported", "routine.daily_seed": "Daily routine loaded", "routine.task_add": "Routine task added", "routine.task_delete": "Routine task deleted", "routine.plan": "Medicine/feed plan changed", "routine.scan_save": "Notebook scan saved", "routine.scan_delete": "Notebook scan deleted", "routine.relink": "Scanned entries moved onto routine tasks" };
   box.innerHTML = a.rows.map((r, i) => `<details><summary><b>${esc(label[r.action] || r.action)}</b>
     <span class="small muted">by <span data-uid="${esc(r.actor)}"></span> · ${esc(fmtDT(r.at))} · ${r.action === "roles.update" ? "Admin / Staff / Viewer permissions" : r.action.startsWith("inventory.") ? esc((r.after || r.before || {}).name || (r.after || {}).month || "Inventory") : r.action.startsWith("accounts.") ? (() => { const x = r.after || r.before || {}; return x.amount != null ? esc(`${x.type === "received" ? "received" : (x.lines || []).map((l) => l.name).join(" & ")} ${inr(x.amount)} on ${dmy(x.date)}`) : "Accounts"; })() : r.action.startsWith("team.") ? `<span data-uid="${esc((r.after || r.before || {}).member || "")}"></span>${r.after?.role ? " → " + esc(ROLES[r.after.role]?.label || r.after.role) : ""}` : `bill ${(r.after || r.before || {}).bill_no ? "No. " + esc((r.after || r.before).bill_no) + " of " : "of "}${esc(fmtDate((r.after || r.before || {}).bill_date))}`}</span></summary>
     <div class="pair"><div><div class="small muted">Before</div><pre data-json="b${i}"></pre></div><div><div class="small muted">After</div><pre data-json="a${i}"></pre></div></div></details>`).join("");
@@ -4253,7 +4253,7 @@ document.addEventListener("submit", (e) => {
    routine/plans/list/<id>    {kind: meds|feed, from, data}  (effective-from versions, so past days keep what was given)
    routine/staff/list/<id>    {name, role, detail, archived}
    routine/updates/list/<id>  family update checklist {name, times: [{at, until}], note, order, archived} */
-const DR_TASKS = "routine/tasks/list", DR_DAYS = "routine/days/list", DR_PLANS = "routine/plans/list", DR_STAFF = "routine/staff/list", DR_UPD = "routine/updates/list", DR_LOCK = "routine/locks/daily";
+const DR_TASKS = "routine/tasks/list", DR_DAYS = "routine/days/list", DR_PLANS = "routine/plans/list", DR_STAFF = "routine/staff/list", DR_UPD = "routine/updates/list", DR_LOCK = "routine/daily_lock";
 const DR_SECTIONS = ["Care & hygiene", "Nebulizer", "RT feed", "Medication", "Vitals", "Oral feed", "Output", "Doctor's comment", "Physiotherapy & therapy", "Visitors", "Notes", "Supplies used"];
 const DR_LABEL = { Notes: "Room issues, improvement & discussion" };
 const DR_PLAN_SECTIONS = new Set(["RT feed", "Medication", "Doctor's comment", "Visitors"]);   // filled from plans/lists, not task templates
@@ -4489,11 +4489,33 @@ function drTick() {
   if (S.tab === "routine" && ROU.section === "daily" && !S.editor && !rouBusy()) render();
 }
 function drMaybeSeed() {
-  if (!Object.values(DR.loaded).every(Boolean) || !ROU.loaded.settings || DR.seeding || ROU.settings.daily_seeded_at || DR.tasks.size) return;
-  if (S.me?.isOwner && canRouManage()) drSeed(true);
+  if (!Object.values(DR.loaded).every(Boolean) || !ROU.loaded.settings || DR.seeding) return;
+  if (!S.me?.isOwner || !canRouManage()) return;
+  if (!drHasTemplate() && !ROU.settings.daily_seeded_at && !DR.seedFailed) { drSeed(true); return; }
+  if (drHasTemplate() && drRelinkable().length && !DR.relinking) drRelinkOnce();
 }
 
 /* ---------- seed: template, medicines, feed plan, staff, updates and the filled sample day 04/11/2026 ---------- */
+const drHasTemplate = () => [...DR.tasks.values()].some((t) => t.kind !== "once");
+/** One-off tasks a scan created only because the template was missing, that now have a regular task with the same name. */
+function drRelinkable() { return allTasks().filter((t) => t.kind === "once" && t.src).map((t) => ({ t, to: matchTask(t.name) })).filter((x) => x.to); }
+async function drRelinkOnce() {
+  DR.relinking = true; let moved = 0;
+  try {
+    const byDay = new Map(); for (const x of drRelinkable()) { if (!byDay.has(x.t.date)) byDay.set(x.t.date, []); byDay.get(x.t.date).push(x); }
+    for (const [d, list] of byDay) {
+      const day = dayDoc(d); const patch = {};
+      for (const { t, to } of list) {
+        const target = drTask(to); const taken = occsFor(day, to);
+        for (const o of occsFor(day, t.id)) { const sched = schedFor(target, o.time, taken); taken.push({ ...o, sched }); (patch.occ = patch.occ || {})[o.id] = { task: to, sched: sched || null }; moved++; }
+      }
+      if (patch.occ) await dayWrite(d, patch);
+      for (const { t } of list) await rouWrite("delete", `${DR_TASKS}/${t.id}`);
+    }
+    if (moved) { writeAudit("routine.relink", null, "routine", null, { moved }); flash(`Moved ${moved} scanned entr${moved === 1 ? "y" : "ies"} onto the routine tasks. Open the scan again to add anything it couldn't place before (such as vitals).`); }
+  } catch (e) { flash(dbErrorText(e)); }
+  finally { DR.relinking = false; rouRefresh(); }
+}
 function drSeedWrites() {
   const now = nowISO(); const W = []; const ids = new Map();
   parseCsv(DR_SEED_TASKS).slice(1).forEach(([section, name, type, unit, sched, details], i) => {
@@ -4503,11 +4525,12 @@ function drSeedWrites() {
   });
   const slots = { morning: [], afternoon: [], night: [] }; for (const [slot, item] of parseCsv(DR_SEED_MEDS).slice(1)) if (item) slots[slot.trim().toLowerCase()]?.push(item.trim());
   const items = parseCsv(DR_SEED_FEED).slice(1).filter((r) => r[0]).map(([time, feed]) => ({ time: to24(time), item: (feed || "").trim() }));
-  W.push([`${DR_PLANS}/pmeds${DR_START.replaceAll("-", "")}`, { kind: "meds", from: DR_START, data: { slots }, created_at: now, created_by: S.uid }]);
-  W.push([`${DR_PLANS}/pfeed${DR_START.replaceAll("-", "")}`, { kind: "feed", from: DR_START, data: { items }, created_at: now, created_by: S.uid }]);
-  [...DR_SEED_STAFF, ["Pavadharani", "family"]].forEach(([name, role, detail], i) => W.push([`${DR_STAFF}/s${String(i + 1).padStart(3, "0")}`, { name, role, detail: detail || "", archived: false, created_at: now }]));
-  DR_SEED_UPDATES.forEach(([name, times, note], i) => W.push([`${DR_UPD}/u${i + 1}`, { name, times: times.map(([at, until]) => ({ at, until: until || "" })), note, order: (i + 1) * 10, archived: false, created_at: now }]));
-  W.push([`${DR_DAYS}/${DR_START}`, drSampleDay((n) => ids.get(n), slots, items, now)]);
+  if (!planFor("meds", "9999-12-31")) W.push([`${DR_PLANS}/pmeds${DR_START.replaceAll("-", "")}`, { kind: "meds", from: DR_START, data: { slots }, created_at: now, created_by: S.uid }]);
+  if (!planFor("feed", "9999-12-31")) W.push([`${DR_PLANS}/pfeed${DR_START.replaceAll("-", "")}`, { kind: "feed", from: DR_START, data: { items }, created_at: now, created_by: S.uid }]);
+  [...DR_SEED_STAFF, ["Pavadharani", "family"]].forEach(([name, role, detail], i) => { const ex = staffByName(name);
+    W.push(ex ? [`${DR_STAFF}/${ex.id}`, { ...DR.staff.get(ex.id), name, role, detail: detail || ex.detail || "" }] : [`${DR_STAFF}/s${String(i + 1).padStart(3, "0")}`, { name, role, detail: detail || "", archived: false, created_at: now }]); });
+  if (!DR.updates.size) DR_SEED_UPDATES.forEach(([name, times, note], i) => W.push([`${DR_UPD}/u${i + 1}`, { name, times: times.map(([at, until]) => ({ at, until: until || "" })), note, order: (i + 1) * 10, archived: false, created_at: now }]));
+  if (!DR.days.has(DR_START)) W.push([`${DR_DAYS}/${DR_START}`, drSampleDay((n) => ids.get(n), slots, items, now)]);   // never overwrite a real day
   return W;
 }
 function drSampleDay(T, slots, items, now) {
@@ -4545,8 +4568,8 @@ function drSampleDay(T, slots, items, now) {
 }
 async function drSeed(auto) {
   if (DR.seeding || !canRouManage()) return;
-  if (ROU.settings.daily_seeded_at) { flash("The daily routine was already loaded."); return; }
-  DR.seeding = { done: 0, total: 0 }; rouRefresh();
+  if (drHasTemplate()) { flash("The daily routine was already loaded."); return; }
+  DR.seedFailed = false; DR.seeding = { done: 0, total: 0 }; rouRefresh();
   try {
     if (auto) {
       const lease = await S.caps.db.doc(DR_LOCK).acquire({ holder: S.uid, ttlMs: 60000 }).catch(() => ({ acquired: true }));
@@ -4559,8 +4582,9 @@ async function drSeed(auto) {
     await rouWrite("set", ROU_SETTINGS, { ...ROU.settings, daily_seeded_at: nowISO() });
     const nt = W.filter(([p]) => p.startsWith(DR_TASKS)).length, ns = W.filter(([p]) => p.startsWith(DR_STAFF)).length;
     writeAudit("routine.daily_seed", null, "routine", null, { tasks: nt, staff: ns });
+    if (drRelinkable().length) await drRelinkOnce();
     flash(`Loaded the daily routine: ${nt} tasks, the medicine list and feed plan, ${ns} staff, the update checklist and the sample day 04/11/2026.`);
-  } catch (e) { flash(dbErrorText(e).replace("save this bill", "load the daily routine")); }
+  } catch (e) { DR.seedFailed = true; flash(dbErrorText(e).replace("save this bill", "load the daily routine") + " Use “Load the routine template” to try again."); }
   finally { DR.seeding = null; rouRefresh(); }
 }
 
@@ -4573,7 +4597,7 @@ function dailyView() {
   if (DR.planForm) return planFormView();
   const n = drAlertCount();
   return `${DR.seeding ? `<div class="note">Loading the daily routine… ${DR.seeding.done} of ${DR.seeding.total}</div>` : ""}
-  ${!DR.tasks.size && !DR.seeding ? `<div class="card"><p class="muted">No routine tasks yet.</p>${canRouManage() && !ROU.settings.daily_seeded_at ? `<button class="btn btn-primary btn-block" data-act="dr-seed">Load the routine template and sample day</button>` : ""}</div>` : ""}
+  ${!drHasTemplate() && !DR.seeding ? `<div class="card"><p class="muted">The routine template (tasks, medicines, feed plan) isn't loaded yet.</p>${canRouManage() ? `<button class="btn btn-primary btn-block" data-act="dr-seed">Load the routine template</button>` : `<p class="small muted">Ask the owner to open Routine once to load it.</p>`}</div>` : ""}
   <div class="seg" role="group" aria-label="Daily Routine view">${[["day", "Day"], ["updates", `Updates${n ? ` (${n})` : ""}`], ["trends", "Trends"], ["manage", "Manage"]].map(([v, l]) => `<button data-act="dr-view" data-v="${v}" aria-pressed="${DR.view === v}">${l}</button>`).join("")}</div>
   ${staffDatalist()}
   ${DR.view === "updates" ? updatesView() : DR.view === "trends" ? trendsView() : DR.view === "manage" ? manageView() : dayView()}`;
@@ -5467,7 +5491,7 @@ window.addEventListener("online", () => setTimeout(processPendingScans, 2500));
 
 /* ---------- review: compare every scanned value with what the day already has ---------- */
 function matchTask(name) {
-  const k = fuzzyKey(name); if (!k) return null; const ts = allTasks().filter((t) => taskStatus(t) !== "archived");
+  const k = fuzzyKey(name); if (!k) return null; const ts = allTasks().filter((t) => taskStatus(t) !== "archived" && t.kind !== "once");
   return (ts.find((t) => fuzzyKey(t.name) === k) || ts.find((t) => fuzzyKey(t.name).startsWith(k) || k.startsWith(fuzzyKey(t.name))) || ts.find((t) => lev(fuzzyKey(t.name), k) <= 2))?.id || null;
 }
 function matchStaff(name) { if (!name) return ""; const s = staffByName(name); if (s) return s.name; const k = personKey(name); const al = staffList().find((x) => (x.aliases || []).some((a) => personKey(a) === k)); if (al) return al.name; const near = staffList().find((x) => lev(personKey(x.name), k) <= 1); return near ? near.name : name; }
@@ -5519,6 +5543,7 @@ function reviewStatus(it, date) {
     return { st: fieldsStatus(f), f, ex };
   }
   if (it.kind === "vitals") {
+    if (!VITAL_TASKS.some(([k, name]) => v[k] && matchTask(name))) return { st: "needs", why: "vitals" };
     const f = {}, ex = {}; let any = false;
     for (const [k, name] of VITAL_TASKS) { if (!v[k]) continue; const tid = matchTask(name); const t = tid && drTask(tid); if (!t) continue; const os = occsFor(day, t.id);
       const o = k === "sugar" ? os.find((x) => x.sched === (t.times?.[0] || null)) || os[0] : os.find((x) => x.slot === v.slot); ex[k] = o || null; if (o) any = true;
@@ -5558,6 +5583,7 @@ function reviewView() {
       <section class="card"><div class="dates"><label class="field"><span>Save to date</span><input class="inp" type="date" id="scan-date" value="${esc(R.date)}"></label>
         <div class="small muted" style="align-self:end">${R.readDate ? `Read as ${dmy(R.readDate)}` : "No date found on the pages"}${pagesDates.length > 1 ? `<br><b class="bad-ink">Pages show different dates: ${pagesDates.map(dmy).join(", ")}</b>` : ""}</div></div>
         <p class="small"><b>${count("new") + count("fill")}</b> to add · <b>${count("same")}</b> already saved · <b class="${count("conflict") ? "bad-ink" : ""}">${count("conflict")}</b> differ${count("needs") ? ` · <b class="bad-ink">${count("needs")} need a match</b>` : ""}</p>
+        ${!drHasTemplate() ? `<div class="note bad small">The routine template isn't loaded, so these rows can't be matched to tasks. Go back, load it from the Daily Routine page, then open this scan again.</div>` : ""}
         <p class="small muted">Values that differ keep what is saved unless you pick the scan. Nothing is saved until you press Save. Tap <b>Checked</b> on a section once its values are right.</p>
         ${(() => { const secs = order.filter((sec) => st.some((x) => x.it.sec === sec)); const n = secs.filter((x) => R.checked.includes(x)).length; return secs.length ? `<p class="small" id="scan-checked-count"><b>${n} of ${secs.length}</b> sections checked</p>` : ""; })()}</section>
       ${order.map((sec) => { const xs = st.filter((x) => x.it.sec === sec); if (!xs.length && !(sec === "Visitors" && R.noVisitors)) return "";
@@ -5605,7 +5631,7 @@ function reviewItem(it, rs, date) {
       ${inp("by", "S/N", "text", 'list="dr-staff-list"')}`;
   } else if (it.kind === "vitals") {
     title = `${slotName(v.slot)} vitals`;
-    body = `<div class="dr-vgrid">${inp("temp", "Temperature (°F)", "text", 'inputmode="decimal"')}${inp("pulse", "Pulse (/min)", "text", 'inputmode="numeric"')}${inp("spo2", "SpO2 (%)", "text", 'inputmode="numeric"')}${inp("bp", "BP (mmHg)")}${inp("sugar", "Sugar (mg/dl)", "text", 'inputmode="numeric"')}</div>${inp("by", "S/N", "text", 'list="dr-staff-list"')}`;
+    body = `${rs.why === "vitals" ? `<div class="note bad small">There are no Temperature/Pulse/SpO2/BP tasks to put these in. Load the routine template (Daily Routine → Manage), then open this scan again.</div>` : ""}<div class="dr-vgrid">${inp("temp", "Temperature (°F)", "text", 'inputmode="decimal"')}${inp("pulse", "Pulse (/min)", "text", 'inputmode="numeric"')}${inp("spo2", "SpO2 (%)", "text", 'inputmode="numeric"')}${inp("bp", "BP (mmHg)")}${inp("sugar", "Sugar (mg/dl)", "text", 'inputmode="numeric"')}</div>${inp("by", "S/N", "text", 'list="dr-staff-list"')}`;
   } else if (it.kind === "doc") { title = "Doctor's comment"; body = `<div class="dates">${inp("name", "Doctor", "text", 'list="dr-staff-list"')}${inp("time", "Time", "time")}</div>${inp("comment", "Comment")}`; }
   else if (it.kind === "note") { title = (NOTE_KEYS.find(([k]) => k === v.key) || [, ""])[1]; body = inp("text", "Text"); }
   else if (it.kind === "visit") { title = "Visitor"; body = `<div class="dates">${inp("time", "Time", "time")}${inp("name", "Name")}</div>${inp("place", "Place")}<p class="small muted">Added to Visitors, tagged “From notebook scan”.</p>`; }

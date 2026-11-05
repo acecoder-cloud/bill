@@ -27,6 +27,7 @@
   const visibleDocs = (col) => childrenOf(col).filter((p) => !(p.startsWith("audit") && ROLE !== "admin")).map(snapDoc);
   const notify = () => subs.forEach((f) => f());
   function query(col, filters = { order: null, lim: null }) {
+    if (col.split("/").length % 2 === 0) throw { code: "invalid_argument", message: "A collection path needs an odd number of segments: " + col };
     const run = () => { let d = visibleDocs(col); if (filters.order) { const [f, dir] = filters.order; d.sort((a, b) => String(a.data()[f]).localeCompare(String(b.data()[f])) * (dir === "desc" ? -1 : 1)); } if (filters.lim) d = d.slice(0, filters.lim); return { docs: d, size: d.length, empty: !d.length, docChanges: () => [], metadata: { fromCache: false, hasPendingWrites: false } }; };
     return {
       path: col,
@@ -41,6 +42,7 @@
   }
   function canWrite(path) { if (ROLE === "admin") return true; const seg = path.split("/"); if (seg[0] === "inventory") return seg[1] === "months"; if (seg[0] === "accounts") return seg[1] !== "settings"; if (seg[0] === "routine") return seg[1] !== "settings"; return (seg[0] === "bills" || seg[0] === "audit" || seg[0] === "people") && seg[1] === UID; }
   function docRef(path) {
+    if (path.split("/").length % 2) throw { code: "invalid_argument", message: "A document path needs an even number of segments: " + path };   // like the real store
     return {
       id: path.split("/").pop(), path,
       get: async () => snapDoc(path),
