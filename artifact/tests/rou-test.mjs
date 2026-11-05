@@ -179,6 +179,7 @@ await step("People list shows counts; person history; add with duplicate warning
   await page.screenshot({ path: DIR + "r3-people.png", fullPage: true });
 });
 await step("survives a reload without importing again", async () => {
+  await page.waitForTimeout(1500);   // let the stand-in's localStorage copy reach disk (Chromium saves it in batches)
   await page.reload();
   await page.getByRole("button", { name: "Adaikkammai, video call" }).waitFor();
   assert.equal((await log()).filter((x) => x[0] === "set" && x[1].startsWith("routine/visits/")).length, 0);
@@ -238,11 +239,11 @@ await step("billing and other tabs still work; no sideways scroll", async () => 
 });
 const dark = await browser.newContext({ ...devices["Pixel 7"], colorScheme: "dark" });
 await dark.route("https://fonts.*/**", (r) => r.abort());
-await dark.addInitScript(() => { try { localStorage.setItem("pbl-rou-section", "visitors"); } catch {} });
 const pd = await dark.newPage(); pd.on("pageerror", (e) => errs.push(String(e)));
 await step("dark theme", async () => {
   await pd.goto(URL_ + "?role=admin#routine");
   await pd.waitForFunction(() => ROU.settings.seeded_at && !ROU.seeding && ROU.visits.size, null, { timeout: 60000 });
+  await pd.getByRole("tab", { name: "Visitors" }).click();
   await pd.screenshot({ path: DIR + "r4-dark.png" });
   await pd.getByRole("button", { name: "Summary", exact: true }).click(); await pd.locator('[data-act="rou-range"]', { hasText: /^All$/ }).click();
   await pd.screenshot({ path: DIR + "r5-dark-summary.png", fullPage: true });

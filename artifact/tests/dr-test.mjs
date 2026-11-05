@@ -240,6 +240,7 @@ await step("trends: vitals charts, task completion, calendar with completion; ta
   await page.getByRole("button", { name: "Go to today" }).click();
 });
 await step("survives a reload and works offline", async () => {
+  await page.waitForTimeout(1500);   // let the stand-in's localStorage copy reach disk (Chromium saves it in batches)
   await page.reload();
   await page.locator("#dr-progress").waitFor();
   assert.equal(await progress(), "9 of 65 done");

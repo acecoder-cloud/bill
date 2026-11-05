@@ -169,6 +169,7 @@ await step("+ Add new item: duplicate warning ignores spelling variants; new ite
   assert.match(await page.locator("tr", { hasText: "Biscuit" }).innerText(), /₹30/);
 });
 await step("survives a reload", async () => {
+  await page.waitForTimeout(1500);   // let the stand-in's localStorage copy reach disk (Chromium saves it in batches)
   await page.reload();
   await page.getByRole("button", { name: /^Banana ₹20$/ }).waitFor();
   assert.equal((await log()).filter((x) => x[0] === "set" && x[1].startsWith("accounts/tx/")).length, 0, "no re-import after reload");

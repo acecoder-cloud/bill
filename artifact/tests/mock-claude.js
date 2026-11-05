@@ -1,9 +1,21 @@
 // Stand-in for window.claude used only to exercise the page locally.
 (() => {
   const PERSIST = new URLSearchParams(location.search).get("persist") === "1";
-  let saved = null; try { saved = PERSIST ? JSON.parse(localStorage.getItem("mock-store") || "null") : null; } catch {}
+  // Chromium can drop localStorage writes on file:// pages across a reload, so the store is also kept in this tab's
+  // window.name (which survives reloads). The newer of the two copies wins, so another tab's later writes still count.
+  const WN = "mock-store:";
+  const _clear = Storage.prototype.clear; Storage.prototype.clear = function () { if (this === window.localStorage) window.name = ""; return _clear.call(this); };
+  let saved = null;
+  try {
+    if (PERSIST) {
+      const ls = { t: Number(localStorage.getItem("mock-store-t") || 0), j: localStorage.getItem("mock-store") };
+      const m = window.name.startsWith(WN) ? /^(\d+)\|([\s\S]*)$/.exec(window.name.slice(WN.length)) : null; const wn = m ? { t: Number(m[1]), j: m[2] } : { t: -1, j: null };
+      saved = JSON.parse((wn.t > ls.t ? wn.j : ls.j) || "null");
+    }
+  } catch {}
   const store = new Map(saved || []); const subs = new Set(); const log = (window.__log = []);
-  const persist = () => { if (PERSIST) localStorage.setItem("mock-store", JSON.stringify([...store])); };
+  let persistN = 0;
+  const persist = () => { if (!PERSIST) return; const j = JSON.stringify([...store]); const t = Date.now() * 1000 + (persistN++ % 1000); localStorage.setItem("mock-store", j); localStorage.setItem("mock-store-t", String(t)); window.name = WN + t + "|" + j; };
   const isObj = (v) => v && typeof v === "object" && !Array.isArray(v);
   const merge = (t, src) => { for (const [k, v] of Object.entries(src)) { if (isObj(v) && isObj(t[k])) merge(t[k], v); else t[k] = JSON.parse(JSON.stringify(v)); } return t; };
   const ROLE = (window.__ROLE = new URLSearchParams(location.search).get("role") || "admin");

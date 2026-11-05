@@ -521,6 +521,10 @@ pre.wa { margin: 0; padding: 12px; border-radius: 12px; background: var(--surfac
 .scan-newname { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
 .scan-newname select { min-height: 36px; }
 .scan-actions { position: sticky; bottom: calc(72px + env(safe-area-inset-bottom)); display: grid; grid-template-columns: 2fr 1fr; gap: 8px; background: var(--bg, var(--surface)); padding: 8px 0; z-index: 2; }
+.scan-sec.is-checked { border-color: color-mix(in srgb, var(--ok-ink) 45%, transparent); }
+.btn-checked { background: var(--ok-bg); color: var(--ok-ink); border-color: color-mix(in srgb, var(--ok-ink) 45%, transparent); font-weight: 800; }
+.scan-item.scan-short .pill { flex: none; white-space: nowrap; }
+.scan-item.scan-short { flex-direction: row; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 0; border-left: 0; background: none; overflow-wrap: anywhere; }
 .scan-row { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--line); padding-top: 8px; }
 .audit { display: flex; flex-direction: column; gap: 8px; }
 .audit details { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
@@ -5484,7 +5488,7 @@ function buildReview(id) {
   for (const [k] of NOTE_KEYS) if (r.notes[k]) push("Notes", "note", { key: k, text: r.notes[k] }, "high", null);
   for (const t of r.unmatched) push("Unmatched", "text", { text: t, assign: "" }, "medium", null);
   const noVisitors = r.visitors.length && !r.visitors.some((x) => x.name) ? r.visitors[0].raw || "No visitors" : "";
-  return { id, date: isISODate(s.result?.date) ? s.result.date : s.date, readDate: s.result?.date || "", items, noVisitors, page: 0, confirmDiscard: false };
+  return { checked: [], id, date: isISODate(s.result?.date) ? s.result.date : s.date, readDate: s.result?.date || "", items, noVisitors, page: 0, confirmDiscard: false };
 }
 function openReview(id) { const s = DR.scans.get(id); if (!s?.result) return; DR.review = buildReview(id); DR.scan = null; ROU.section = "daily"; render(); window.scrollTo(0, 0); }
 const same = (a, b) => normName(a) === normName(b);
@@ -5554,15 +5558,32 @@ function reviewView() {
       <section class="card"><div class="dates"><label class="field"><span>Save to date</span><input class="inp" type="date" id="scan-date" value="${esc(R.date)}"></label>
         <div class="small muted" style="align-self:end">${R.readDate ? `Read as ${dmy(R.readDate)}` : "No date found on the pages"}${pagesDates.length > 1 ? `<br><b class="bad-ink">Pages show different dates: ${pagesDates.map(dmy).join(", ")}</b>` : ""}</div></div>
         <p class="small"><b>${count("new") + count("fill")}</b> to add · <b>${count("same")}</b> already saved · <b class="${count("conflict") ? "bad-ink" : ""}">${count("conflict")}</b> differ${count("needs") ? ` · <b class="bad-ink">${count("needs")} need a match</b>` : ""}</p>
-        <p class="small muted">Values that differ keep what is saved unless you pick the scan. Nothing is saved until you press Save.</p></section>
+        <p class="small muted">Values that differ keep what is saved unless you pick the scan. Nothing is saved until you press Save. Tap <b>Checked</b> on a section once its values are right.</p>
+        ${(() => { const secs = order.filter((sec) => st.some((x) => x.it.sec === sec)); const n = secs.filter((x) => R.checked.includes(x)).length; return secs.length ? `<p class="small" id="scan-checked-count"><b>${n} of ${secs.length}</b> sections checked</p>` : ""; })()}</section>
       ${order.map((sec) => { const xs = st.filter((x) => x.it.sec === sec); if (!xs.length && !(sec === "Visitors" && R.noVisitors)) return "";
-        return `<section class="card"><h2>${esc(sec === "Unmatched" ? "Unmatched text" : DR_LABEL[sec] || sec)}</h2>${sec === "Visitors" && R.noVisitors ? `<p class="small muted">Notebook says: “${esc(R.noVisitors)}”. No visitors will be added.</p>` : ""}${xs.map(({ it, s: rs }) => reviewItem(it, rs, R.date)).join("")}</section>`; }).join("")}
+        const done = R.checked.includes(sec); const label = sec === "Unmatched" ? "Unmatched text" : DR_LABEL[sec] || sec;
+        return `<section class="card scan-sec ${done ? "is-checked" : ""}" data-scansec="${esc(sec)}"><div class="row-between"><h2>${esc(label)}</h2>${xs.length ? `<button class="btn ${done ? "btn-checked" : "btn-ghost"} btn-sm" data-act="scan-check-sec" data-sec="${esc(sec)}" aria-pressed="${done}" aria-label="${done ? `${esc(label)} checked. Tap to undo` : `Mark ${esc(label)} as checked`}">${done ? "✓ Checked" : "Checked"}</button>` : ""}</div>${sec === "Visitors" && R.noVisitors ? `<p class="small muted">Notebook says: “${esc(R.noVisitors)}”. No visitors will be added.</p>` : ""}${xs.map(({ it, s: rs }) => (done && rs.st !== "needs" ? reviewItemShort(it, rs) : reviewItem(it, rs, R.date))).join("")}</section>`; }).join("")}
       <div class="scan-actions"><button class="btn btn-primary" data-act="scan-save">Save to ${esc(dmy(R.date))}</button><button class="btn btn-danger" data-act="scan-discard">Discard</button></div>
       ${R.confirmDiscard ? `<div class="note bad confirm"><span>Discard this scan? Its pages are deleted and nothing is saved.</span><button class="btn btn-danger" data-act="scan-discard-yes">Discard</button><button class="btn btn-ghost" data-act="scan-discard-no">Keep</button></div>` : ""}
     </div>
   </div>`;
 }
 const ST_LABEL = { new: ["New", "ok"], fill: ["Adds details", "ok"], same: ["Already saved", ""], conflict: ["Differs: choose", "bad"], needs: ["Needs a match", "bad"], text: ["Not placed", "warn"] };
+/** One line per value once its section is marked Checked. */
+function reviewItemShort(it, rs) {
+  const v = it.v; const [lab, tone] = ST_LABEL[rs.st]; const t = it.kind === "occ" && v.tid && v.tid !== "__once" ? drTask(v.tid) : null;
+  const tm = (a, b) => [a && fmtTime(a), b && fmtTime(b)].filter(Boolean).join("–");
+  const parts = it.kind === "occ" ? [t?.name || v.task, tm(v.time, v.end), v.item, t?.type === "value" && v.value ? withUnit(v.value, t.unit) : "", v.text, v.by, v.note]
+    : it.kind === "feed" ? [`${fmtTime(v.time)} feed`, v.item, v.by]
+    : it.kind === "meds" ? [`${slotName(v.slot)} medicines`, `${medChoice(it, DR.review.date).filter((m) => m.on).length} given`, v.by && `S/N ${v.by}`]
+    : it.kind === "vitals" ? [`${slotName(v.slot)}`, v.temp && `T ${v.temp}°F`, v.pulse && `PR ${v.pulse}/min`, v.spo2 && `SpO2 ${v.spo2}%`, v.bp && `BP ${v.bp}`, v.sugar && `Sugar ${v.sugar}`, v.by && `S/N ${v.by}`]
+    : it.kind === "doc" ? [v.name || "Note", v.time && fmtTime(v.time), v.comment]
+    : it.kind === "note" ? [(NOTE_KEYS.find(([k]) => k === v.key) || [, ""])[1], v.text]
+    : it.kind === "visit" ? [v.time && fmtTime(v.time), v.name, v.place]
+    : [v.text, v.assign ? `→ ${(NOTE_KEYS.find(([k]) => k === v.assign) || [, "one-off note"])[1]}` : "left out"];
+  const extra = rs.st === "conflict" ? (it.choice === "scan" ? " · uses scan" : it.choice === "both" ? " · keeps both" : " · keeps saved") : !it.include && rs.st !== "same" ? " · left out" : "";
+  return `<div class="scan-item scan-short st-${rs.st}" data-item="${it.id}"><span>✓ ${esc(parts.filter(Boolean).join(" · "))}<span class="small muted">${extra}</span></span><span class="pill ${tone}">${lab}</span></div>`;
+}
 function reviewItem(it, rs, date) {
   const v = it.v; const [lab, tone] = ST_LABEL[rs.st]; const f = rs.f || {};
   const inp = (k, label, type = "text", extra = "") => `<label class="field ${f[k] === "conflict" ? "is-conflict" : ""}"><span>${label}</span><input class="inp" type="${type}" data-rv="${it.id}" data-k="${k}" value="${esc(v[k] || "")}" ${extra} autocomplete="off"></label>`;
@@ -5774,6 +5795,11 @@ document.addEventListener("click", async (e) => {
     case "scan-review-close": (R?.urls || []).forEach((u) => URL.revokeObjectURL(u)); DR.review = null; render(); break;
     case "scan-zoom": openViewer(t.dataset.src); break;
     case "scan-choice": R.items.find((x) => x.id === id).choice = t.dataset.v; render(); break;
+    case "scan-check-sec": {
+      const sec = t.dataset.sec; const was = R.checked.includes(sec); R.checked = was ? R.checked.filter((x) => x !== sec) : [...R.checked, sec]; render();
+      if (!was) { const all = [...document.querySelectorAll("[data-scansec]")]; const next = all.slice(all.findIndex((x) => x.dataset.scansec === sec) + 1).find((x) => !x.classList.contains("is-checked"));
+        (next || $(".scan-actions"))?.scrollIntoView({ block: "start", behavior: "smooth" }); }
+      break; }
     case "scan-set": { const it = R.items.find((x) => x.id === id); it.v[t.dataset.k] = t.dataset.v; render(); break; }
     case "scan-add-staff": { const n = t.dataset.name; const role = R.items.some((it) => it.kind === "doc" && it.v.name === n) ? "doctor" : "family"; await ensureStaff(n, role); flash(`${n} added to the staff list.`); render(); break; }
     case "scan-save": t.disabled = true; saveReview(); break;

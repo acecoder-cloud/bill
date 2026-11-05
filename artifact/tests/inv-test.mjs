@@ -170,6 +170,7 @@ await step("edit, archive (with confirmation) and restore a product", async () =
   await page.locator(".inv-card", { hasText: "Cotton Roll 500g" }).waitFor();
 });
 await step("survives a reload", async () => {
+  await page.waitForTimeout(1500);   // let the stand-in's localStorage copy reach disk (Chromium saves it in batches)
   await page.reload();
   await page.locator(".inv-card", { hasText: "Cotton Roll 500g" }).waitFor();
   assert.equal((await log()).filter((x) => x[0] === "set" && x[1].startsWith("inventory/products/")).length, 0, "no re-seeding after reload");

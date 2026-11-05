@@ -123,6 +123,17 @@ await step("review: confidence marks, new names, medicines not in the plan, unma
   await page.getByText("Notebook says: “No visitors”. No visitors will be added.").waitFor();
   await item("Written on the page").locator('[data-k="assign"]').selectOption("other");
   assert.match(await page.locator(".scan-fields .card").first().innerText(), /\b4[0-9] to add · 0 already saved · 0 differ/);
+  const vit = page.locator('[data-scansec="Vitals"]');
+  await vit.getByRole("button", { name: "Mark Vitals as checked" }).click();
+  await vit.getByRole("button", { name: "Vitals checked. Tap to undo" }).waitFor();
+  assert.match(await vit.innerText(), /✓ Morning · T 97°F · PR 82\/min · SpO2 99% · BP 110\/70 · S\/N Mangai/);
+  assert.equal(await vit.getByText("Check", { exact: true }).count(), 0, "confidence warnings cleared once checked");
+  assert.equal(await vit.locator("input").count(), 0);
+  await page.getByText(/^1 of \d+ sections checked$/).waitFor();
+  await vit.getByRole("button", { name: "Vitals checked. Tap to undo" }).click();
+  assert.ok(await vit.locator('input[data-k="bp"]').count() > 0, "Edit opens the values again");
+  await vit.getByRole("button", { name: "Mark Vitals as checked" }).click();
+  await vit.screenshot({ path: DIR + "s3-checked.png" });
 });
 await step("Save puts everything in place: matches the 04/11 sample day (42 of 64)", async () => {
   const visitsBefore = await page.evaluate(() => ROU.visits.size);
@@ -238,6 +249,7 @@ await step("settings: model choice is used; Scan notebook can be turned off", as
   await page.getByRole("button", { name: "‹ Back" }).click();
 });
 await step("scans and values survive a reload; printable sheet includes the scanned pages", async () => {
+  await page.waitForTimeout(1500);   // let the stand-in's localStorage copy reach disk (Chromium saves it in batches)
   await page.reload();
   await page.locator(".scan-row").first().waitFor();
   assert.equal(await page.locator(".scan-row").count(), 2);
