@@ -13,6 +13,7 @@ node dr-test.mjs         # daily routine (17 checks: sample day 42 of 64, WhatsA
 node scan-test.mjs       # notebook scan (11 checks: review, merge into the day, re-scan without duplicates, hand edits kept, offline queue, PDF)
 node repair-test.mjs     # repair of a live app whose template never loaded (3 checks)
 node inv-scan-test.mjs   # scan the paper stock register into Inventory (7 checks)
+node wallet-test.mjs     # staff wallets: linking, giving money, staff-only views, rules, transfers, offline, conflicts, shared phone
 ```
 
 Needs Playwright with Chromium, `sample-bill.png` next to the scripts, and the report/PDF libraries

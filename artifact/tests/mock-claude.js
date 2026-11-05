@@ -20,11 +20,19 @@
   const merge = (t, src) => { for (const [k, v] of Object.entries(src)) { if (isObj(v) && isObj(t[k])) merge(t[k], v); else t[k] = JSON.parse(JSON.stringify(v)); } return t; };
   const ROLE = (window.__ROLE = new URLSearchParams(location.search).get("role") || "admin");
   const QP = new URLSearchParams(location.search);
-  const UID = ROLE === "none" ? null : ROLE === "admin" ? "u_admin" : "u_staff";
+  const UID = ROLE === "none" ? null : new URLSearchParams(location.search).get("uid") || (ROLE === "admin" ? "u_admin" : "u_staff");
   const OWNER = ROLE === "admin" && QP.get("owner") !== "0";
-  const snapDoc = (path) => ({ id: path.split("/").pop(), exists: store.has(path), data: () => store.get(path), metadata: { fromCache: false, hasPendingWrites: false } });
+  // the page's published access rules, as the real store applies them (owner/editors = "admin" here)
+  function canRead(path) {
+    if (ROLE === "admin") return true; const seg = path.split("/");
+    if (["wallets", "walletin", "walletclaims"].includes(seg[0])) return seg[1] === UID;   // {self} subtrees
+    if (seg[0] === "walletreg") return false;
+    if (seg[0] === "accounts") return seg[1] === "items" || seg[1] === "settings";
+    return true;
+  }
+  const snapDoc = (path) => ({ id: path.split("/").pop(), exists: store.has(path) && canRead(path), data: () => store.get(path), metadata: { fromCache: false, hasPendingWrites: false } });
   const childrenOf = (col) => [...store.keys()].filter((p) => p.startsWith(col + "/") && p.split("/").length === col.split("/").length + 1).sort();
-  const visibleDocs = (col) => childrenOf(col).filter((p) => !(p.startsWith("audit") && ROLE !== "admin")).map(snapDoc);
+  const visibleDocs = (col) => childrenOf(col).filter((p) => !(p.startsWith("audit") && ROLE !== "admin") && canRead(p)).map(snapDoc);
   const notify = () => subs.forEach((f) => f());
   function query(col, filters = { order: null, lim: null }) {
     if (col.split("/").length % 2 === 0) throw { code: "invalid_argument", message: "A collection path needs an odd number of segments: " + col };
@@ -40,7 +48,7 @@
       add: async (data) => { const r = docRef(col + "/x" + Math.random().toString(36).slice(2)); await r.set(data); return r; },
     };
   }
-  function canWrite(path) { if (ROLE === "admin") return true; const seg = path.split("/"); if (seg[0] === "inventory") return seg[1] === "months"; if (seg[0] === "accounts") return seg[1] !== "settings"; if (seg[0] === "routine") return seg[1] !== "settings"; return (seg[0] === "bills" || seg[0] === "audit" || seg[0] === "people") && seg[1] === UID; }
+  function canWrite(path) { if (ROLE === "admin") return true; const seg = path.split("/"); if (seg[0] === "inventory") return seg[1] === "months" || seg[1] === "scans"; if (seg[0] === "accounts" || seg[0] === "walletreg" || seg[0] === "walletin") return false; if (seg[0] === "wallets" || seg[0] === "walletclaims") return seg[1] === UID; if (seg[0] === "routine") return seg[1] !== "settings"; return (seg[0] === "bills" || seg[0] === "audit" || seg[0] === "people") && seg[1] === UID; }
   function docRef(path) {
     if (path.split("/").length % 2) throw { code: "invalid_argument", message: "A document path needs an even number of segments: " + path };   // like the real store
     return {

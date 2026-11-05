@@ -534,6 +534,17 @@ pre.wa { margin: 0; padding: 12px; border-radius: 12px; background: var(--surfac
 .iscan-cell.st-conflict .inp, .iscan-cell.st-bad .inp { border: 2px solid var(--bad-line); }
 .iscan-cell.st-conflict small, .iscan-cell.st-bad small { color: var(--bad-ink); }
 .iscan-cell.circled .inp { border-radius: 99px; }
+.wcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.wcard { all: unset; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; border-top: 5px solid var(--wc, var(--brand)); min-width: 0; }
+.wcard.combined { --wc: var(--fg); }
+.wcard.sel { outline: 3px solid var(--brand); outline-offset: -1px; }
+.wcard:focus-visible { outline: 3px solid var(--brand); }
+.wcard.inactive { opacity: .7; }
+.wcard b { font-size: 1.25rem; }
+.wname { font-weight: 800; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.wname i { width: 10px; height: 10px; border-radius: 50%; background: var(--wc, var(--brand)); display: inline-block; }
+.wbar-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.wcode { font-size: 1.8rem; font-weight: 800; letter-spacing: .2em; margin: 4px 0; }
 .scan-row { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--line); padding-top: 8px; }
 .audit { display: flex; flex-direction: column; gap: 8px; }
 .audit details { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
@@ -847,7 +858,7 @@ function onHash() {
 function renderTabs() {
   $("#tabs").innerHTML = TABS.filter((t) => tabAllowed(t.id)).map((t) => `
     <a href="#${t.id}" ${S.tab === t.id && !S.editor ? 'aria-current="page"' : ""}>
-      <span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${t.icon}</svg>${t.id === "inventory" && invAlertCount() ? `<span class="tab-badge" aria-label="${invAlertCount()} stock alerts">${invAlertCount()}</span>` : ""}${t.id === "routine" && drAlertCount() ? `<span class="tab-badge" aria-label="${drAlertCount()} family updates due">${drAlertCount()}</span>` : ""}</span>${t.label}</a>`).join("");
+      <span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${t.icon}</svg>${t.id === "inventory" && invAlertCount() ? `<span class="tab-badge" aria-label="${invAlertCount()} stock alerts">${invAlertCount()}</span>` : ""}${t.id === "routine" && drAlertCount() ? `<span class="tab-badge" aria-label="${drAlertCount()} family updates due">${drAlertCount()}</span>` : ""}${t.id === "accounts" && accAlertCount() ? `<span class="tab-badge" aria-label="${accAlertCount()} new in Accounts">${accAlertCount()}</span>` : ""}</span>${t.label}</a>`).join("");
 }
 function renderWho() {
   const el = $("#who"); el.textContent = "";
@@ -1327,7 +1338,7 @@ function paintAdmin() {
   const team = $("#team"); if (team) paintNames(team).then(() => showLabelBoxes(team));
   const a = S.audit; const box = $("#audit-list"); if (!box || !a?.rows) return;
   if (!a.rows.length) { box.innerHTML = `<p class="muted">No activity yet.</p>`; return; }
-  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed", "roles.update": "Role permissions changed", "inventory.seed": "Stock register loaded", "inventory.add": "Product added", "inventory.edit": "Product edited", "inventory.archive": "Product archived", "inventory.restore": "Product restored", "inventory.delete": "Product deleted", "inventory.month": "Stock month started", "inventory.import": "Stock CSV imported", "inventory.delivered": "Order delivered", "accounts.add": "Account entry added", "accounts.edit": "Account entry edited", "accounts.delete": "Account entry deleted", "accounts.seed": "WhatsApp ledger imported", "accounts.import": "Account entries imported", "routine.add": "Visit logged", "routine.edit": "Visit edited", "routine.delete": "Visit deleted", "routine.merge": "People merged", "routine.seed": "Visitor log imported", "routine.import": "Visits imported", "routine.daily_seed": "Daily routine loaded", "routine.task_add": "Routine task added", "routine.task_delete": "Routine task deleted", "routine.plan": "Medicine/feed plan changed", "routine.scan_save": "Notebook scan saved", "routine.scan_delete": "Notebook scan deleted", "routine.relink": "Scanned entries moved onto routine tasks", "inventory.scan_save": "Register scan saved", "inventory.scan_delete": "Register scan deleted" };
+  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed", "roles.update": "Role permissions changed", "inventory.seed": "Stock register loaded", "inventory.add": "Product added", "inventory.edit": "Product edited", "inventory.archive": "Product archived", "inventory.restore": "Product restored", "inventory.delete": "Product deleted", "inventory.month": "Stock month started", "inventory.import": "Stock CSV imported", "inventory.delivered": "Order delivered", "accounts.add": "Account entry added", "accounts.edit": "Account entry edited", "accounts.delete": "Account entry deleted", "accounts.seed": "WhatsApp ledger imported", "accounts.import": "Account entries imported", "routine.add": "Visit logged", "routine.edit": "Visit edited", "routine.delete": "Visit deleted", "routine.merge": "People merged", "routine.seed": "Visitor log imported", "routine.import": "Visits imported", "routine.daily_seed": "Daily routine loaded", "routine.task_add": "Routine task added", "routine.task_delete": "Routine task deleted", "routine.plan": "Medicine/feed plan changed", "routine.scan_save": "Notebook scan saved", "routine.scan_delete": "Notebook scan deleted", "routine.relink": "Scanned entries moved onto routine tasks", "accounts.give": "Money given", "accounts.transfer": "Transfer between staff", "accounts.wallet_add": "Staff wallet added", "accounts.wallet_edit": "Wallet changed", "accounts.wallet_link": "Wallet linked to a phone", "accounts.migrate": "Ledger moved into wallet", "inventory.scan_save": "Register scan saved", "inventory.scan_delete": "Register scan deleted" };
   box.innerHTML = a.rows.map((r, i) => `<details><summary><b>${esc(label[r.action] || r.action)}</b>
     <span class="small muted">by <span data-uid="${esc(r.actor)}"></span> · ${esc(fmtDT(r.at))} · ${r.action === "roles.update" ? "Admin / Staff / Viewer permissions" : r.action.startsWith("inventory.") ? esc((r.after || r.before || {}).name || (r.after || {}).month || "Inventory") : r.action.startsWith("accounts.") ? (() => { const x = r.after || r.before || {}; return x.amount != null ? esc(`${x.type === "received" ? "received" : (x.lines || []).map((l) => l.name).join(" & ")} ${inr(x.amount)} on ${dmy(x.date)}`) : "Accounts"; })() : r.action.startsWith("team.") ? `<span data-uid="${esc((r.after || r.before || {}).member || "")}"></span>${r.after?.role ? " → " + esc(ROLES[r.after.role]?.label || r.after.role) : ""}` : `bill ${(r.after || r.before || {}).bill_no ? "No. " + esc((r.after || r.before).bill_no) + " of " : "of "}${esc(fmtDate((r.after || r.before || {}).bill_date))}`}</span></summary>
     <div class="pair"><div><div class="small muted">Before</div><pre data-json="b${i}"></pre></div><div><div class="small muted">After</div><pre data-json="a${i}"></pre></div></div></details>`).join("");
@@ -2002,7 +2013,9 @@ function applyLocal(op, path, data) {
   const map = col === INV_PRODUCTS ? INV.products : col === INV_MONTHS ? INV.months
     : col === "accounts/items/list" ? ACC.items : col === "accounts/tx/list" ? ACC.tx : col === "accounts/checks/list" ? ACC.checks
     : col === "routine/people/list" ? ROU.people : col === "routine/visits/list" ? ROU.visits
-    : col === "routine/tasks/list" ? DR.tasks : col === "routine/days/list" ? DR.days : col === "routine/plans/list" ? DR.plans : col === "routine/staff/list" ? DR.staff : col === "routine/updates/list" ? DR.updates : col === "routine/scans/list" ? DR.scans : col === "inventory/scans/list" ? INV.scans : null;
+    : col === "routine/tasks/list" ? DR.tasks : col === "routine/days/list" ? DR.days : col === "routine/plans/list" ? DR.plans : col === "routine/staff/list" ? DR.staff : col === "routine/updates/list" ? DR.updates : col === "routine/scans/list" ? DR.scans : col === "inventory/scans/list" ? INV.scans
+    : col === "walletreg" ? W.reg : col === "walletclaims" ? W.claims : /^(wallets|walletin)\/[^/]+\/(tx|checks|newitems)$/.test(col) ? wRaw(col) : null;
+  if (/^walletin\/[^/]+$/.test(path)) { if (op === "delete") W.meta.delete(id); else if (path === `walletin/${S.uid}` || W.meta.has(id)) W.meta.set(id, op === "set" ? clone(data) : deepMerge(clone(W.meta.get(id)) || {}, data)); return; }
   if (path === "inventory/settings") { INV.settings = op === "set" ? clone(data) : deepMerge(clone(INV.settings) || {}, data); return; }
   if (path === "routine/settings") { ROU.settings = op === "set" ? clone(data) : deepMerge(clone(ROU.settings) || {}, data); return; }
   if (path === "accounts/settings") { ACC.settings = op === "set" ? clone(data) : deepMerge(clone(ACC.settings) || {}, data); return; }
@@ -2010,9 +2023,17 @@ function applyLocal(op, path, data) {
   if (op === "delete") map.delete(id);
   else if (op === "set") map.set(id, clone(data));
   else map.set(id, deepMerge(clone(map.get(id)) || {}, data));
+  if (/^(wallets|walletin|walletreg)/.test(path)) accRebuild();
 }
 async function sendWrite(op, path, data) {
   const ref = S.caps.db.doc(path);
+  if (data && "_base" in data) {
+    const { _base, ...clean } = data; data = clean;
+    if (op === "update" && /^(wallets|walletin)\/[^/]+\/tx\//.test(path)) {
+      const cur = await ref.get().catch(() => null); const now = cur?.exists ? cur.data().updated_at || cur.data().created_at || "" : _base;
+      if (cur?.exists && now !== _base) return S.caps.db.doc(`${path}_v${Date.now().toString(36)}`).set({ ...cur.data(), ...clean, conflict_of: path.split("/").pop(), conflict_at: new Date().toISOString() });   // keep both, the owner picks
+    }
+  }
   if (op === "set") return ref.set(data);
   if (op === "update") return ref.update(data);
   return ref.delete();
@@ -2760,6 +2781,7 @@ const ACC = {
   items: new Map(), tx: new Map(), checks: new Map(), settings: {}, loaded: { items: false, tx: false, settings: false },
   view: "entries", range: "period", from: "", to: "", q: "", type: "all", cat: "all", detail: null, confirm: null,
   form: null, itemForm: null, lastQuick: null, seeding: null, importPreview: null, showArchived: false, checkResult: null, waPeriod: null, copied: null, busy: false,
+  wallet: (() => { try { return localStorage.getItem("pbl-acc-wallet") || "all"; } catch { return "all"; } })(), by: "all", newSince: {}, legacy: new Map(), legacyChecks: new Map(), legacyLoaded: false,
 };
 const ACC_ITEMS = "accounts/items/list", ACC_TX = "accounts/tx/list", ACC_CHECKS = "accounts/checks/list", ACC_SETTINGS = "accounts/settings";
 const ACC_BASE_CATS = ["Food", "Fruits & juice", "Medical", "Courier", "Stationery", "Personal care", "Other"];
@@ -2994,14 +3016,18 @@ function needsReviewNote(note) { const n = String(note || ""); return /^date wri
 
 /* ---------- permissions ---------- */
 function canAccEdit() { return S.canWrite && allowed("acc_edit"); }
+function accTargetKey() { const a = accActor(); return a.key || null; }
+function canAddExpense() { const a = accActor(); return canAccEdit() && a.active && (a.owner ? wallets().some((w) => w.status !== "inactive") : !!a.key); }
 function canAccManage() { return (S.isAdmin || S.me?.isOwner) && allowed("acc_manage"); }
 
 /* ---------- loading ---------- */
 function accStart() {
   const db = S.caps.db;
   db.collection(ACC_ITEMS).onSnapshot((snap) => { ACC.items = new Map(snap.docs.map((d) => [d.id, clone(d.data())])); reapplyOutbox(ACC_ITEMS); if (!snap.metadata.fromCache) ACC.loaded.items = true; accChanged(); accMaybeSeed(); }, () => { ACC.loaded.items = true; accChanged(); });
-  db.collection(ACC_TX).onSnapshot((snap) => { ACC.tx = new Map(snap.docs.map((d) => [d.id, clone(d.data())])); reapplyOutbox(ACC_TX); if (!snap.metadata.fromCache) ACC.loaded.tx = true; accChanged(); accMaybeSeed(); }, () => { ACC.loaded.tx = true; accChanged(); });
-  db.collection(ACC_CHECKS).onSnapshot((snap) => { ACC.checks = new Map(snap.docs.map((d) => [d.id, clone(d.data())])); reapplyOutbox(ACC_CHECKS); accChanged(); }, () => {});
+  // the old shared ledger: owner-only now, read once to move it into Nandhini's wallet
+  db.collection(ACC_TX).onSnapshot((snap) => { ACC.legacy = new Map(snap.docs.map((d) => [d.id, clone(d.data())])); if (!snap.metadata.fromCache) ACC.legacyLoaded = true; accMaybeSeed(); }, () => { ACC.legacyLoaded = true; accChanged(); });
+  db.collection(ACC_CHECKS).onSnapshot((snap) => { ACC.legacyChecks = new Map(snap.docs.map((d) => [d.id, clone(d.data())])); }, () => {});
+  walletsStart();
   db.doc(ACC_SETTINGS).onSnapshot((snap) => { ACC.settings = snap.exists ? clone(snap.data()) : {}; reapplyOutbox(ACC_SETTINGS); if (!snap.metadata.fromCache) ACC.loaded.settings = true; accChanged(); accMaybeSeed(); }, () => { ACC.loaded.settings = true; accChanged(); });
 }
 let accQueued = false;
@@ -3009,24 +3035,26 @@ function accChanged() {
   if (accQueued) return; accQueued = true;
   requestAnimationFrame(() => { accQueued = false; renderTabs(); if (S.tab === "accounts" && !S.editor && !accBusy()) render(); else if (S.tab === "home" && !S.editor) render(); });
 }
-function accBusy() { return !!(ACC.form || ACC.itemForm || ACC.importPreview || ACC.confirm || document.activeElement?.closest?.(".acc-filters, #acc-check")); }
+function accBusy() { return !!(ACC.form || ACC.itemForm || ACC.importPreview || ACC.confirm || W.staffForm || W.transfer || W.pinAsk != null || W.question || W.settingsOpen || document.activeElement?.closest?.(".acc-filters, #acc-check")); }
 function accRefresh() { if (S.tab === "accounts" && !S.editor) render(); else renderTabs(); }
 function accWrite(op, path, data) { return invWrite(op, path, data); }   // same instant-on-screen + offline queue as Inventory
 
 /* ---------- balances (always calculated, never typed) ---------- */
 function txList() { return [...ACC.tx.entries()].map(([id, t]) => ({ id, ...t })).sort((a, b) => a.date.localeCompare(b.date) || (a.seq || 0) - (b.seq || 0)); }
-const signed = (t) => (t.type === "received" ? t.amount : -t.amount);
+const signed = (t) => (IN_TYPES.has(t.type) ? t.amount : -t.amount);   // received, transfer in, opening balance add; expenses and transfer out subtract
 function balanceThrough(iso) { let b = 0; for (const t of ACC.tx.values()) if (t.date <= iso) b += signed(t); return b; }
 function balanceBefore(iso) { let b = 0; for (const t of ACC.tx.values()) if (t.date < iso) b += signed(t); return b; }
 function totalsBetween(from, to) {
-  let received = 0, spent = 0, nRec = 0; const cats = {};
+  let received = 0, spent = 0, nRec = 0, net = 0, tin = 0, tout = 0; const cats = {};
   for (const t of ACC.tx.values()) {
     if ((from && t.date < from) || (to && t.date > to)) continue;
+    net += signed(t);
     if (t.type === "received") { received += t.amount; nRec++; }
-    else { spent += t.amount; for (const l of t.lines || []) cats[l.category || "Other"] = (cats[l.category || "Other"] || 0) + l.amount; }
+    else if (t.type === "expense") { spent += t.amount; for (const l of t.lines || []) cats[l.category || "Other"] = (cats[l.category || "Other"] || 0) + l.amount; }
+    else if (t.type === "transfer_in" || t.type === "opening") tin += t.amount; else if (t.type === "transfer_out") tout += t.amount;
   }
   const opening = from ? balanceBefore(from) : 0;
-  return { received, spent, nRec, cats, opening, closing: opening + received - spent };
+  return { received, spent, nRec, cats, opening, tin, tout, closing: opening + net };
 }
 function availableNow() { let b = 0; for (const t of ACC.tx.values()) b += signed(t); return b; }
 
@@ -3063,6 +3091,9 @@ function rangeBounds() {
 /* ---------- WhatsApp message (agreed format) ---------- */
 function lineText(t) {
   if (t.type === "received") return `*${dmy(t.date)} Amount received ${grouped(t.amount)}*`;
+  if (t.type === "transfer_in") return `*${dmy(t.date)} Received from ${t.from_name || "staff"} ${grouped(t.amount)}*`;
+  if (t.type === "transfer_out") return `${dmy(t.date)} - Handed over to ${t.to_name || "staff"} ${t.amount} rupees`;
+  if (t.type === "opening") return `*${dmy(t.date)} Opening balance ${grouped(t.amount)}*`;
   const name = (t.lines || []).map((l) => (l.qty > 1 ? `${l.name} x${l.qty}` : l.name)).join(" & ") || "Expense";
   return `${dmy(t.date)} - ${name} ${t.amount} rupees`;
 }
@@ -3070,11 +3101,13 @@ function lineText(t) {
 function whatsappText(p) {
   const entries = txList().filter((t) => t.date >= p.start && t.date <= p.end);
   const bal = grouped(balanceThrough(p.end));
-  return [`*Available -RS: ${bal}*`, "", ...entries.map(lineText), "", `*RS: ${bal}*`].join("\n");
+  const name = accVisibleKeys().length === 1 ? walletName(accVisibleKeys()[0]) : "";   // each wallet's message starts with the staff name
+  return [...(name ? [`*${name}*`] : []), `*Available -RS: ${bal}*`, "", ...entries.map(lineText), "", `*RS: ${bal}*`].join("\n");
 }
 
 /* ---------- items ---------- */
-function activeItems() { return [...ACC.items.entries()].filter(([, i]) => !i.archived).sort((a, b) => a[1].name.localeCompare(b[1].name)); }
+function itemRequests() { const out = []; for (const k of accVisibleKeys()) for (const [id, i] of W.raw.get(wreqCol(k)) || []) out.push([id, { ...i, requested: true, wallet: k }]); return out; }
+function activeItems() { return [...ACC.items.entries(), ...itemRequests().filter(([id]) => !ACC.items.has(id))].filter(([, i]) => !i.archived).sort((a, b) => a[1].name.localeCompare(b[1].name)); }
 function itemByName(name) { const k = fuzzyKey(name); if (!k) return null; for (const [id, i] of ACC.items) if (!i.archived && fuzzyKey(i.name) === k) return [id, i]; return null; }
 function itemStats() {
   const st = new Map(); for (const id of ACC.items.keys()) st.set(id, { used: 0, last: null });
@@ -3093,6 +3126,7 @@ function accCategories() {
 async function accSeed(auto) {
   if (ACC.seeding || !canAccManage()) return;
   if (ACC.settings.seeded_at) { flash("The WhatsApp ledger was already imported."); accRefresh(); return; }
+  if (!legacyKey()) { flash("Nandhini's wallet isn't ready yet."); return; }
   ACC.seeding = { done: 0, total: 0 }; accRefresh();
   try {
     if (auto) {
@@ -3121,7 +3155,7 @@ async function accSeed(auto) {
       const doc = type === "Received"
         ? { type: "received", date: iso, amount: amt, method: /amazon/i.test(item) ? "Amazon Pay" : "PhonePe", from: "", note: note || "", lines: [], category: "Received" }
         : { type: "expense", date: iso, amount: amt, category, note: note || "", spent_by: ACC.settings.default_spender || "Nandhini", lines: [{ item_id: ids.get(fuzzyKey(item)) || null, name: item, category, qty: 1, amount: amt }] };
-      await accWrite("set", `${ACC_TX}/${id}`, { ...doc, review: needsReviewNote(note), seq, source: "whatsapp-2026", created_at: now, created_by: S.uid });
+      await accWrite("set", `${doc.type === "received" ? winCol(legacyKey()) : wtxCol(legacyKey())}/${id}`, { ...doc, wallet: legacyKey(), review: needsReviewNote(note), seq, source: "whatsapp-2026", created_at: now, created_by: S.uid, created_by_name: "Nandhini (WhatsApp ledger)" });
       ACC.seeding.done++; if (ACC.seeding.done % 10 === 0) accRefresh();
     }
     await accWrite("set", ACC_SETTINGS, { period: "10", default_spender: "Nandhini", categories: [], ...ACC.settings, seeded_at: now,
@@ -3131,22 +3165,22 @@ async function accSeed(auto) {
   } catch (e) { flash(dbErrorText(e).replace("save this bill", "import the ledger")); }
   finally { ACC.seeding = null; accRefresh(); }
 }
-function accMaybeSeed() {
-  if (!ACC.loaded.items || !ACC.loaded.tx || !ACC.loaded.settings || ACC.seeding || ACC.settings.seeded_at || ACC.tx.size) return;
-  if (S.tab === "accounts" && S.me?.isOwner && canAccManage()) accSeed(true);   // runs when the owner first opens Accounts
-}
 
 /* ---------- views ---------- */
 function accountsView() {
   if (!ACC.loaded.tx && !ACC.tx.size) return `<h1>Accounts</h1><div class="card"><div class="row-between"><span class="spin"></span><span class="muted">Loading accounts…</span></div></div>`;
   if (ACC.form) return ACC.form.kind === "received" ? receivedFormView() : expenseFormView();
   if (ACC.itemForm) return itemFormView();
-  const pending = outbox().filter((w) => w.path.startsWith("accounts/")).length;
+  if (W.staffForm) return staffFormView();
+  if (W.transfer) return transferFormView();
+  const actor = accActor(); if (!actor.owner && !actor.key) return linkView();
+  const pending = outbox().filter((w) => /^(accounts|wallets|walletin|walletreg)\//.test(w.path)).length;
   return `<h1>Accounts</h1>
+  ${walletBar()}
   ${pending ? `<div class="note warn">${pending} change${pending === 1 ? "" : "s"} saved on this phone, waiting for a connection to sync.</div>` : ""}
-  ${ACC.seeding ? `<div class="note">Importing the WhatsApp ledger… ${ACC.seeding.done} of ${ACC.seeding.total}</div>` : ""}
+  ${ACC.seeding ? `<div class="note">${esc(ACC.seeding.label || "Importing the WhatsApp ledger")}… ${ACC.seeding.done} of ${ACC.seeding.total}</div>` : ""}
   ${summaryCard()}
-  ${!ACC.tx.size && !ACC.seeding ? accEmpty() : ""}
+  ${!ACC.tx.size && !ACC.seeding && accActor().owner && legacyKey() && !ACC.settings.seeded_at ? accEmpty() : ""}
   <div class="seg acc-tabs" role="group" aria-label="Accounts view">
     ${[["entries", "Entries"], ["periods", "Periods"], ["items", "Items"], ["check", "Check balance"]].map(([v, l]) => `<button data-act="acc-view" data-v="${v}" aria-pressed="${ACC.view === v}">${l}</button>`).join("")}
   </div>
@@ -3163,7 +3197,7 @@ function summaryCard() {
   const quick = activeItems().filter(([, i]) => i.quick_add);
   const label = ACC.range === "all" ? "All time" : ACC.range === "custom" ? (b.start || b.end ? `${dmy(b.start) || "start"} – ${dmy(b.end) || "today"}` : "Choose dates") : periodLabel(b);
   return `<section class="card acc-summary">
-    <div class="acc-balance"><span class="small">Available balance</span><b class="num ${now < 0 ? "neg" : ""}" id="acc-available">${inr(now)}</b>
+    <div class="acc-balance"><span class="small">${accVisibleKeys().length === 1 ? `${esc(walletName(accVisibleKeys()[0]))}: available balance` : "All wallets: available balance"}</span><b class="num ${now < 0 ? "neg" : ""}" id="acc-available">${inr(now)}</b>
       <span class="small muted">Received minus spent, calculated from every entry</span></div>
     <div class="seg acc-filters" role="group" aria-label="Date range">${[["period", "This period"], ["month", "This month"], ["custom", "Custom"], ["all", "All time"]].map(([v, l]) => `<button data-act="acc-range" data-v="${v}" aria-pressed="${ACC.range === v}">${l}</button>`).join("")}</div>
     ${ACC.range === "custom" ? `<div class="dates acc-filters"><label class="field"><span>From</span><input class="inp" type="date" id="acc-from" data-act="acc-dates" value="${esc(ACC.from)}"></label><label class="field"><span>To</span><input class="inp" type="date" id="acc-to" data-act="acc-dates" value="${esc(ACC.to)}"></label></div>` : ""}
@@ -3175,10 +3209,10 @@ function summaryCard() {
     </div>
     ${ACC.range !== "all" ? `<p class="small muted">Opening balance ${inr(tot.opening)}</p>` : ""}
     ${cats.length ? `<div class="acc-cats">${cats.map(([c, v]) => `<div class="acc-cat"><span>${esc(c)}</span><span class="bar"><i style="width:${Math.max(2, Math.round((v / max) * 100))}%"></i></span><b class="num">${inr(v)}</b></div>`).join("")}</div>` : ""}
-    ${canAccEdit() ? `<div class="duo"><button class="btn btn-primary" data-act="acc-add-expense">+ Add expense</button><button class="btn btn-received" data-act="acc-add-received">+ Add received</button></div>
-      ${quick.length ? `<div><div class="small muted" style="font-weight:600;margin-bottom:6px">Quick add for today</div><div class="chips">${quick.map(([id, i]) => `<button class="chip" data-act="acc-quick" data-id="${esc(id)}">${esc(i.name)} <span class="num">${inr(i.usual_price || 0)}</span></button>`).join("")}</div></div>` : ""}
+    ${canAddExpense() ? `<button class="btn btn-primary btn-block" data-act="acc-add-expense">+ Add expense</button>
+      ${quick.length && accTargetKey() ? `<div><div class="small muted" style="font-weight:600;margin-bottom:6px">Quick add for today</div><div class="chips">${quick.map(([id, i]) => `<button class="chip" data-act="acc-quick" data-id="${esc(id)}">${esc(i.name)} <span class="num">${inr(i.usual_price || 0)}</span></button>`).join("")}</div></div>` : ""}
       ${ACC.lastQuick ? `<div class="note ok confirm"><span>Added ${esc(ACC.lastQuick.label)} for today.</span><button class="btn btn-ghost btn-sm" data-act="acc-undo">Undo</button></div>` : ""}` : ""}
-    <button class="btn btn-ghost btn-block" data-act="acc-wa" data-where="summary" data-start="${esc(periodOf(accTodayISO()).start)}">Copy for WhatsApp (this period)</button>
+    ${accVisibleKeys().length === 1 ? `<button class="btn btn-ghost btn-block" data-act="acc-wa" data-where="summary" data-start="${esc(periodOf(accTodayISO()).start)}">Copy for WhatsApp (this period)</button>` : `<p class="small muted">Pick a wallet above for its WhatsApp message, or copy the combined summary.</p>`}
     ${ACC.copied?.where === "summary" ? `<div class="note ok">${esc(ACC.copied.text)}</div>` : ""}
   </section>`;
 }
@@ -3187,12 +3221,12 @@ function summaryCard() {
 function entryRows() {
   const b = rangeBounds(); const q = normName(ACC.q);
   return txList().filter((t) => (!b.start || t.date >= b.start) && (!b.end || t.date <= b.end) &&
-    (ACC.type === "all" || t.type === ACC.type) &&
+    (ACC.type === "all" || t.type === ACC.type || (ACC.type === "received" && (t.type === "transfer_in" || t.type === "opening"))) && (ACC.by === "all" || (t.created_by_name || "") === ACC.by) &&
     (ACC.cat === "all" || (ACC.cat === "review" ? !!t.review : (t.type === "expense" && (t.lines || []).some((l) => l.category === ACC.cat)) || (ACC.cat === "Received" && t.type === "received"))) &&
     (!q || normName(t.type === "received" ? `money received ${t.method || ""} ${t.from || ""}` : (t.lines || []).map((l) => l.name).join(" ")).includes(q) || normName(t.note).includes(q))).reverse();
 }
-function txTitle(t) { return t.type === "received" ? `Money received${t.method ? ` (${t.method})` : ""}${t.from ? ` from ${t.from}` : ""}` : (t.lines || []).map((l) => (l.qty > 1 ? `${l.name} × ${l.qty}` : l.name)).join(" & "); }
-function txCats(t) { return t.type === "received" ? "Received" : [...new Set((t.lines || []).map((l) => l.category || "Other"))].join(", "); }
+function txTitle(t) { if (t.type === "transfer_in") return `Transfer from ${t.from_name || "staff"}`; if (t.type === "transfer_out") return `Handed over to ${t.to_name || "staff"}`; if (t.type === "opening") return "Opening balance"; return t.type === "received" ? `Money received${t.method ? ` (${t.method})` : ""}${t.from ? ` from ${t.from}` : ""}` : (t.lines || []).map((l) => (l.qty > 1 ? `${l.name} × ${l.qty}` : l.name)).join(" & "); }
+function txCats(t) { if (t.type !== "expense" && t.type !== "received") return t.type === "opening" ? "Opening" : "Transfer"; return t.type === "received" ? "Received" : [...new Set((t.lines || []).map((l) => l.category || "Other"))].join(", "); }
 function entriesView() {
   const rows = entryRows(); const groups = new Map();
   for (const t of rows) { if (!groups.has(t.date)) groups.set(t.date, []); groups.get(t.date).push(t); }
@@ -3201,6 +3235,7 @@ function entriesView() {
     <label class="field"><span>Search item or note</span><input class="inp" type="search" id="acc-q" data-act="acc-q" placeholder="e.g. Idli" value="${esc(ACC.q)}" autocomplete="off"></label>
     <div class="dates">
       <label class="field"><span>Type</span><select class="inp" id="acc-type" data-act="acc-type">${[["all", "All entries"], ["expense", "Expenses"], ["received", "Received"]].map(([v, l]) => `<option value="${v}" ${ACC.type === v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+      <label class="field"><span>Added by</span><select class="inp" id="acc-by" data-act="acc-by"><option value="all">Anyone</option>${[...new Set([...ACC.tx.values()].map((t) => t.created_by_name).filter(Boolean))].sort().map((n) => `<option ${ACC.by === n ? "selected" : ""}>${esc(n)}</option>`).join("")}</select></label>
       <label class="field"><span>Category</span><select class="inp" id="acc-cat" data-act="acc-cat"><option value="all">All categories</option>${accCategories().map((c) => `<option ${ACC.cat === c ? "selected" : ""}>${esc(c)}</option>`).join("")}<option value="review" ${ACC.cat === "review" ? "selected" : ""}>Needs review (${reviewN})</option></select></label>
     </div>
   </div>
@@ -3211,11 +3246,11 @@ function entriesView() {
 }
 function txRow(t) {
   const open = ACC.detail === t.id; const conf = ACC.confirm === t.id;
-  return `<div class="acc-row ${t.type === "received" ? "is-received" : ""} ${open ? "open" : ""}">
+  return `<div class="acc-row ${IN_TYPES.has(t.type) ? "is-received" : ""} ${open ? "open" : ""}">
     <button class="acc-row-btn" data-act="acc-open" data-id="${esc(t.id)}" aria-expanded="${open}">
       <span class="acc-row-main"><b>${esc(txTitle(t))}</b><span class="small muted">${esc(txCats(t))}${t.note ? ` · ${esc(t.note)}` : ""}</span>
-        ${t.review ? '<span class="pill warn">Needs review</span>' : ""}</span>
-      <span class="acc-amt num">${t.type === "received" ? "+" : ""}${inr(t.amount)}</span>
+        ${t.review ? '<span class="pill warn">Needs review</span>' : ""}${txBadges(t)}</span>
+      <span class="acc-amt num">${IN_TYPES.has(t.type) ? "+" : t.type === "transfer_out" ? "−" : ""}${inr(t.amount)}</span>
     </button>
     ${open ? `<div class="acc-detail">
       <dl class="kv"><dt>Date</dt><dd>${esc(dmy(t.date))}</dd>
@@ -3223,7 +3258,8 @@ function txRow(t) {
           : `<dt>Method</dt><dd>${esc(t.method || "—")}</dd><dt>From</dt><dd>${esc(t.from || "—")}</dd>`}
         <dt>Note</dt><dd>${esc(t.note || "—")}</dd><dt>Balance after this day</dt><dd class="num">${inr(balanceThrough(t.date))}</dd></dl>
       ${t.attachment ? `<button class="thumb" data-act="acc-photo" data-id="${esc(t.attachment)}" aria-label="View payment screenshot"><img src="/_blob/${esc(t.attachment)}" alt=""></button>` : ""}
-      ${canAccEdit() ? `<div class="inv-actions">${t.review ? `<button class="btn btn-ghost" data-act="acc-reviewed" data-id="${esc(t.id)}">Mark reviewed</button>` : ""}<button class="btn btn-ghost" data-act="acc-edit" data-id="${esc(t.id)}">Edit</button><button class="btn btn-danger" data-act="acc-del" data-id="${esc(t.id)}">Delete</button></div>` : ""}
+      ${txExtras(t)}
+      ${canEditEntry(t) && t.type !== "transfer_in" && t.type !== "transfer_out" ? `<div class="inv-actions">${t.review && accActor().owner ? `<button class="btn btn-ghost" data-act="acc-reviewed" data-id="${esc(t.id)}">Mark reviewed</button>` : ""}<button class="btn btn-ghost" data-act="acc-edit" data-id="${esc(t.id)}">Edit</button><button class="btn btn-danger" data-act="acc-del" data-id="${esc(t.id)}">Delete</button></div>` : ""}
       ${conf ? `<div class="note bad confirm"><span>Delete "${esc(txTitle(t))}" (${inr(t.amount)}) from ${esc(dmy(t.date))}? Every balance after it changes.</span><button class="btn btn-danger" data-act="acc-del-yes" data-id="${esc(t.id)}">Delete</button><button class="btn btn-ghost" data-act="acc-del-no">Keep</button></div>` : ""}
     </div>` : ""}
   </div>`;
@@ -3256,12 +3292,13 @@ function waCard(p) {
 function itemsView() {
   const st = itemStats(); const list = [...ACC.items.entries()].filter(([, i]) => ACC.showArchived ? i.archived : !i.archived).sort((a, b) => (st.get(b[0])?.used || 0) - (st.get(a[0])?.used || 0) || a[1].name.localeCompare(b[1].name));
   return `<section class="card">
-    <div class="row-between"><h2>Manage items</h2>${canAccEdit() ? `<button class="btn btn-primary" data-act="acc-item-new">+ Add new item</button>` : ""}</div>
+    <div class="row-between"><h2>Manage items</h2>${canAccManage() ? `<button class="btn btn-primary" data-act="acc-item-new">+ Add new item</button>` : ""}</div>
+    ${itemRequests().length ? `<div class="add-panel"><b>New items – need owner check</b>${itemRequests().map(([id, i]) => `<div class="row-between"><span>${esc(i.name)} <span class="small muted">${esc(i.category)} · ${inr(i.usual_price || 0)} · asked by ${esc(i.requested_by_name || "staff")}</span></span>${canAccManage() ? `<span class="dr-mact"><button class="btn-link" data-act="acc-req-ok" data-id="${esc(id)}" data-w="${esc(i.wallet)}">Approve</button><button class="btn-link danger-text" data-act="acc-req-no" data-id="${esc(id)}" data-w="${esc(i.wallet)}">Reject</button></span>` : `<span class="pill warn">Waiting for owner</span>`}</div>`).join("")}</div>` : ""}
     <div class="chips"><button class="chip" data-act="acc-item-arch" aria-pressed="${ACC.showArchived}">Archived items</button></div>
     <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Category</th><th class="r">Usual price</th><th class="r">Times used</th><th>Last used</th><th></th></tr></thead>
       <tbody>${list.map(([id, i]) => { const s = st.get(id) || {}; return `<tr><td class="wrap"><b>${esc(i.name)}</b>${i.quick_add ? ' <span class="pill">Quick add</span>' : ""}</td><td>${esc(i.category || "—")}</td>
         <td class="r num">${inr(i.usual_price || 0)}${i.price_locked ? ' <span title="Price locked" aria-label="locked">🔒</span>' : ""}</td><td class="r num">${s.used || 0}</td><td>${s.last ? esc(dmy(s.last)) : "—"}</td>
-        <td>${canAccEdit() ? `<button class="btn-link" data-act="acc-item-edit" data-id="${esc(id)}">Edit</button>` : ""}</td></tr>`; }).join("") || `<tr><td colspan="6" class="muted">No items.</td></tr>`}</tbody></table></div>
+        <td>${canAccManage() ? `<button class="btn-link" data-act="acc-item-edit" data-id="${esc(id)}">Edit</button>` : ""}</td></tr>`; }).join("") || `<tr><td colspan="6" class="muted">No items.</td></tr>`}</tbody></table></div>
     <p class="small muted">Usual price follows the latest price paid unless it's locked.</p>
   </section>`;
 }
@@ -3288,28 +3325,32 @@ function openExpense(id) {
   const t = id ? ACC.tx.get(id) : null; ACC.detail = null; ACC.confirm = null; ACC.copied = null;
   ACC.form = { kind: "expense", id: id || null, values: t ? { date: t.date, note: t.note || "", spent_by: t.spent_by || "", review: !!t.review,
     lines: (t.lines || []).map((l) => ({ name: l.name, qty: String(l.qty || 1), amount: String(l.amount), category: l.category || "Other", item_id: l.item_id || null })) }
-    : { date: accTodayISO(), note: "", spent_by: ACC.settings.default_spender || "Nandhini", lines: [{ name: "", qty: "1", amount: "", category: "Food", item_id: null }] } };
+    : { date: accTodayISO(), note: "", spent_by: accActor().owner ? walletName(accTargetKey() || wallets()[0]?.key) : accActor().name, lines: [{ name: "", qty: "1", amount: "", category: "Food", item_id: null }] } };
+  ACC.form.values.wallet = t ? t.wallet : accTargetKey() || wallets().find((w) => w.status !== "inactive")?.key;
   render(); window.scrollTo(0, 0); $('[data-line="0"][data-lf="name"]')?.focus();
 }
 function openReceived(id) {
   const t = id ? ACC.tx.get(id) : null; ACC.detail = null; ACC.confirm = null; ACC.copied = null;
   ACC.form = { kind: "received", id: id || null, values: t ? { date: t.date, amount: String(t.amount), method: t.method || "PhonePe", from: t.from || "", note: t.note || "", attachment: t.attachment || null }
     : { date: accTodayISO(), amount: "", method: "PhonePe", from: "", note: "", attachment: null } };
+  ACC.form.values.wallet = t ? t.wallet : accTargetKey() || wallets().find((w) => w.status !== "inactive")?.key;
+  ACC.form.values.time = t?.time || nowHM();
   render(); window.scrollTo(0, 0); $("#rf-amount")?.focus();
 }
 function lineMatch(l) { return itemByName(l.name); }
 function expenseFormView() {
   const f = ACC.form; const v = f.values; const cats = accCategories();
   const total = v.lines.reduce((a, l) => a + (parseRupees(l.amount) || 0), 0);
-  const before = availableNow() + (f.id ? ACC.tx.get(f.id)?.amount || 0 : 0);
+  const before = walletBalance(v.wallet) + (f.id ? ACC.tx.get(f.id)?.amount || 0 : 0);
   return `<div class="row-between"><button class="btn-link" data-act="acc-form-cancel">‹ Cancel</button><h1 style="flex:1">${f.id ? "Edit expense" : "Add expense"}</h1></div>
   <datalist id="acc-item-list">${activeItems().map(([, i]) => `<option value="${esc(i.name)}"></option>`).join("")}</datalist>
   <form class="card" id="acc-exp-form" novalidate>
+    ${accActor().owner && !f.id ? `<label class="field"><span>Wallet</span><select class="inp" id="ef-wallet" data-ef="wallet">${wallets().filter((w) => w.status !== "inactive").map((w) => `<option value="${esc(w.key)}" ${v.wallet === w.key ? "selected" : ""}>${esc(w.name)} (${inr(walletBalance(w.key))})</option>`).join("")}</select></label>` : `<p class="small muted">Wallet: <b>${esc(walletName(v.wallet))}</b></p>`}
     <label class="field"><span>Date</span><input class="inp" type="date" id="ef-date" data-ef="date" value="${esc(v.date)}"></label>
     <div class="acc-lines">${v.lines.map((l, i) => { const m = l.name.trim() ? lineMatch(l) : null; return `<div class="acc-line" data-line-box="${i}">
       <div class="row-between"><b class="small">Item ${v.lines.length > 1 ? i + 1 : ""}</b>${v.lines.length > 1 ? `<button type="button" class="btn-link danger-text" data-act="acc-line-del" data-i="${i}">Remove</button>` : ""}</div>
       <label class="field"><span>Item</span><input class="inp" list="acc-item-list" data-line="${i}" data-lf="name" value="${esc(l.name)}" placeholder="Type or pick, e.g. Idli" autocomplete="off" aria-label="Item ${i + 1}"></label>
-      <div class="line-new" data-newbox="${i}">${l.name.trim() && !m ? `<label class="pick small"><input type="checkbox" data-line="${i}" data-lf="addNew" ${l.addNew ? "checked" : ""}> Add "${esc(l.name.trim())}" as a new item</label>` : m && m[1].name !== l.name.trim() ? `<span class="small muted">Matches item "${esc(m[1].name)}"</span>` : ""}</div>
+      <div class="line-new" data-newbox="${i}">${l.name.trim() && !m ? `<label class="pick small"><input type="checkbox" data-line="${i}" data-lf="addNew" ${l.addNew ? "checked" : ""}> Add "${esc(l.name.trim())}" as a new item${accActor().owner ? "" : " (the owner will check it)"}</label>` : m && m[1].name !== l.name.trim() ? `<span class="small muted">Matches item "${esc(m[1].name)}"</span>` : ""}</div>
       <div class="acc-line-grid">
         <label class="field"><span>Qty</span><input class="inp num" inputmode="numeric" data-line="${i}" data-lf="qty" value="${esc(l.qty)}" aria-label="Quantity ${i + 1}"></label>
         <label class="field"><span>Amount (₹)</span><input class="inp num" inputmode="numeric" data-line="${i}" data-lf="amount" value="${esc(l.amount)}" aria-label="Amount ${i + 1}"></label>
@@ -3320,6 +3361,7 @@ function expenseFormView() {
       <label class="field"><span>Spent by</span><input class="inp" id="ef-spent" data-ef="spent_by" value="${esc(v.spent_by)}" maxlength="40"></label>
       <label class="field"><span>Note</span><input class="inp" id="ef-note" data-ef="note" value="${esc(v.note)}" maxlength="200"></label>
     </div>
+    ${S.caps.assets ? `<label class="field"><span>Receipt photo (optional)</span><input class="inp" type="file" accept="image/*" id="ef-shot"></label>` : ""}
     ${f.id && v.review ? `<label class="pick"><input type="checkbox" data-ef="clearReview" ${v.clearReview ? "checked" : ""}> This entry is correct now (clear "Needs review")</label>` : ""}
     <div class="acc-total-line"><span>Total</span><b class="num" id="ef-total">${inr(total)}</b></div>
     <p class="small muted" id="ef-after">Balance after saving: <b class="num ${before - total < 0 ? "neg" : ""}">${inr(before - total)}</b></p>
@@ -3329,8 +3371,10 @@ function expenseFormView() {
 }
 function receivedFormView() {
   const f = ACC.form; const v = f.values;
-  return `<div class="row-between"><button class="btn-link" data-act="acc-form-cancel">‹ Cancel</button><h1 style="flex:1">${f.id ? "Edit money received" : "Add money received"}</h1></div>
+  return `<div class="row-between"><button class="btn-link" data-act="acc-form-cancel">‹ Cancel</button><h1 style="flex:1">${f.id ? "Edit money given" : "Give money"}</h1></div>
   <form class="card" id="acc-rec-form" novalidate>
+    ${!f.id ? `<label class="field"><span>Give to</span><select class="inp" id="rf-wallet" data-rf="wallet">${wallets().filter((w) => w.status !== "inactive").map((w) => `<option value="${esc(w.key)}" ${v.wallet === w.key ? "selected" : ""}>${esc(w.name)} (${inr(walletBalance(w.key))})</option>`).join("")}</select></label>` : `<p class="small muted">Wallet: <b>${esc(walletName(v.wallet))}</b></p>`}
+    <label class="field"><span>Time</span><input class="inp" type="time" data-rf="time" value="${esc(v.time || "")}"></label>
     <div class="dates"><label class="field"><span>Date</span><input class="inp" type="date" id="rf-date" data-rf="date" value="${esc(v.date)}"></label>
       <label class="field"><span>Amount (₹)</span><input class="inp num" id="rf-amount" data-rf="amount" inputmode="numeric" value="${esc(v.amount)}" placeholder="e.g. 5000"></label></div>
     <label class="field"><span>Method</span><select class="inp" id="rf-method" data-rf="method">${ACC_METHODS.map((m) => `<option ${v.method === m ? "selected" : ""}>${m}</option>`).join("")}</select></label>
@@ -3362,34 +3406,38 @@ async function saveExpense(force) {
   }
   if (!lines.length) return err("Add at least one item with its amount.");
   const total = lines.reduce((a, l) => a + l.amt, 0);
-  const after = availableNow() + (f.id ? ACC.tx.get(f.id)?.amount || 0 : 0) - total;
+  if (!v.wallet) return err("Pick the wallet.");
+  const after = walletBalance(v.wallet) + (f.id ? ACC.tx.get(f.id)?.amount || 0 : 0) - total;
   if (after < 0 && !force) { errBox.innerHTML = `<div class="note warn confirm"><span>This takes the balance below zero (${inr(after)}). Save anyway?</span><button type="button" class="btn btn-primary" data-act="acc-save-anyway">Save anyway</button></div>`; errBox.scrollIntoView({ block: "center" }); return; }
   const now = new Date().toISOString();
   try {
     for (const l of lines) if (!l.item_id && l.addNew) {
       const id = "i" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
-      await accWrite("set", `${ACC_ITEMS}/${id}`, { name: l.name, category: l.category, usual_price: Math.round(l.amt / l.qty), quick_add: false, price_locked: false, archived: false, created_at: now, created_by: S.uid });
+      if (accActor().owner) await accWrite("set", `${ACC_ITEMS}/${id}`, { name: l.name, category: l.category, usual_price: Math.round(l.amt / l.qty), quick_add: false, price_locked: false, archived: false, created_at: now, created_by: S.uid });
+      else await accWrite("set", `${wreqCol(v.wallet)}/${id}`, { name: l.name, category: l.category, usual_price: Math.round(l.amt / l.qty), requested_by_name: accActor().name, created_at: now, created_by: S.uid });   // "New item – needs owner check"
       l.item_id = id;
     }
+    let receipt = f.id ? ACC.tx.get(f.id)?.receipt || null : null; const shot = $("#ef-shot")?.files?.[0];
+    if (shot && S.caps.assets) receipt = (await S.caps.assets.upload(await compressImage(shot), { type: "image/jpeg" })).id;
     const prevStats = itemStats();
     const doc = { type: "expense", date: v.date, amount: total, category: [...new Set(lines.map((l) => l.category))].length === 1 ? lines[0].category : "Mixed",
-      lines: lines.map((l) => ({ item_id: l.item_id, name: l.name, category: l.category, qty: l.qty, amount: l.amt })), note: v.note.trim(), spent_by: v.spent_by.trim(), updated_at: now, updated_by: S.uid };
+      lines: lines.map((l) => ({ item_id: l.item_id, name: l.name, category: l.category, qty: l.qty, amount: l.amt })), note: v.note.trim(), spent_by: v.spent_by.trim(), wallet: v.wallet, receipt, ...(after < 0 ? { negative: true } : {}) };
     if (f.id) {
       const before = ACC.tx.get(f.id);
-      await accWrite("update", `${ACC_TX}/${f.id}`, { ...doc, ...(v.clearReview ? { review: false } : {}) });
+      await accWrite("update", txPathOf(f.id), { ...doc, ...editStamp(), _base: before.updated_at || before.created_at || "", ...(v.clearReview ? { review: false } : {}) });
       writeAudit("accounts.edit", null, f.id, before, { ...before, ...doc });
     } else {
-      const id = "t" + v.date.replaceAll("-", "") + Date.now().toString(36);
-      await accWrite("set", `${ACC_TX}/${id}`, { ...doc, review: false, seq: Date.now(), created_at: now, created_by: S.uid });
-      writeAudit("accounts.add", null, id, null, doc);
+      const ref = newTxRef("expense", v.wallet, v.date);
+      await accWrite("set", ref.path, { ...doc, review: false, seq: Date.now(), ...stamp() });
+      writeAudit("accounts.add", null, ref.tid, null, doc);
     }
     // usual price follows the most recent price paid, unless locked
     for (const l of lines) {
       const it = l.item_id && ACC.items.get(l.item_id); if (!it || it.price_locked) continue;
       const unit = Math.round(l.amt / l.qty); const last = prevStats.get(l.item_id)?.last;
-      if (unit !== it.usual_price && (!last || v.date >= last)) await accWrite("update", `${ACC_ITEMS}/${l.item_id}`, { usual_price: unit });
+      if (accActor().owner && unit !== it.usual_price && (!last || v.date >= last)) await accWrite("update", `${ACC_ITEMS}/${l.item_id}`, { usual_price: unit });
     }
-    flash(`${f.id ? "Expense updated" : "Expense saved"}: ${inr(total)}. Balance ${inr(availableNow())}.`);
+    flash(`${f.id ? "Expense updated" : "Expense saved"}: ${inr(total)}. ${walletName(v.wallet)}'s balance ${inr(walletBalance(v.wallet))}.${after < 0 ? " This is below zero; the owner will see it flagged." : ""}`);
     ACC.form = null; ACC.view = "entries";
   } catch (e) { return err(dbErrorText(e).replace("save this bill", "save this expense")); }
   render(); window.scrollTo(0, 0);
@@ -3403,10 +3451,11 @@ async function saveReceived() {
   try {
     const file = $("#rf-shot")?.files?.[0];
     if (file && S.caps.assets) { const blob = await compressImage(file); attachment = (await S.caps.assets.upload(blob, { type: "image/jpeg" })).id; }
-    const doc = { type: "received", date: v.date, amount: amt, method: v.method, from: v.from.trim(), note: v.note.trim(), attachment, lines: [], category: "Received", updated_at: now, updated_by: S.uid };
-    if (f.id) { const before = ACC.tx.get(f.id); await accWrite("update", `${ACC_TX}/${f.id}`, doc); writeAudit("accounts.edit", null, f.id, before, { ...before, ...doc }); }
-    else { const id = "t" + v.date.replaceAll("-", "") + Date.now().toString(36); await accWrite("set", `${ACC_TX}/${id}`, { ...doc, review: false, seq: Date.now(), created_at: now, created_by: S.uid }); writeAudit("accounts.add", null, id, null, doc); }
-    flash(`Money received saved: ${inr(amt)}. Balance ${inr(availableNow())}.`);
+    if (!v.wallet) return err("Pick who gets the money.");
+    const doc = { type: "received", date: v.date, time: v.time || "", amount: amt, method: v.method, from: v.from.trim(), note: v.note.trim(), attachment, lines: [], category: "Received", wallet: v.wallet };
+    if (f.id) { const before = ACC.tx.get(f.id); await accWrite("update", txPathOf(f.id), { ...doc, ...editStamp() }); writeAudit("accounts.edit", null, f.id, before, { ...before, ...doc }); }
+    else { const ref = newTxRef("received", v.wallet, v.date); await accWrite("set", ref.path, { ...doc, review: false, seq: Date.now(), ...stamp() }); writeAudit("accounts.give", null, ref.tid, null, doc); }
+    flash(`Gave ${inr(amt)} to ${walletName(v.wallet)}. Their balance ${inr(walletBalance(v.wallet))}.`);
     ACC.form = null; ACC.view = "entries";
   } catch (e) { f.saving = false; return err(e?.code ? (e.code === "too_large" ? "That screenshot is too large." : dbErrorText(e).replace("save this bill", "save this entry")) : e.message || "Couldn't save."); }
   render(); window.scrollTo(0, 0);
@@ -3415,10 +3464,11 @@ async function quickAdd(id) {
   const it = ACC.items.get(id); if (!it) return;
   const now = new Date().toISOString(); const date = accTodayISO(); const amt = Math.round(it.usual_price || 0);
   if (amt <= 0) { flash(`Set a usual price for ${it.name} first.`); render(); return; }
-  const tid = "t" + date.replaceAll("-", "") + Date.now().toString(36);
+  const key = accTargetKey(); if (!key) { flash("Pick a wallet first."); render(); return; }
+  const ref = newTxRef("expense", key, date); const tid = ref.tid; const neg = walletBalance(key) - amt < 0;
   const doc = { type: "expense", date, amount: amt, category: it.category || "Other", lines: [{ item_id: id, name: it.name, category: it.category || "Other", qty: 1, amount: amt }],
-    note: "", spent_by: ACC.settings.default_spender || "Nandhini", review: false, seq: Date.now(), created_at: now, created_by: S.uid, updated_at: now };
-  try { await accWrite("set", `${ACC_TX}/${tid}`, doc); writeAudit("accounts.add", null, tid, null, doc); ACC.lastQuick = { id: tid, label: `${it.name} ${inr(amt)}` }; }
+    note: "", spent_by: walletName(key), wallet: key, review: false, seq: Date.now(), ...stamp(), ...(neg ? { negative: true } : {}) };
+  try { await accWrite("set", ref.path, doc); writeAudit("accounts.add", null, tid, null, doc); ACC.lastQuick = { id: tid, path: ref.path, label: `${it.name} ${inr(amt)}` }; }
   catch (e) { flash(dbErrorText(e).replace("save this bill", "add this expense")); }
   render();
 }
@@ -3449,9 +3499,9 @@ function checkView() {
     <div class="copy-row"><input class="inp num" id="acc-actual" inputmode="numeric" placeholder="Amount in hand, e.g. 5897" aria-label="Amount actually in hand"><button class="btn btn-primary" data-act="acc-check">Check</button></div>
     ${r ? `<div class="note ${r.diff === 0 ? "ok" : "warn"}">${r.diff === 0 ? `It matches: ${inr(r.actual)} in hand.` : `In hand ${inr(r.actual)} vs calculated ${inr(r.calculated)}: <b>${r.diff > 0 ? `${inr(r.diff)} more` : `${inr(-r.diff)} less`}</b> than the ledger says.`}
       ${canAccEdit() ? `<button class="btn btn-ghost btn-sm" data-act="acc-check-save">Save this check</button>` : ""}</div>` : ""}
-    ${checks.length ? `<div class="small muted" style="font-weight:600">Saved checks</div><ul class="acc-checks">${checks.map((c) => `<li><span>${esc(dmy(c.date))}</span><span class="num">in hand ${inr(c.actual)} · calculated ${inr(c.calculated)}</span><b class="num ${c.diff ? "neg" : "pos"}">${c.diff === 0 ? "matched" : signedInr(c.diff)}</b></li>`).join("")}</ul>` : ""}
+    ${checks.length ? `<div class="small muted" style="font-weight:600">Saved checks</div><ul class="acc-checks">${checks.map((c) => `<li><span>${esc(dmy(c.date))}</span><span class="num">in hand ${inr(c.actual)} · calculated ${inr(c.calculated)}${c.by_name ? ` · ${esc(c.by_name)}` : ""}</span><b class="num ${c.diff ? "neg" : "pos"}">${c.diff === 0 ? "matched" : signedInr(c.diff)}</b></li>`).join("")}</ul>` : ""}
   </section>
-  ${wl || lc.length ? `<section class="card"><h2>Hand-written WhatsApp ledger</h2>
+  ${(wl || lc.length) && accVisibleKeys().length === 1 && accVisibleKeys()[0] === legacyKey() ? `<section class="card"><h2>Hand-written WhatsApp ledger</h2>
     ${wl ? (() => { const at = balanceThrough(wl.date); const d = at - wl.amount; return `<p>Last balance written in WhatsApp on ${esc(dmy(wl.date))}: <b class="num">${inr(wl.amount)}</b>. The app calculates <b class="num">${inr(at)}</b> from the same entries, a difference of <b class="num ${d ? "neg" : "pos"}">${d === 0 ? "₹0" : `${inr(Math.abs(d))} (${d < 0 ? "written balance too high" : "written balance too low"})`}</b>.</p>`; })() : ""}
     ${lc.length ? `<p class="small muted">Where the written balances went wrong (app's closing minus written closing, per WhatsApp message):</p>
       <div class="tbl-wrap"><table><thead><tr><th>WhatsApp period</th><th class="r">Difference</th></tr></thead><tbody>${lc.map((c) => `<tr><td>${esc(c.label)}</td><td class="r num ${c.diff ? "neg" : "pos"}">${c.diff === 0 ? "₹0" : signedInr(c.diff)}</td></tr>`).join("")}</tbody></table></div>
@@ -3473,21 +3523,22 @@ function accToolsView() {
   </section>
   ${canAccManage() ? `<section class="card"><h2>Accounts settings</h2>
     <label class="field"><span>Period length</span><select class="inp" id="acc-period-mode" data-act="acc-period-mode">${[["10", "10 days (1–10, 11–20, 21–end)"], ["14", "14 days"], ["month", "Calendar month"]].map(([v, l]) => `<option value="${v}" ${periodMode() === v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
-    <label class="field"><span>Default "Spent by"</span><input class="inp" id="acc-spender" data-act="acc-spender" value="${esc(ACC.settings.default_spender || "Nandhini")}" maxlength="40"></label>
+    <label class="pick"><input type="checkbox" id="acc-shared" ${sharedMode() ? "checked" : ""}> Shared phone mode on this phone (staff without their own account pick their name and enter their PIN)</label>
+    ${sharedMode() ? `<form class="copy-row" id="acc-owner-pin-form"><input class="inp num" id="acc-owner-pin" inputmode="numeric" maxlength="4" placeholder="${ACC.settings.owner_pin_hash ? "Owner PIN set; type to change" : "Owner PIN (4 digits)"}" aria-label="Owner PIN" autocomplete="off"><button class="btn btn-ghost">Save owner PIN</button></form>` : ""}
   </section>` : ""}`;
 }
 function accCsv() {
-  const b = rangeBounds(); const rows = txList().filter((t) => (!b.start || t.date >= b.start) && (!b.end || t.date <= b.end));
-  const lines = [["date", "type", "item", "category", "amount", "qty", "note", "method", "from", "spent_by", "needs_review", "balance_after_day"]];
+  const b = rangeBounds(); const rows = txList().filter((t) => (!b.start || t.date >= b.start) && (!b.end || t.date <= b.end) && (ACC.by === "all" || (t.created_by_name || "") === ACC.by));
+  const lines = [["date", "type", "item", "category", "amount", "qty", "note", "method", "from", "spent_by", "needs_review", "balance_after_day", "wallet", "created_by", "created_at"]];
   for (const t of rows) lines.push([dmy(t.date), t.type === "received" ? "Received" : "Expense", t.type === "received" ? txTitle(t) : (t.lines || []).map((l) => l.name).join(" & "), txCats(t), t.amount,
-    t.type === "expense" ? (t.lines || []).reduce((a, l) => a + (l.qty || 1), 0) : "", t.note || "", t.method || "", t.from || "", t.spent_by || "", t.review ? "yes" : "", balanceThrough(t.date)]);
+    t.type === "expense" ? (t.lines || []).reduce((a, l) => a + (l.qty || 1), 0) : "", t.note || "", t.method || "", t.from || "", t.spent_by || "", t.review ? "yes" : "", balanceThrough(t.date), walletName(t.wallet), t.created_by_name || "", t.created_at || ""]);
   return "﻿" + lines.map((l) => l.map(csvCell).join(",")).join("\r\n") + "\r\n";
 }
 async function accStatementPdf(p) {
   await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
   await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js");
   const tot = totalsBetween(p.start, p.end); const doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" });
-  doc.setFontSize(15); doc.text(`Accounts statement ${dmy(p.start)} – ${dmy(p.end)}`, 40, 42);
+  doc.setFontSize(15); doc.text(`${accVisibleKeys().length === 1 ? walletName(accVisibleKeys()[0]) + " – " : ""}Accounts statement ${dmy(p.start)} – ${dmy(p.end)}`, 40, 42);
   doc.setFontSize(10); doc.setTextColor(90); doc.text(`Opening Rs ${grouped(tot.opening)} · received Rs ${grouped(tot.received)} · spent Rs ${grouped(tot.spent)} · closing Rs ${grouped(tot.closing)}`, 40, 60);
   let bal = tot.opening; const body = [["", "Opening balance", "", "", "", grouped(bal)]];
   for (const t of txList().filter((x) => x.date >= p.start && x.date <= p.end)) { bal += signed(t); body.push([dmy(t.date), txTitle(t), txCats(t), t.type === "received" ? grouped(t.amount) : "", t.type === "expense" ? grouped(t.amount) : "", grouped(bal)]); }
@@ -3522,7 +3573,8 @@ function buildAccImport(text) {
 async function applyAccImport() {
   const ip = ACC.importPreview; ACC.busy = true; accRefresh(); const now = new Date().toISOString();
   try {
-    let n = 0; for (const t of ip.rows) { n++; await accWrite("set", `${ACC_TX}/${"t" + t.date.replaceAll("-", "") + Date.now().toString(36) + n}`, { ...t, seq: Date.now() + n, created_at: now, created_by: S.uid, source: "csv" }); }
+    const key = accTargetKey(); if (!key) { flash("Pick a wallet first, then import."); return; }
+    let n = 0; for (const t of ip.rows) { n++; const ref = newTxRef(t.type === "received" ? "received" : "expense", key, t.date); await accWrite("set", ref.path, { ...t, wallet: key, seq: Date.now() + n, ...stamp(), source: "csv" }); }
     writeAudit("accounts.import", null, "accounts", null, { entries: ip.rows.length });
     flash(`Imported ${ip.rows.length} entries.`); ACC.importPreview = null;
   } catch (e) { flash(dbErrorText(e).replace("save this bill", "import")); }
@@ -3537,22 +3589,24 @@ document.addEventListener("click", async (e) => {
     case "acc-view": ACC.view = t.dataset.v; ACC.copied = null; render(); break;
     case "acc-range": ACC.range = t.dataset.v; render(); break;
     case "acc-add-expense": openExpense(null); break;
+    case "acc-req-ok": { const req = W.raw.get(wreqCol(t.dataset.w))?.get(id); if (!req) break; try { await accWrite("set", `${ACC_ITEMS}/${id}`, { name: req.name, category: req.category, usual_price: req.usual_price || 0, quick_add: false, price_locked: false, archived: false, created_at: nowISO(), created_by: S.uid, approved_from: req.requested_by_name || "" }); await accWrite("delete", `${wreqCol(t.dataset.w)}/${id}`); flash(`${req.name} added to the item list.`); } catch (x) { flash(dbErrorText(x)); } render(); break; }
+    case "acc-req-no": try { await accWrite("delete", `${wreqCol(t.dataset.w)}/${id}`); flash("Item request removed."); } catch (x) { flash(dbErrorText(x)); } render(); break;
     case "acc-add-expense-home": location.hash = "accounts"; setTimeout(() => openExpense(null), 0); break;
     case "acc-add-received": openReceived(null); break;
     case "acc-form-cancel": ACC.form = null; render(); break;
     case "acc-quick": t.disabled = true; quickAdd(id); break;
-    case "acc-undo": { const q = ACC.lastQuick; ACC.lastQuick = null; if (q) { try { await accWrite("delete", `${ACC_TX}/${q.id}`); flash(`Removed ${q.label}.`); } catch (err) { flash(dbErrorText(err)); } } render(); break; }
+    case "acc-undo": { const q = ACC.lastQuick; ACC.lastQuick = null; if (q) { try { await accWrite("delete", q.path || txPathOf(q.id)); flash(`Removed ${q.label}.`); } catch (err) { flash(dbErrorText(err)); } } render(); break; }
     case "acc-open": ACC.detail = ACC.detail === id ? null : id; ACC.confirm = null; render(); break;
     case "acc-edit": { const tx = ACC.tx.get(id); if (tx?.type === "received") openReceived(id); else openExpense(id); break; }
     case "acc-del": ACC.confirm = id; render(); break;
     case "acc-del-no": ACC.confirm = null; render(); break;
     case "acc-del-yes": {
       const before = ACC.tx.get(id); ACC.confirm = null; ACC.detail = null;
-      try { await accWrite("delete", `${ACC_TX}/${id}`); writeAudit("accounts.delete", null, id, before, null); if (before?.attachment && S.caps.assets) S.caps.assets.delete(before.attachment).catch(() => {}); flash(`Deleted. Balance ${inr(availableNow())}.`); }
+      try { await accWrite("delete", txPathOf(id)); writeAudit("accounts.delete", null, id, before, null); if (before?.attachment && S.caps.assets) S.caps.assets.delete(before.attachment).catch(() => {}); flash(`Deleted. Balance ${inr(availableNow())}.`); }
       catch (err) { flash(dbErrorText(err).replace("save this bill", "delete this entry")); }
       render(); break;
     }
-    case "acc-reviewed": try { await accWrite("update", `${ACC_TX}/${id}`, { review: false, reviewed_at: new Date().toISOString(), reviewed_by: S.uid }); flash("Marked as reviewed."); } catch (err) { flash(dbErrorText(err)); } render(); break;
+    case "acc-reviewed": try { await accWrite("update", txPathOf(id), { review: false, reviewed_at: new Date().toISOString(), reviewed_by: S.uid }); flash("Marked as reviewed."); } catch (err) { flash(dbErrorText(err)); } render(); break;
     case "acc-review-filter": ACC.cat = "review"; ACC.range = "all"; ACC.view = "entries"; render(); break;
     case "acc-photo": openViewer("/_blob/" + id); break;
     case "acc-line-add": ACC.form.values.lines.push({ name: "", qty: "1", amount: "", category: ACC.form.values.lines.at(-1)?.category || "Food", item_id: null }); render(); document.querySelector(`[data-line="${ACC.form.values.lines.length - 1}"][data-lf="name"]`)?.focus(); break;
@@ -3574,9 +3628,10 @@ document.addEventListener("click", async (e) => {
     case "acc-item-arch": ACC.showArchived = !ACC.showArchived; render(); break;
     case "acc-check": {
       const v = parseRupees($("#acc-actual").value); if (v == null || Number.isNaN(v)) { flash("Enter the amount in hand in whole rupees."); render(); break; }
+      if (accVisibleKeys().length !== 1) { flash("Pick one wallet to check its balance."); render(); break; }
       const calc = availableNow(); ACC.checkResult = { actual: v, calculated: calc, diff: v - calc }; render(); break;
     }
-    case "acc-check-save": { const r = ACC.checkResult; if (!r) break; try { await accWrite("set", `${ACC_CHECKS}/${"c" + Date.now().toString(36)}`, { date: accTodayISO(), at: new Date().toISOString(), ...r, by: S.uid }); flash("Check saved."); ACC.checkResult = null; } catch (err) { flash(dbErrorText(err)); } render(); break; }
+    case "acc-check-save": { const r = ACC.checkResult; if (!r) break; try { const ck = accTargetKey(); if (!ck) { flash("Pick a wallet first."); break; } await accWrite("set", `${wchkCol(ck)}/${"c" + Date.now().toString(36)}`, { date: accTodayISO(), at: new Date().toISOString(), ...r, by_name: accActor().name, wallet: ck, by: S.uid }); flash("Check saved."); ACC.checkResult = null; } catch (err) { flash(dbErrorText(err)); } render(); break; }
     case "acc-csv": saveFile(`accounts-${ACC.range === "all" ? "all" : rangeBounds().start || "range"}.csv`, accCsv()); break;
     case "acc-import": $("#acc-import-file").click(); break;
     case "acc-import-cancel": ACC.importPreview = null; render(); break;
@@ -3598,7 +3653,7 @@ document.addEventListener("input", (e) => {
         box.querySelector('[data-lf="category"]').value = l.category;
       } else l.item_id = null;
       const nb = box.querySelector("[data-newbox]");
-      nb.innerHTML = l.name.trim() && !m ? `<label class="pick small"><input type="checkbox" data-line="${i}" data-lf="addNew" ${l.addNew ? "checked" : ""}> Add "${esc(l.name.trim())}" as a new item</label>` : m && m[1].name !== l.name.trim() ? `<span class="small muted">Matches item "${esc(m[1].name)}"</span>` : "";
+      nb.innerHTML = l.name.trim() && !m ? `<label class="pick small"><input type="checkbox" data-line="${i}" data-lf="addNew" ${l.addNew ? "checked" : ""}> Add "${esc(l.name.trim())}" as a new item${accActor().owner ? "" : " (the owner will check it)"}</label>` : m && m[1].name !== l.name.trim() ? `<span class="small muted">Matches item "${esc(m[1].name)}"</span>` : "";
     }
     if (t.dataset.lf === "amount") l.amountTyped = true;
     refreshExpenseTotals(); return;
@@ -4252,6 +4307,8 @@ document.addEventListener("change", async (e) => {
   if (f && t.dataset.vf === "clearReview") { f.values.clearReview = t.checked; return; }
   if (ROU.personForm && t.dataset.pf2) { ROU.personForm.values[t.dataset.pf2] = t.value; return; }
   const a = t.dataset.act;
+  if (t.id === "acc-by") { ACC.by = t.value; render(); return; }
+  if (t.id === "acc-shared") { try { localStorage.setItem("pbl-acc-shared", t.checked ? "1" : "0"); } catch {} W.profile = null; render(); return; }
   if (a === "rou-type") { ROU.type = t.value; ROU.copied = null; render(); }
   if (a === "rou-person") { ROU.person = t.value; ROU.copied = null; render(); }
   if (a === "rou-dates") { ROU.from = $("#rou-from").value; ROU.to = $("#rou-to").value; render(); }
@@ -6106,5 +6163,365 @@ document.addEventListener("change", (e) => {
   if (t.id === "iscan-month" && /^\d{4}-\d{2}$/.test(t.value)) { R.month = t.value; watchMonth(t.value); render(); }
 });
 
+/* ================= Wallets: one per staff member (Accounts) ================= */
+/* Storage and who may use it (enforced by the page storage's access rules, not only here):
+   walletreg/<wid>               wallet list {name, phone, color, status, opening_balance, start_date, threshold, key, uid, code, pin_hash}   owner/editors only
+   walletin/<key>                that wallet's details, readable by its staff member
+   walletin/<key>/tx/<id>        money given and transfers: the staff member reads, only the owner writes
+   wallets/<key>/tx/<id>         expenses: the staff member reads and writes their own; the owner all
+   wallets/<key>/checks/<id>     cash-in-hand counts;  wallets/<key>/newitems/<id>  items a staff member asked to add
+   walletclaims/<uid>            "I have invite code X": written by the staff member, linked by the owner's phone
+   <key> is the staff member's claude.ai id once linked (so `{self}` rules apply), before that the wallet id. */
+const WREG = "walletreg";
+const wtxCol = (k) => `wallets/${k}/tx`, winCol = (k) => `walletin/${k}/tx`, wchkCol = (k) => `wallets/${k}/checks`, wreqCol = (k) => `wallets/${k}/newitems`;
+const WCOLORS = ["#0f6e66", "#b4561b", "#5b4cb3", "#2f7d32", "#a33a5a", "#1f6fae"];
+const W = { reg: new Map(), meta: new Map(), raw: new Map(), subs: new Map(), loadedCols: new Set(), claims: new Map(), myClaim: null, regLoaded: false, metaLoaded: false,
+  profile: null, pinAsk: null, staffForm: null, transfer: null, settingsOpen: false, linking: false, setup: false, question: null, seenAt: {} };
+const IN_TYPES = new Set(["received", "transfer_in", "opening"]);
+const wRaw = (col) => { if (!W.raw.has(col)) W.raw.set(col, new Map()); return W.raw.get(col); };
+const tidKey = (tid) => String(tid).split("~")[0];
+const tidDoc = (tid) => String(tid).split("~").slice(1).join("~");
+function newDocId(date) { return "t" + String(date || accTodayISO()).replaceAll("-", "") + Date.now().toString(36) + Math.random().toString(36).slice(2, 4); }
+function wallets() { const list = [...W.reg.entries()].map(([wid, w]) => ({ wid, ...w })); for (const [k, m] of W.meta) if (!list.some((w) => w.key === k)) list.push({ wid: m.wid || k, ...m, key: k }); return list.sort((a, b) => (a.created_at || "").localeCompare(b.created_at || "") || (b.legacy ? 1 : 0) - (a.legacy ? 1 : 0) || a.name.localeCompare(b.name)); }
+function walletOf(k) { return wallets().find((w) => w.key === k) || null; }
+function walletName(k) { return walletOf(k)?.name || "Wallet"; }
+function legacyKey() { const w = W.reg.get(ACC.settings.legacy_wallet); return w?.key || wallets().find((x) => x.legacy)?.key || null; }
+/** Who is acting: the owner (all wallets), a staff member (their wallet), or a profile picked on a shared phone. */
+function accActor() {
+  if (canAccManage()) {
+    const p = W.profile && W.reg.get(W.profile); if (p) return { owner: false, key: p.key, name: p.name, shared: true, active: p.status !== "inactive" };
+    const sel = ACC.wallet && ACC.wallet !== "all" && walletOf(ACC.wallet) ? ACC.wallet : null;   // a remembered wallet that no longer exists means Combined
+    return { owner: true, key: sel, name: S.me?.name || "Owner", active: sel ? walletOf(sel).status !== "inactive" : true };
+  }
+  const m = W.meta.get(S.uid); if (m) return { owner: false, key: S.uid, name: m.name, active: m.status !== "inactive" };
+  return { owner: false, key: null, name: S.me?.name || "", active: false };
+}
+function accVisibleKeys() { const a = accActor(); if (a.owner) return a.key ? [a.key] : wallets().map((w) => w.key); return a.key ? [a.key] : []; }
+function walletEntries(k) {
+  const out = [];
+  for (const col of [wtxCol(k), winCol(k)]) for (const [id, d] of W.raw.get(col) || []) if (!d.conflict_of && !d.deleted) out.push({ ...d, id: `${k}~${id}`, wallet: k, _col: col });
+  const w = walletOf(k); if (w && Number(w.opening_balance)) out.push({ id: `${k}~opening`, type: "opening", date: w.start_date || "2000-01-01", amount: Number(w.opening_balance), wallet: k, _col: null, lines: [], seq: -1, note: "Opening balance" });
+  return out;
+}
+function walletBalance(k) { return walletEntries(k).reduce((a, t) => a + signed(t), 0); }
+/** The ledger the rest of Accounts works on: the chosen wallet, or every wallet for the owner's Combined view. */
+function accRebuild() {
+  const m = new Map(), checks = new Map();
+  for (const k of accVisibleKeys()) {
+    for (const t of walletEntries(k)) m.set(t.id, t);
+    for (const [id, c] of W.raw.get(wchkCol(k)) || []) checks.set(`${k}~${id}`, { ...c, wallet: k });
+  }
+  ACC.tx = m; ACC.checks = checks;
+  const keys = [...W.subs.keys()];
+  ACC.loaded.tx = (W.regLoaded || W.metaLoaded) && keys.every((k) => [wtxCol(k), winCol(k)].every((c) => W.loadedCols.has(c)));
+}
+function txPathOf(tid) { const t = ACC.tx.get(tid); const col = t?._col || (t?.type === "expense" ? wtxCol(tidKey(tid)) : winCol(tidKey(tid))); return `${col}/${tidDoc(tid)}`; }
+function newTxRef(type, key, date) { const id = newDocId(date); const col = type === "expense" ? wtxCol(key) : winCol(key); return { tid: `${key}~${id}`, path: `${col}/${id}` }; }
+function stamp(extra = {}) { const a = accActor(); return { created_at: nowISO(), created_by: S.uid, created_by_name: a.name || S.me?.name || "", ...(a.shared ? { profile: true } : {}), ...extra }; }
+function editStamp() { const a = accActor(); return { updated_at: nowISO(), updated_by: S.uid, updated_by_name: a.name || "" }; }
+const isPendingSync = (tid) => { const p = txPathOf(tid); return outbox().some((w) => w.path === p); };
+
+/* ---------- loading ---------- */
+function wWatch(k) {
+  if (!k || W.subs.has(k)) return; const db = S.caps.db; const offs = [];
+  for (const col of [wtxCol(k), winCol(k), wchkCol(k), wreqCol(k)]) offs.push(db.collection(col).onSnapshot((snap) => {
+    W.raw.set(col, new Map(snap.docs.map((d) => [d.id, clone(d.data())]))); reapplyOutbox(col);
+    if (!snap.metadata.fromCache) W.loadedCols.add(col); accRebuild(); accChanged(); accMaybeSeed();
+  }, () => { W.loadedCols.add(col); accRebuild(); accChanged(); }));
+  W.subs.set(k, offs);
+}
+function wUnwatch(k) { for (const off of W.subs.get(k) || []) try { off(); } catch {} W.subs.delete(k); }
+function walletsStart() {
+  const db = S.caps.db; try { W.seenAt = JSON.parse(localStorage.getItem("pbl-acc-seen") || "{}"); } catch {}
+  db.collection(WREG).onSnapshot((snap) => {
+    W.reg = new Map(snap.docs.map((d) => [d.id, clone(d.data())])); reapplyOutbox(WREG);
+    if (!snap.metadata.fromCache) W.regLoaded = true;
+    for (const w of W.reg.values()) wWatch(w.key);
+    accRebuild(); accChanged(); accMaybeSeed(); processClaims();
+  }, () => { W.regLoaded = true; accRebuild(); accChanged(); });
+  db.collection("walletclaims").onSnapshot((snap) => { W.claims = new Map(snap.docs.map((d) => [d.id, clone(d.data())])); processClaims(); accChanged(); }, () => {});
+  if (S.uid) {
+    db.doc(`walletin/${S.uid}`).onSnapshot((snap) => {
+      if (snap.exists) { W.meta.set(S.uid, clone(snap.data())); wWatch(S.uid); } else W.meta.delete(S.uid);
+      W.metaLoaded = true; accRebuild(); accChanged();
+    }, () => { W.metaLoaded = true; accRebuild(); accChanged(); });
+    db.doc(`walletclaims/${S.uid}`).onSnapshot((snap) => { W.myClaim = snap.exists ? clone(snap.data()) : null; accChanged(); }, () => {});
+  }
+}
+
+/* ---------- owner setup: wallets, move the old ledger into Nandhini's wallet ---------- */
+function inviteCode() { const a = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; let s = ""; for (let i = 0; i < 6; i++) s += a[Math.floor(Math.random() * a.length)]; return s; }
+function metaOf(w) { return { wid: w.wid, name: w.name, phone: w.phone || "", color: w.color, status: w.status || "active", opening_balance: Number(w.opening_balance) || 0, start_date: w.start_date || "", threshold: Number(w.threshold ?? 500), legacy: !!w.legacy }; }
+async function createWallet(v) {
+  const wid = "w" + fuzzyKey(v.name).slice(0, 10) + Math.random().toString(36).slice(2, 5);
+  const w = { name: v.name.trim(), phone: (v.phone || "").trim(), color: v.color || WCOLORS[W.reg.size % WCOLORS.length], status: "active", opening_balance: Math.round(Number(v.opening_balance) || 0),
+    start_date: v.start_date || accTodayISO(), threshold: Math.round(Number(v.threshold ?? 500)), key: wid, uid: null, code: inviteCode(), pin_hash: v.pin ? await pinHash(wid, v.pin) : null, legacy: !!v.legacy, created_at: nowISO(), created_by: S.uid };
+  await accWrite("set", `${WREG}/${wid}`, w);
+  await accWrite("set", `walletin/${wid}`, metaOf({ wid, ...w }));
+  writeAudit("accounts.wallet_add", null, wid, null, { name: w.name }); return wid;
+}
+async function accMaybeSeed() {
+  if (S.tab !== "accounts" || !S.me?.isOwner || !canAccManage() || ACC.seeding || W.setup) return;
+  if (!ACC.loaded.items || !ACC.loaded.settings || !W.regLoaded || !ACC.legacyLoaded) return;
+  W.setup = true;
+  try {
+    if (!W.reg.size && !ACC.settings.wallets_at) {   // first run of the wallet version: Nandhini (who kept the ledger) and Dharani
+      const legacyStart = [...ACC.legacy.values()].map((t) => t.date).sort()[0] || accTodayISO();
+      const n = await createWallet({ name: "Nandhini", legacy: true, start_date: legacyStart, color: WCOLORS[0] });
+      await createWallet({ name: "Dharani", color: WCOLORS[1] });
+      await accWrite("set", ACC_SETTINGS, { period: "10", default_spender: "Nandhini", categories: [], ...ACC.settings, wallets_at: nowISO(), legacy_wallet: n, low_threshold: 500 });
+      return;
+    }
+    if (!ACC.loaded.tx) return;
+    const lk = legacyKey();
+    if (lk && ACC.legacy.size && !ACC.settings.wallets_migrated_at) { await migrateLegacy(lk); return; }
+    if (lk && !ACC.settings.seeded_at && !ACC.legacy.size && !walletEntries(lk).length) await accSeed(true);
+  } catch (e) { flash(dbErrorText(e)); }
+  finally { W.setup = false; }
+}
+async function migrateLegacy(lk) {
+  ACC.seeding = { done: 0, total: ACC.legacy.size + ACC.legacyChecks.size, label: "Moving the ledger into Nandhini's wallet" }; accRefresh();
+  try {
+    for (const [id, t] of ACC.legacy) {
+      const col = t.type === "received" ? winCol(lk) : wtxCol(lk);
+      await accWrite("set", `${col}/${id}`, { ...t, wallet: lk, created_by_name: t.created_by_name || "Nandhini (WhatsApp ledger)", migrated_from: "accounts/tx" });
+      ACC.seeding.done++; if (ACC.seeding.done % 20 === 0) accRefresh();
+    }
+    for (const [id, c] of ACC.legacyChecks) { await accWrite("set", `${wchkCol(lk)}/${id}`, { ...c, wallet: lk }); ACC.seeding.done++; }
+    await accWrite("update", ACC_SETTINGS, { wallets_migrated_at: nowISO() });
+    writeAudit("accounts.migrate", null, "accounts", null, { entries: ACC.legacy.size, wallet: lk });
+    flash(`Moved ${ACC.legacy.size} ledger entries into Nandhini's wallet. The old shared ledger is kept as a backup only the owner can see.`);
+  } finally { ACC.seeding = null; accRefresh(); }
+}
+/** On the owner's phone: link staff who typed their invite code to their wallet, moving the wallet under their account. */
+async function processClaims() {
+  if (W.linking || !canAccManage() || !W.regLoaded) return;
+  const todo = [...W.claims.entries()].filter(([, c]) => c.status !== "linked" && c.status !== "unknown_code" && c.code);
+  if (!todo.length) return; W.linking = true;
+  try {
+    for (const [uid, c] of todo) {
+      const hit = [...W.reg.entries()].find(([, w]) => w.code && w.code.toUpperCase() === String(c.code).trim().toUpperCase());
+      if (!hit) { await accWrite("update", `walletclaims/${uid}`, { status: "unknown_code", checked_at: nowISO() }); continue; }
+      const [wid, w] = hit; if (w.uid && w.uid !== uid) { await accWrite("update", `walletclaims/${uid}`, { status: "unknown_code", checked_at: nowISO() }); continue; }
+      if (w.key !== uid) {
+        for (const [from, to] of [[wtxCol(w.key), wtxCol(uid)], [winCol(w.key), winCol(uid)], [wchkCol(w.key), wchkCol(uid)], [wreqCol(w.key), wreqCol(uid)]]) {
+          const docs = (await S.caps.db.collection(from).get()).docs;
+          for (const d of docs) { await accWrite("set", `${to}/${d.id}`, { ...d.data(), wallet: uid }); }
+          for (const d of docs) await accWrite("delete", `${from}/${d.id}`);
+        }
+        await accWrite("delete", `walletin/${w.key}`).catch(() => {});
+        wUnwatch(w.key);
+      }
+      await accWrite("update", `${WREG}/${wid}`, { key: uid, uid, linked_at: nowISO(), linked_name: c.name || "" });
+      await accWrite("set", `walletin/${uid}`, metaOf({ wid, ...w }));
+      await accWrite("update", `walletclaims/${uid}`, { status: "linked", wallet: wid, linked_at: nowISO() });
+      if (ACC.wallet === w.key) ACC.wallet = uid;
+      writeAudit("accounts.wallet_link", null, wid, null, { name: w.name });
+      flash(`${w.name}'s wallet is now linked to their phone.`);
+    }
+  } catch (e) { flash(dbErrorText(e)); }
+  finally { W.linking = false; accRefresh(); }
+}
+async function pinHash(wid, pin) { const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`pbl:${wid}:${pin}`)); return [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join(""); }
+const sharedMode = () => { try { return localStorage.getItem("pbl-acc-shared") === "1"; } catch { return false; } };
+
+/* ---------- views ---------- */
+function walletCards() {
+  const a = accActor(); const p = periodOf(accTodayISO()); const list = a.owner ? wallets() : wallets().filter((w) => w.key === a.key);
+  const card = (w) => { const bal = walletBalance(w.key); const spent = walletEntries(w.key).filter((t) => t.type === "expense" && t.date >= p.start && t.date <= p.end).reduce((x, t) => x + t.amount, 0);
+    const last = walletEntries(w.key).filter((t) => t.created_at).sort((x, y) => y.created_at.localeCompare(x.created_at))[0]; const low = bal < Number(w.threshold ?? 500);
+    return `<button class="wcard ${a.owner && ACC.wallet === w.key ? "sel" : ""} ${w.status === "inactive" ? "inactive" : ""}" ${a.owner ? `data-act="acc-wallet" data-v="${esc(w.key)}"` : "disabled"} style="--wc:${esc(w.color || "#0f6e66")}" aria-pressed="${ACC.wallet === w.key}">
+      <span class="wname"><i></i>${esc(w.name)}${w.status === "inactive" ? ' <span class="pill">Inactive</span>' : ""}${a.owner && !w.uid ? ' <span class="pill warn">Not linked</span>' : ""}</span>
+      <b class="num ${bal < 0 ? "neg" : ""}">${inr(bal)}</b><span class="small muted">Spent this period ${inr(spent)}</span>
+      <span class="small muted">${last ? `Last entry ${new Date(last.created_at).toLocaleString("en-IN", { day: "2-digit", month: "2-digit", hour: "numeric", minute: "2-digit" })}` : "No entries yet"}</span>
+      ${low ? `<span class="small bad-ink">⚠ Below ${inr(Number(w.threshold ?? 500))}</span>` : ""}${a.owner && newCount(w.key) ? `<span class="pill warn">${newCount(w.key)} new</span>` : ""}</button>`; };
+  if (!a.owner) return list.length ? `<div class="wcards">${list.map(card).join("")}</div>` : "";
+  const all = wallets(); const given = all.reduce((x, w) => x + walletEntries(w.key).filter((t) => t.type === "received").reduce((y, t) => y + t.amount, 0), 0);
+  const spentAll = all.reduce((x, w) => x + walletEntries(w.key).filter((t) => t.type === "expense").reduce((y, t) => y + t.amount, 0), 0);
+  const availAll = all.reduce((x, w) => x + walletBalance(w.key), 0);
+  return `<div class="wcards">
+    <button class="wcard combined ${ACC.wallet === "all" ? "sel" : ""}" data-act="acc-wallet" data-v="all" aria-pressed="${ACC.wallet === "all"}"><span class="wname">Combined</span><b class="num" id="acc-combined">${inr(availAll)}</b>
+      <span class="small muted">Given ${inr(given)} · spent ${inr(spentAll)}</span></button>
+    ${all.map(card).join("")}</div>`;
+}
+function newCount(k) { const since = W.seenAt[k] || ""; return walletEntries(k).filter((t) => t.created_at && t.created_at > since && t.created_by !== S.uid).length; }
+function markSeen(k) { if (!k) return; ACC.newSince = { ...(ACC.newSince || {}), [k]: W.seenAt[k] || "" }; W.seenAt[k] = nowISO(); try { localStorage.setItem("pbl-acc-seen", JSON.stringify(W.seenAt)); } catch {} }
+function isNew(t) { const a = accActor(); if (!a.owner || !t.created_at || t.created_by === S.uid) return false; const since = ACC.newSince?.[t.wallet] ?? W.seenAt[t.wallet] ?? ""; return t.created_at > since; }
+function accAlertCount() {
+  if (!ACC.loaded?.tx) return 0; const a = accActor();
+  if (a.owner) return wallets().reduce((n, w) => n + newCount(w.key), 0) + [...W.claims.values()].filter((c) => c.status !== "linked" && c.status !== "unknown_code").length + conflictsAll().length;
+  if (!a.key) return 0; const since = W.seenAt[a.key] || "";
+  return walletEntries(a.key).filter((t) => (IN_TYPES.has(t.type) && t.type !== "opening" && (t.created_at || "") > since) || (t.question && !t.answer)).length;
+}
+function conflictsAll() { const out = []; for (const k of accVisibleKeys()) for (const col of [wtxCol(k), winCol(k)]) for (const [id, d] of W.raw.get(col) || []) if (d.conflict_of) out.push({ k, col, id, d }); return out; }
+function walletBar() {
+  const a = accActor();
+  return `${sharedMode() && canAccManage() ? profileBar() : ""}
+  ${walletCards()}
+  ${a.owner ? `<div class="wbar-acts"><button class="btn btn-received" data-act="acc-add-received">+ Give money</button><button class="btn btn-ghost" data-act="acc-transfer">Transfer</button><button class="btn btn-ghost" data-act="acc-staff-new">+ Add staff</button>
+    ${ACC.wallet === "all" ? `<button class="btn btn-ghost" data-act="acc-combined-copy">Copy combined summary</button>` : `<button class="btn btn-ghost" data-act="acc-wallet-settings">Wallet settings</button>`}</div>
+    ${ACC.copied?.where === "combined" ? `<div class="note ok">${esc(ACC.copied.text)}</div>` : ""}
+    ${claimsView()}${conflictsView()}${W.settingsOpen && ACC.wallet !== "all" ? walletSettingsView(ACC.wallet) : ""}` : ""}
+  ${!a.owner && a.key ? staffNotices(a) : ""}`;
+}
+function staffNotices(a) {
+  const qs = walletEntries(a.key).filter((t) => t.question && !t.answer); const since = W.seenAt[a.key] || "";
+  const got = walletEntries(a.key).filter((t) => (t.type === "received" || t.type === "transfer_in") && (t.created_at || "") > since);
+  return `${!a.active ? `<div class="note warn">Your wallet is inactive. You can see your history but not add new entries.</div>` : ""}
+    ${got.length ? `<div class="note ok confirm"><span>💰 ${got.map((t) => `${inr(t.amount)} ${t.type === "received" ? "received" : "transferred to you"} on ${dmy(t.date)}`).join(", ")}</span><button class="btn btn-ghost btn-sm" data-act="acc-seen">OK</button></div>` : ""}
+    ${qs.length ? `<div class="note warn">The owner asked about ${qs.length} entr${qs.length === 1 ? "y" : "ies"}. Open ${qs.length === 1 ? "it" : "them"} below to answer.</div>` : ""}`;
+}
+function profileBar() {
+  const p = W.profile && W.reg.get(W.profile);
+  return `<section class="card"><div class="small muted" style="font-weight:600">Shared phone: who is using it?</div>
+    <div class="chips">${[["", "Owner"], ...wallets().filter((w) => w.status !== "inactive").map((w) => [w.wid, w.name])].map(([id, l]) => `<button class="chip" data-act="acc-profile" data-v="${esc(id)}" aria-pressed="${(W.profile || "") === id}">${esc(l)}</button>`).join("")}</div>
+    ${W.pinAsk != null ? `<form class="copy-row" id="acc-pin-form"><input class="inp num" id="acc-pin" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="4-digit PIN" aria-label="PIN for ${esc(W.pinAsk ? W.reg.get(W.pinAsk)?.name : "Owner")}"><button class="btn btn-primary">Switch</button></form><div id="acc-pin-err"></div>` : ""}
+    ${p ? `<p class="small">Recording as <b>${esc(p.name)}</b>. Only ${esc(p.name)}'s wallet is shown.</p>` : ""}</section>`;
+}
+function claimsView() {
+  const waiting = [...W.claims.entries()].filter(([, c]) => c.status === "unknown_code");
+  return waiting.length ? `<div class="note warn">${waiting.map(([, c]) => `${esc(c.name || "Someone")} typed invite code “${esc(c.code)}”, which doesn't match any wallet.`).join("<br>")}</div>` : "";
+}
+function conflictsView() {
+  const list = conflictsAll(); if (!list.length) return "";
+  return `<section class="card"><h2>Two versions to choose from</h2><p class="small muted">An entry was changed on two phones at once. Pick the one to keep.</p>
+    ${list.map(({ k, col, id, d }) => { const orig = W.raw.get(col)?.get(d.conflict_of); const desc = (t) => t ? `${dmy(t.date)} · ${txTitle(t)} · ${inr(t.amount)}${t.updated_by_name ? ` (by ${t.updated_by_name})` : ""}` : "deleted";
+      return `<div class="scan-row"><div class="small">${esc(walletName(k))}: A) ${esc(desc(orig))}<br>B) ${esc(desc(d))}</div><div class="dr-mact"><button class="btn-link" data-act="acc-conf" data-col="${esc(col)}" data-id="${esc(id)}" data-v="a">Keep A</button><button class="btn-link" data-act="acc-conf" data-col="${esc(col)}" data-id="${esc(id)}" data-v="b">Keep B</button></div></div>`; }).join("")}</section>`;
+}
+function walletSettingsView(k) {
+  const w = walletOf(k); if (!w) return ""; const link = `${location.href.split("#")[0]}#accounts`;
+  return `<section class="card"><h2>${esc(w.name)}'s wallet</h2>
+    <form id="acc-wallet-form" class="acc-lines">
+      <div class="dates"><label class="field"><span>Name</span><input class="inp" data-wf="name" value="${esc(w.name)}" maxlength="40"></label><label class="field"><span>Phone</span><input class="inp" type="tel" data-wf="phone" value="${esc(w.phone || "")}" maxlength="20"></label></div>
+      <div class="dates"><label class="field"><span>Opening balance (₹)</span><input class="inp num" data-wf="opening_balance" inputmode="numeric" value="${esc(String(w.opening_balance || 0))}"></label><label class="field"><span>Start date</span><input class="inp" type="date" data-wf="start_date" value="${esc(w.start_date || "")}"></label></div>
+      <div class="dates"><label class="field"><span>Low balance warning below (₹)</span><input class="inp num" data-wf="threshold" inputmode="numeric" value="${esc(String(w.threshold ?? 500))}"></label><label class="field"><span>Colour</span><select class="inp" data-wf="color">${WCOLORS.map((c, i) => `<option value="${c}" ${w.color === c ? "selected" : ""}>${["Teal", "Orange", "Purple", "Green", "Rose", "Blue"][i]}</option>`).join("")}</select></label></div>
+      <label class="field"><span>Status</span><select class="inp" data-wf="status"><option value="active" ${w.status !== "inactive" ? "selected" : ""}>Active</option><option value="inactive" ${w.status === "inactive" ? "selected" : ""}>Inactive (history kept, no new entries)</option></select></label>
+      <label class="field"><span>PIN for the shared phone (4 digits, optional)</span><input class="inp num" data-wf="pin" inputmode="numeric" maxlength="4" placeholder="${w.pin_hash ? "PIN set; type a new one to change" : "Not set"}" autocomplete="off"></label>
+      <div id="wf-err"></div><button class="btn btn-primary">Save wallet</button></form>
+    <div class="add-panel"><b>Invite ${esc(w.name)}</b>${w.uid ? `<p class="small">Linked to ${esc(w.linked_name || "their claude.ai account")}${w.linked_at ? ` on ${dmy(w.linked_at.slice(0, 10))}` : ""}.</p>`
+      : `<p class="small">Share this page with ${esc(w.name)} as a <b>Contributor</b> (Share menu), then ask them to open Accounts and type the code:</p><p class="wcode num" id="wf-code">${esc(w.code)}</p><p class="small muted">Link: ${esc(link)}</p><button class="btn btn-ghost" data-act="acc-invite-copy" data-code="${esc(w.code)}">Copy invite message</button>`}</div>
+  </section>`;
+}
+function staffFormView() {
+  const v = W.staffForm;
+  return `<div class="row-between"><button class="btn-link" data-act="acc-staff-cancel">‹ Cancel</button><h1 style="flex:1">Add staff</h1></div>
+  <form class="card" id="acc-staff-form"><label class="field"><span>Name *</span><input class="inp" id="sf-name" data-sf="name" value="${esc(v.name)}" maxlength="40" autocomplete="off"></label>
+    <label class="field"><span>Phone (optional)</span><input class="inp" type="tel" data-sf="phone" value="${esc(v.phone)}" maxlength="20"></label>
+    <div class="dates"><label class="field"><span>Opening balance (₹)</span><input class="inp num" inputmode="numeric" data-sf="opening_balance" value="${esc(v.opening_balance)}"></label><label class="field"><span>Start date</span><input class="inp" type="date" data-sf="start_date" value="${esc(v.start_date)}"></label></div>
+    <label class="field"><span>Low balance warning below (₹)</span><input class="inp num" inputmode="numeric" data-sf="threshold" value="${esc(v.threshold)}"></label>
+    <label class="field"><span>PIN for the shared phone (optional)</span><input class="inp num" inputmode="numeric" maxlength="4" data-sf="pin" value="${esc(v.pin)}" autocomplete="off"></label>
+    <div id="sf-err"></div><button class="btn btn-primary btn-block">Add staff</button></form>`;
+}
+function transferFormView() {
+  const v = W.transfer; const ws = wallets().filter((w) => w.status !== "inactive");
+  const opt = (sel) => ws.map((w) => `<option value="${esc(w.key)}" ${sel === w.key ? "selected" : ""}>${esc(w.name)} (${inr(walletBalance(w.key))})</option>`).join("");
+  return `<div class="row-between"><button class="btn-link" data-act="acc-transfer-cancel">‹ Cancel</button><h1 style="flex:1">Transfer between staff</h1></div>
+  <form class="card" id="acc-transfer-form"><div class="dates"><label class="field"><span>From</span><select class="inp" data-tf2="from">${opt(v.from)}</select></label><label class="field"><span>To</span><select class="inp" data-tf2="to">${opt(v.to)}</select></label></div>
+    <div class="dates"><label class="field"><span>Amount (₹)</span><input class="inp num" id="tr-amount" data-tf2="amount" inputmode="numeric" value="${esc(v.amount)}"></label><label class="field"><span>Date</span><input class="inp" type="date" data-tf2="date" value="${esc(v.date)}"></label></div>
+    <label class="field"><span>Note</span><input class="inp" data-tf2="note" value="${esc(v.note)}" maxlength="120" placeholder="e.g. cash handed over at end of shift"></label>
+    <p class="small muted">Recorded in both wallets. The combined total doesn't change.</p><div id="tr-err"></div><button class="btn btn-primary btn-block">Transfer</button></form>`;
+}
+function linkView() {
+  const c = W.myClaim;
+  return `<h1>Accounts</h1><section class="card"><h2>Link your wallet</h2>
+    ${c?.status === "linked" ? `<p class="muted">Linked. Loading your wallet…</p>` : c && c.status !== "unknown_code" ? `<p>Code <b>${esc(c.code)}</b> sent. Your wallet appears here as soon as the owner opens the app on their phone.</p>`
+      : `<p class="small muted">Ask the owner for your 6-letter invite code.</p>${c?.status === "unknown_code" ? `<div class="note bad">The code “${esc(c.code)}” didn't match. Check it with the owner.</div>` : ""}
+        <form class="copy-row" id="acc-claim-form"><input class="inp" id="acc-claim-code" maxlength="8" autocomplete="off" placeholder="Invite code" aria-label="Invite code" style="text-transform:uppercase"><button class="btn btn-primary">Link</button></form>`}</section>`;
+}
+function combinedText() {
+  const p = periodOf(accTodayISO()); const all = wallets();
+  const lines = all.map((w) => { const spent = walletEntries(w.key).filter((t) => t.type === "expense" && t.date >= p.start && t.date <= p.end).reduce((x, t) => x + t.amount, 0); return `${w.name} – balance ₹${grouped(walletBalance(w.key))} · spent this period ₹${grouped(spent)}`; });
+  return [`*Wallets – ${dmy(accTodayISO())}*`, ...lines, "", `*Total available ₹${grouped(all.reduce((x, w) => x + walletBalance(w.key), 0))}*`].join("\n");
+}
+/* entry extras: who added it, sync state, new/checked/below zero, questions */
+function txBadges(t) {
+  return `${accActor().owner && ACC.wallet === "all" && t.wallet ? `<span class="pill" style="--wc:${esc(walletOf(t.wallet)?.color || "")}">${esc(walletName(t.wallet))}</span>` : ""}
+    ${isNew(t) ? '<span class="pill warn">New</span>' : ""}${t.negative ? '<span class="pill bad">Below zero</span>' : ""}${t.checked_at ? '<span class="pill ok">Checked ✓</span>' : ""}
+    ${t.question && !t.answer ? '<span class="pill warn">Question</span>' : ""}${t._col && isPendingSync(t.id) ? '<span class="pill">Not synced yet</span>' : ""}`;
+}
+function canEditEntry(t) {
+  const a = accActor(); if (!t._col) return false; if (a.owner) return true;
+  if (!a.active || t.type !== "expense") return false;
+  const mine = t.created_by === S.uid && (!a.shared || t.created_by_name === a.name);
+  return mine && Date.now() - new Date(t.created_at || 0).getTime() < 24 * 3600e3;
+}
+function txExtras(t) {
+  const a = accActor(); const ask = W.question === t.id;
+  return `<p class="small muted">Added by ${esc(t.created_by_name || "—")}${t.created_at ? ` · ${new Date(t.created_at).toLocaleString("en-IN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "numeric", minute: "2-digit" })}` : ""}${t.updated_by_name ? ` · edited by ${esc(t.updated_by_name)}${t.updated_at ? " " + new Date(t.updated_at).toLocaleString("en-IN", { day: "2-digit", month: "2-digit", hour: "numeric", minute: "2-digit" }) : ""}` : ""}${t.checked_at ? ` · checked by ${esc(t.checked_by_name || "owner")}` : ""}</p>
+    ${t.receipt ? `<button class="thumb" data-act="acc-photo" data-id="${esc(t.receipt)}" aria-label="View receipt"><img src="/_blob/${esc(t.receipt)}" alt=""></button>` : ""}
+    ${t.question ? `<div class="note ${t.answer ? "ok" : "warn"} small"><b>Owner asked:</b> ${esc(t.question.text)}${t.answer ? `<br><b>${esc(walletName(t.wallet))} answered:</b> ${esc(t.answer.text)}` : ""}</div>` : ""}
+    ${t.question && !t.answer && !a.owner && a.key === t.wallet ? `<form class="copy-row" data-answer="${esc(t.id)}"><input class="inp" name="a" placeholder="Your answer" aria-label="Your answer" maxlength="200"><button class="btn btn-primary">Answer</button></form>` : ""}
+    ${a.owner && t._col ? `<div class="inv-actions">${!t.checked_at ? `<button class="btn btn-ghost" data-act="acc-checked" data-id="${esc(t.id)}">Mark checked</button>` : ""}${t.type === "expense" ? `<button class="btn btn-ghost" data-act="acc-ask" data-id="${esc(t.id)}">Ask a question</button>` : ""}</div>
+      ${ask ? `<form class="copy-row" data-ask="${esc(t.id)}"><input class="inp" name="q" placeholder="e.g. What was this for?" aria-label="Question" maxlength="200"><button class="btn btn-primary">Send</button></form>` : ""}` : ""}`;
+}
+async function saveTransfer() {
+  const v = W.transfer; const err = (m) => { $("#tr-err").innerHTML = `<div class="note bad">${esc(m)}</div>`; };
+  const amt = parseRupees(v.amount); if (!v.from || !v.to || v.from === v.to) return err("Pick two different staff."); if (amt == null || Number.isNaN(amt) || amt <= 0) return err("Amount must be whole rupees."); if (!isISODate(v.date)) return err("Pick the date.");
+  const pair = "x" + Date.now().toString(36); const base = { date: v.date, amount: amt, note: v.note.trim(), lines: [], category: "Transfer", pair, seq: Date.now(), ...stamp() };
+  try {
+    const out = newTxRef("transfer_out", v.from, v.date), inn = newTxRef("transfer_in", v.to, v.date);
+    await accWrite("set", out.path, { ...base, type: "transfer_out", wallet: v.from, to_wallet: v.to, to_name: walletName(v.to) });
+    await accWrite("set", inn.path, { ...base, type: "transfer_in", wallet: v.to, from_wallet: v.from, from_name: walletName(v.from) });
+    writeAudit("accounts.transfer", null, pair, null, { from: walletName(v.from), to: walletName(v.to), amount: amt });
+  } catch (e) { return err(dbErrorText(e)); }
+  flash(`Moved ${inr(amt)} from ${walletName(v.from)} to ${walletName(v.to)}.`); W.transfer = null; render();
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click", async (e) => {
+  const t = e.target.closest("[data-act]"); if (!t) return; const a = t.dataset.act; const id = t.dataset.id;
+  if (!["acc-wallet", "acc-transfer", "acc-transfer-cancel", "acc-staff-new", "acc-staff-cancel", "acc-wallet-settings", "acc-combined-copy", "acc-invite-copy", "acc-profile", "acc-checked", "acc-ask", "acc-conf", "acc-seen"].includes(a)) return;
+  switch (a) {
+    case "acc-wallet": ACC.wallet = t.dataset.v; try { localStorage.setItem("pbl-acc-wallet", ACC.wallet); } catch {} W.settingsOpen = false; ACC.detail = null; ACC.copied = null; if (t.dataset.v !== "all") markSeen(t.dataset.v); else wallets().forEach((w) => markSeen(w.key)); accRebuild(); render(); break;
+    case "acc-transfer": { const ws = wallets().filter((w) => w.status !== "inactive"); W.transfer = { from: ACC.wallet !== "all" ? ACC.wallet : ws[0]?.key, to: ws.find((w) => w.key !== (ACC.wallet !== "all" ? ACC.wallet : ws[0]?.key))?.key, amount: "", date: accTodayISO(), note: "" }; render(); $("#tr-amount")?.focus(); break; }
+    case "acc-transfer-cancel": W.transfer = null; render(); break;
+    case "acc-staff-new": W.staffForm = { name: "", phone: "", opening_balance: "0", start_date: accTodayISO(), threshold: String(ACC.settings.low_threshold ?? 500), pin: "" }; render(); $("#sf-name")?.focus(); break;
+    case "acc-staff-cancel": W.staffForm = null; render(); break;
+    case "acc-wallet-settings": W.settingsOpen = !W.settingsOpen; render(); break;
+    case "acc-combined-copy": { const txt = combinedText(); try { await navigator.clipboard.writeText(txt); ACC.copied = { where: "combined", text: "Copied the combined summary." }; } catch { flash("Copying isn't allowed here."); } render(); break; }
+    case "acc-invite-copy": { const msg = `Please open the Pharmacy Bill Log (Accounts tab) and type this invite code to link your wallet: ${t.dataset.code}`; try { await navigator.clipboard.writeText(msg); flash("Invite message copied."); } catch { flash(`Invite code: ${t.dataset.code}`); } render(); break; }
+    case "acc-profile": { const wid = t.dataset.v; const w = wid ? W.reg.get(wid) : null;
+      if ((w && w.pin_hash) || (!wid && ACC.settings.owner_pin_hash && W.profile)) { W.pinAsk = wid; render(); $("#acc-pin")?.focus(); break; }
+      W.profile = wid || null; W.pinAsk = null; ACC.wallet = w ? w.key : "all"; accRebuild(); render(); break; }
+    case "acc-checked": try { await accWrite("update", txPathOf(id), { checked_at: nowISO(), checked_by: S.uid, checked_by_name: accActor().name }); } catch (x) { flash(dbErrorText(x)); } render(); break;
+    case "acc-ask": W.question = W.question === id ? null : id; render(); document.querySelector(`[data-ask="${CSS.escape(id)}"] input`)?.focus(); break;
+    case "acc-seen": { const k = accActor().key; if (k) { W.seenAt[k] = nowISO(); try { localStorage.setItem("pbl-acc-seen", JSON.stringify(W.seenAt)); } catch {} } renderTabs(); render(); break; }
+    case "acc-conf": { const col = t.dataset.col; const copy = W.raw.get(col)?.get(id); if (!copy) break;
+      try { if (t.dataset.v === "b") { const { conflict_of, conflict_at, ...rest } = copy; await accWrite("set", `${col}/${conflict_of}`, { ...rest, resolved_at: nowISO() }); } await accWrite("delete", `${col}/${id}`); flash("Kept the version you chose."); } catch (x) { flash(dbErrorText(x)); }
+      render(); break; }
+  }
+});
+document.addEventListener("input", (e) => { const t = e.target; if (W.staffForm && t.dataset.sf) W.staffForm[t.dataset.sf] = t.value; if (W.transfer && t.dataset.tf2) W.transfer[t.dataset.tf2] = t.value; });
+document.addEventListener("change", (e) => { const t = e.target; if (W.transfer && t.dataset.tf2) W.transfer[t.dataset.tf2] = t.value; });
+document.addEventListener("submit", async (e) => {
+  const f = e.target;
+  if (f.id === "acc-staff-form") { e.preventDefault(); const v = W.staffForm; const err = (m) => { $("#sf-err").innerHTML = `<div class="note bad">${esc(m)}</div>`; };
+    if (!v.name.trim()) return err("Enter the name."); if (wallets().some((w) => fuzzyKey(w.name) === fuzzyKey(v.name))) return err("There is already a wallet with that name.");
+    if (v.pin && !/^\d{4}$/.test(v.pin)) return err("The PIN must be 4 digits.");
+    try { const wid = await createWallet(v); W.staffForm = null; ACC.wallet = wid; W.settingsOpen = true; accRebuild(); flash(`${v.name.trim()}'s wallet is ready. Share the invite code below with them.`); } catch (x) { return err(dbErrorText(x)); }
+    render(); }
+  if (f.id === "acc-transfer-form") { e.preventDefault(); saveTransfer(); }
+  if (f.id === "acc-wallet-form") { e.preventDefault(); const k = ACC.wallet; const w = walletOf(k); const v = {}; f.querySelectorAll("[data-wf]").forEach((i) => { v[i.dataset.wf] = i.value; });
+    const err = (m) => { $("#wf-err").innerHTML = `<div class="note bad">${esc(m)}</div>`; };
+    if (!v.name.trim()) return err("Enter the name."); if (v.pin && !/^\d{4}$/.test(v.pin)) return err("The PIN must be 4 digits.");
+    const upd = { name: v.name.trim(), phone: v.phone.trim(), opening_balance: Math.round(Number(v.opening_balance) || 0), start_date: v.start_date || w.start_date, threshold: Math.round(Number(v.threshold) || 0), color: v.color, status: v.status, ...(v.pin ? { pin_hash: await pinHash(w.wid, v.pin) } : {}) };
+    try { await accWrite("update", `${WREG}/${w.wid}`, upd); await accWrite("set", `walletin/${w.key}`, metaOf({ ...w, ...upd })); writeAudit("accounts.wallet_edit", null, w.wid, null, upd); flash("Wallet saved."); W.settingsOpen = false; } catch (x) { return err(dbErrorText(x)); }
+    accRebuild(); render(); }
+  if (f.id === "acc-claim-form") { e.preventDefault(); const code = $("#acc-claim-code").value.trim().toUpperCase(); if (!code) return;
+    try { await accWrite("set", `walletclaims/${S.uid}`, { code, name: S.me?.name || "", at: nowISO(), status: "pending" }); } catch (x) { flash(dbErrorText(x)); } render(); }
+  if (f.id === "acc-pin-form") { e.preventDefault(); const pin = $("#acc-pin").value; const wid = W.pinAsk; const want = wid ? W.reg.get(wid)?.pin_hash : ACC.settings.owner_pin_hash;
+    if (want && (await pinHash(wid || "owner", pin)) !== want) { $("#acc-pin-err").innerHTML = `<div class="note bad">Wrong PIN.</div>`; return; }
+    W.profile = wid || null; W.pinAsk = null; ACC.wallet = wid ? W.reg.get(wid).key : "all"; accRebuild(); render(); }
+  if (f.dataset.ask) { e.preventDefault(); const q = f.querySelector("input").value.trim(); if (!q) return;
+    try { await accWrite("update", txPathOf(f.dataset.ask), { question: { text: q, at: nowISO(), by: S.uid }, answer: null }); W.question = null; flash("Question sent."); } catch (x) { flash(dbErrorText(x)); } render(); }
+  if (f.dataset.answer) { e.preventDefault(); const ans = f.querySelector("input").value.trim(); if (!ans) return;
+    try { await accWrite("update", txPathOf(f.dataset.answer), { answer: { text: ans, at: nowISO(), by: S.uid } }); flash("Answer sent."); } catch (x) { flash(dbErrorText(x)); } render(); }
+});
+
+document.addEventListener("submit", async (e) => {
+  if (e.target.id !== "acc-owner-pin-form") return; e.preventDefault(); const pin = $("#acc-owner-pin").value;
+  if (!/^\d{4}$/.test(pin)) { flash("The PIN must be 4 digits."); render(); return; }
+  try { await accWrite("update", ACC_SETTINGS, { owner_pin_hash: await pinHash("owner", pin) }); flash("Owner PIN saved."); } catch (x) { flash(dbErrorText(x)); } render();
+});
 boot();
 </script>

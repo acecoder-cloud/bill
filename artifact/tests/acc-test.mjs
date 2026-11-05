@@ -30,10 +30,13 @@ await page.goto(URL_ + "?role=admin&persist=1#accounts");
 await step("Accounts tab is in the main navigation and the WhatsApp ledger imports on first run", async () => {
   await page.getByRole("link", { name: "Accounts" }).waitFor();
   await page.getByText("Imported the WhatsApp ledger: 182 entries and 25 items.").waitFor({ timeout: 60000 });
-  const tx = (await log()).filter((x) => x[0] === "set" && x[1].startsWith("accounts/tx/list/"));
-  assert.equal(tx.length, 182);
+  const tx = (await log()).filter((x) => x[0] === "set" && /^(wallets|walletin)\/[^/]+\/tx\//.test(x[1]));
+  assert.equal(tx.length, 182, "the ledger goes into Nandhini's wallet");
   assert.ok(tx.every((x) => Number.isInteger(x[2].amount)), "amounts are whole rupees");
   assert.equal(tx.filter((x) => x[2].review).length, 19, "Needs review entries");
+  assert.equal(new Set(tx.map((x) => x[1].split("/")[1])).size, 1, "all in one wallet");
+  await page.locator(".wcard", { hasText: "Nandhini" }).click();   // everything below runs inside Nandhini's wallet
+  await page.getByText("Nandhini: available balance").waitFor();
 });
 await step("totals match the expected figures exactly", async () => {
   await allTime();
@@ -61,7 +64,7 @@ await step("reconciliation shows the WhatsApp differences", async () => {
   await page.getByText("Check saved.").waitFor();
   await page.screenshot({ path: DIR + "c2-check.png", fullPage: true });
 });
-const NOV_WA = ["*Available -RS: 5,897*", "", "01/11/2026 - Meals 100 rupees", "01/11/2026 - Dosai 137 rupees", "02/11/2026 - Idli 116 rupees", "02/11/2026 - Meals 100 rupees", "02/11/2026 - Idli 116 rupees",
+const NOV_WA = ["*Nandhini*", "*Available -RS: 5,897*", "", "01/11/2026 - Meals 100 rupees", "01/11/2026 - Dosai 137 rupees", "02/11/2026 - Idli 116 rupees", "02/11/2026 - Meals 100 rupees", "02/11/2026 - Idli 116 rupees",
   "03/11/2026 - Pongal & idli 176 rupees", "03/11/2026 - Meals 100 rupees", "03/11/2026 - Dosai 137 rupees", "04/11/2026 - Pongal & idli 176 rupees", "04/11/2026 - Curd rice & lemon juice & rasam rice 160 rupees", "", "*RS: 5,897*"].join("\n");
 await step("periods carry closing to opening; Copy for WhatsApp matches the agreed format line for line", async () => {
   await page.getByRole("button", { name: "Periods", exact: true }).click();
@@ -73,11 +76,11 @@ await step("periods carry closing to opening; Copy for WhatsApp matches the agre
   await page.getByRole("button", { name: "Copy for WhatsApp", exact: true }).click();
   await page.getByText("Copied the 01/11/2026 – 10/11/2026 message.").waitFor();
   assert.equal(await clip(), NOV_WA);
-  const lines = NOV_WA.split("\n"); assert.equal(lines[0].match(/[\d,]+/)[0], lines.at(-1).match(/[\d,]+/)[0]);
+  const lines = NOV_WA.split("\n"); assert.equal(lines[0], "*Nandhini*"); assert.equal(lines[1].match(/[\d,]+/)[0], lines.at(-1).match(/[\d,]+/)[0]);
   await page.locator('[data-act="acc-period"][data-start="2026-10-21"]').click();
   const oct = await page.locator("#acc-wa-text").innerText();
   assert.ok(oct.includes("*21/10/2026 Amount received 5,000*"), oct);
-  assert.ok(oct.startsWith("*Available -RS: 7,215*\n\n") && oct.endsWith("\n\n*RS: 7,215*"), oct.slice(0, 40));
+  assert.ok(oct.startsWith("*Nandhini*\n*Available -RS: 7,215*\n\n") && oct.endsWith("\n\n*RS: 7,215*"), oct.slice(0, 40));
   await page.screenshot({ path: DIR + "c3-periods.png", fullPage: true });
 });
 await step("quick-add chip adds today at the usual price; balances and WhatsApp text update instantly; Undo", async () => {
@@ -87,7 +90,7 @@ await step("quick-add chip adds today at the usual price; balances and WhatsApp 
   await page.getByRole("button", { name: "Periods", exact: true }).click();
   await page.locator('[data-act="acc-period"][data-start="2026-11-01"]').click();
   const t = await page.locator("#acc-wa-text").innerText();
-  assert.ok(t.startsWith("*Available -RS: 5,781*") && t.endsWith("*RS: 5,781*") && t.includes(`- Idli 116 rupees\n\n*RS`), t);
+  assert.ok(t.startsWith("*Nandhini*\n*Available -RS: 5,781*") && t.endsWith("*RS: 5,781*") && t.includes(`- Idli 116 rupees\n\n*RS`), t);
   await page.getByRole("button", { name: "Undo" }).click();
   await page.getByText("Removed Idli ₹116.").waitFor();
   assert.equal(await available(), "₹5,897");
@@ -103,9 +106,9 @@ await step("add expense with several items; usual price follows latest price; ed
   await page.getByText("Balance after saving: ₹5,747").waitFor();
   await page.screenshot({ path: DIR + "c4-expense-form.png", fullPage: true });
   await page.getByRole("button", { name: "Save expense" }).click();
-  await page.getByText("Expense saved: ₹150. Balance ₹5,747.").waitFor();
+  await page.getByText("Expense saved: ₹150. Nandhini's balance ₹5,747.").waitFor();
   assert.equal(await available(), "₹5,747");
-  const saved = (await log()).filter((x) => x[0] === "set" && x[1].startsWith("accounts/tx/list/")).at(-1)[2];
+  const saved = (await log()).filter((x) => x[0] === "set" && /^wallets\/[^/]+\/tx\//.test(x[1])).at(-1)[2];
   assert.equal(saved.amount, 150); assert.equal(saved.lines.length, 2); assert.equal(saved.spent_by, "Nandhini");
   await page.getByRole("button", { name: "Items", exact: true }).click();
   assert.match(await page.locator("tr", { hasText: "Coffee" }).innerText(), /₹50/);
@@ -138,12 +141,12 @@ await step("warns but still allows a negative balance", async () => {
   await page.getByText("Deleted. Balance ₹5,897.").waitFor();
 });
 await step("add money received (PhonePe) shows green with +", async () => {
-  await page.getByRole("button", { name: "+ Add received" }).click();
+  await page.getByRole("button", { name: "+ Give money" }).click();
   await page.locator("#rf-amount").fill("2000");
   await page.locator("#rf-method").selectOption("Google Pay");
   await page.locator("#rf-from").fill("Arun");
   await page.getByRole("button", { name: "Save money received" }).click();
-  await page.getByText("Money received saved: ₹2,000. Balance ₹7,897.").waitFor();
+  await page.getByText("Gave ₹2,000 to Nandhini. Their balance ₹7,897.").waitFor();
   const row = page.locator(".acc-row.is-received", { hasText: "Money received (Google Pay) from Arun" });
   assert.match(await row.innerText(), /\+₹2,000/);
 });
@@ -172,7 +175,7 @@ await step("survives a reload", async () => {
   await page.waitForTimeout(1500);   // let the stand-in's localStorage copy reach disk (Chromium saves it in batches)
   await page.reload();
   await page.getByRole("button", { name: /^Banana ₹20$/ }).waitFor();
-  assert.equal((await log()).filter((x) => x[0] === "set" && x[1].startsWith("accounts/tx/")).length, 0, "no re-import after reload");
+  assert.equal((await log()).filter((x) => x[0] === "set" && /^(wallets|walletin)\/[^/]+\/tx\//.test(x[1])).length, 0, "no re-import after reload");
   assert.equal(await available(), "₹7,867");
 });
 await step("works offline: entries are kept on the phone and synced later", async () => {
@@ -205,7 +208,7 @@ await step("export CSV and period statement; import CSV", async () => {
   await page.waitForFunction(() => window.__log.some((x) => x[0] === "save" && x[1].startsWith("accounts-")));
   const csv = await page.evaluate(() => window.__lastSave);
   const lines = csv.replace(/^﻿/, "").trim().split("\r\n");
-  assert.equal(lines[0], "date,type,item,category,amount,qty,note,method,from,spent_by,needs_review,balance_after_day");
+  assert.equal(lines[0], "date,type,item,category,amount,qty,note,method,from,spent_by,needs_review,balance_after_day,wallet,created_by,created_at");
   assert.ok(lines.length >= 186, String(lines.length));
   await page.getByRole("button", { name: "Periods", exact: true }).click();
   const n = (await log()).filter((x) => x[0] === "save").length;
@@ -228,12 +231,12 @@ await step("Home dashboard shows the available balance", async () => {
   await page.getByRole("heading", { name: "Add expense" }).waitFor();
   await page.getByRole("button", { name: "‹ Cancel" }).click();
 });
-await step("Staff can add expenses but not change accounts settings or import", async () => {
+await step("someone without a wallet sees only the invite-code screen (staff wallets are tested in wallet-test.mjs)", async () => {
   const p2 = await ctx.newPage();
   await p2.goto(URL_ + "?role=staff&persist=1#accounts");
-  await p2.getByRole("button", { name: "+ Add expense" }).waitFor();
-  assert.equal(await p2.getByRole("heading", { name: "Accounts settings" }).count(), 0);
-  assert.equal(await p2.getByRole("button", { name: /Import entries/ }).count(), 0);
+  await p2.getByRole("heading", { name: "Link your wallet" }).waitFor();
+  assert.equal(await p2.getByRole("button", { name: "+ Add expense" }).count(), 0);
+  assert.equal(await p2.getByText("₹5,897").count(), 0, "no other wallet's balance");
   await p2.close();
 });
 await step("existing tabs still work and the page never scrolls sideways", async () => {
