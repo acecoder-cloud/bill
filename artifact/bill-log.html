@@ -420,6 +420,79 @@ pre.wa { margin: 0; padding: 12px; border-radius: 12px; background: var(--surfac
 .vstack i { display: block; border-radius: 4px 4px 0 0; min-height: 3px; }
 .vstack i.seg-v:not(:first-child) { border-radius: 0; }
 .vlab { height: 18px; font-size: .66rem; color: var(--muted); white-space: nowrap; overflow: visible; }
+.rou-menu button { font-weight: 800; }
+.dr-datebar { display: grid; grid-template-columns: 52px minmax(0, 1fr) 52px; gap: 8px; }
+.dr-datebar .btn { padding: 0; font-size: 1.3rem; }
+.dr-prog { display: flex; flex-direction: column; gap: 6px; }
+.dr-bar { height: 10px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--line); overflow: hidden; }
+.dr-bar i { display: block; height: 100%; background: var(--v-in); border-radius: 99px; transition: width .3s; }
+.dr-upnote { text-align: left; width: 100%; cursor: pointer; font: inherit; }
+.dr-sec h2 { margin: 0; }
+.dr-task { border-top: 1px solid var(--line); padding-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.dr-task.overdue { border-left: 4px solid var(--bad-line); padding-left: 8px; }
+.dr-units { display: flex; flex-wrap: wrap; gap: 6px; }
+.dr-chip { min-height: 40px; padding: 4px 12px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font: inherit; font-size: .86rem; font-weight: 600; cursor: pointer; text-align: left; }
+.dr-chip.done { background: var(--ok-bg); border-color: color-mix(in srgb, var(--ok-ink) 40%, transparent); }
+.dr-chip.notdone { background: var(--surface-2); }
+.dr-chip.overdue { background: var(--bad-bg); border-color: var(--bad-line); color: var(--bad-ink); font-weight: 800; }
+.dr-chip.missed { color: var(--muted); border-style: dashed; }
+.dr-chip:disabled { cursor: default; opacity: 1; }
+.dr-text { all: unset; box-sizing: border-box; display: block; width: 100%; padding: 6px 0; cursor: pointer; overflow-wrap: anywhere; }
+.dr-text:focus-visible { outline: 3px solid var(--brand); }
+.dr-edit { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); }
+.dr-feed { display: flex; flex-direction: column; gap: 6px; }
+.dr-frow { display: grid; grid-template-columns: 74px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--line); }
+.dr-frow.overdue { border-left: 4px solid var(--bad-line); padding-left: 6px; }
+.dr-ftime { font-weight: 700; font-size: .88rem; }
+.dr-fmain { min-width: 0; overflow-wrap: anywhere; }
+.dr-slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.dr-slot { border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; background: var(--surface-2); min-width: 0; }
+.dr-slot.done { border-color: color-mix(in srgb, var(--ok-ink) 40%, transparent); }
+.dr-slot.overdue { border: 2px solid var(--bad-line); }
+.dr-vgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.dr-vals { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.dr-qty { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 4px 0; border-top: 1px solid var(--line); }
+.dr-step { display: inline-flex; align-items: center; gap: 8px; }
+.dr-step .btn { width: 44px; padding: 0; font-size: 1.2rem; }
+.dr-step b { min-width: 2ch; text-align: center; }
+.dr-doc { border-top: 1px solid var(--line); }
+.dr-thumbs { display: flex; flex-wrap: wrap; gap: 10px; }
+.dr-thumb { display: inline-flex; flex-direction: column; align-items: center; }
+.dr-pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: .82rem; background: var(--surface-2); padding: 10px; border-radius: 10px; max-height: 320px; overflow: auto; }
+.dr-upd { border-top: 1px solid var(--line); padding-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+.dr-uslot { display: grid; grid-template-columns: 116px minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.dr-uslot.overdue .small { color: var(--bad-ink); font-weight: 800; }
+.dr-uslot.due .small { color: var(--warn-ink); font-weight: 700; }
+.dr-svg { width: 100%; height: auto; display: block; overflow: visible; }
+.dr-svg .grid { stroke: var(--line); stroke-width: 1; }
+.dr-svg .axis { fill: var(--muted); font-size: 9px; }
+.dr-svg .ln { fill: none; stroke-width: 2; }
+.dr-svg .ln.s1 { stroke: var(--v-in); } .dr-svg .ln.s2 { stroke: var(--v-call); }
+.dr-svg .pt { stroke: var(--surface); stroke-width: 2; cursor: pointer; } .dr-svg .pt.s1 { fill: var(--v-in); } .dr-svg .pt.s2 { fill: var(--v-call); }
+.dr-svg .pt:focus-visible, .dr-svg .dr-barr:focus-visible { outline: none; stroke: var(--fg); }
+.dr-svg .dr-barr { fill: var(--v-in); cursor: pointer; }
+.dr-svg .target { stroke: var(--muted); stroke-dasharray: 4 3; }
+.sw.s1 { background: var(--v-in); } .sw.s2 { background: var(--v-call); }
+.dr-cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; text-align: center; }
+.dr-cal-day { min-height: 48px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--fg); font: inherit; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2px; cursor: pointer; }
+.dr-cal-day small { font-size: .66rem; font-weight: 700; }
+.dr-cal-day.today { outline: 2px solid var(--brand); }
+.dr-cal-day.sel { border-color: var(--fg); }
+.dr-mhead { margin: 8px 0 0; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
+.dr-mlist { display: flex; flex-direction: column; }
+.dr-mrow { display: flex; gap: 8px; align-items: flex-start; padding: 8px 0; border-top: 1px solid var(--line); background: var(--surface); }
+.dr-mrow.dragging { opacity: .7; box-shadow: 0 4px 14px rgb(0 0 0 / .15); }
+.drag-h { touch-action: none; cursor: grab; min-width: 36px; min-height: 44px; border: 0; background: none; color: var(--muted); font-size: 1.2rem; }
+.dr-mmain { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.dr-mact { display: flex; flex-wrap: wrap; gap: 0 4px; }
+.dr-fs { border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 8px; margin: 0; }
+.dr-times { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.dr-timechip { display: inline-flex; align-items: center; gap: 2px; }
+.dr-timechip .inp { width: 130px; }
+.dr-plrow { display: grid; grid-template-columns: 130px minmax(0, 1fr) 36px; gap: 6px; align-items: center; }
+.dr-list { margin: 2px 0 6px; padding-left: 20px; }
+.bad-ink { color: var(--bad-ink); }
+.pill.bad { background: var(--bad-bg); color: var(--bad-ink); }
 .audit { display: flex; flex-direction: column; gap: 8px; }
 .audit details { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
 .audit summary { padding: 10px 12px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
@@ -470,6 +543,7 @@ pre.wa { margin: 0; padding: 12px; border-radius: 12px; background: var(--surfac
 </main>
 <nav class="tabs" aria-label="Sections"><div class="tabs-in" id="tabs"></div></nav>
 <input id="camera" type="file" accept="image/*" capture="environment" hidden>
+<input id="dr-photo-file" type="file" accept="image/*" multiple hidden>
 <input id="rou-import-file" type="file" accept=".csv,text/csv" hidden>
 <input id="acc-import-file" type="file" accept=".csv,text/csv" hidden>
 <input id="inv-import-file" type="file" accept=".csv,text/csv" hidden>
@@ -728,7 +802,7 @@ function onHash() {
 function renderTabs() {
   $("#tabs").innerHTML = TABS.filter((t) => tabAllowed(t.id)).map((t) => `
     <a href="#${t.id}" ${S.tab === t.id && !S.editor ? 'aria-current="page"' : ""}>
-      <span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${t.icon}</svg>${t.id === "inventory" && invAlertCount() ? `<span class="tab-badge" aria-label="${invAlertCount()} stock alerts">${invAlertCount()}</span>` : ""}</span>${t.label}</a>`).join("");
+      <span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${t.icon}</svg>${t.id === "inventory" && invAlertCount() ? `<span class="tab-badge" aria-label="${invAlertCount()} stock alerts">${invAlertCount()}</span>` : ""}${t.id === "routine" && drAlertCount() ? `<span class="tab-badge" aria-label="${drAlertCount()} family updates due">${drAlertCount()}</span>` : ""}</span>${t.label}</a>`).join("");
 }
 function renderWho() {
   const el = $("#who"); el.textContent = "";
@@ -1208,7 +1282,7 @@ function paintAdmin() {
   const team = $("#team"); if (team) paintNames(team).then(() => showLabelBoxes(team));
   const a = S.audit; const box = $("#audit-list"); if (!box || !a?.rows) return;
   if (!a.rows.length) { box.innerHTML = `<p class="muted">No activity yet.</p>`; return; }
-  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed", "roles.update": "Role permissions changed", "inventory.seed": "Stock register loaded", "inventory.add": "Product added", "inventory.edit": "Product edited", "inventory.archive": "Product archived", "inventory.restore": "Product restored", "inventory.delete": "Product deleted", "inventory.month": "Stock month started", "inventory.import": "Stock CSV imported", "inventory.delivered": "Order delivered", "accounts.add": "Account entry added", "accounts.edit": "Account entry edited", "accounts.delete": "Account entry deleted", "accounts.seed": "WhatsApp ledger imported", "accounts.import": "Account entries imported", "routine.add": "Visit logged", "routine.edit": "Visit edited", "routine.delete": "Visit deleted", "routine.merge": "People merged", "routine.seed": "Visitor log imported", "routine.import": "Visits imported" };
+  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed", "roles.update": "Role permissions changed", "inventory.seed": "Stock register loaded", "inventory.add": "Product added", "inventory.edit": "Product edited", "inventory.archive": "Product archived", "inventory.restore": "Product restored", "inventory.delete": "Product deleted", "inventory.month": "Stock month started", "inventory.import": "Stock CSV imported", "inventory.delivered": "Order delivered", "accounts.add": "Account entry added", "accounts.edit": "Account entry edited", "accounts.delete": "Account entry deleted", "accounts.seed": "WhatsApp ledger imported", "accounts.import": "Account entries imported", "routine.add": "Visit logged", "routine.edit": "Visit edited", "routine.delete": "Visit deleted", "routine.merge": "People merged", "routine.seed": "Visitor log imported", "routine.import": "Visits imported", "routine.daily_seed": "Daily routine loaded", "routine.task_add": "Routine task added", "routine.task_delete": "Routine task deleted", "routine.plan": "Medicine/feed plan changed" };
   box.innerHTML = a.rows.map((r, i) => `<details><summary><b>${esc(label[r.action] || r.action)}</b>
     <span class="small muted">by <span data-uid="${esc(r.actor)}"></span> · ${esc(fmtDT(r.at))} · ${r.action === "roles.update" ? "Admin / Staff / Viewer permissions" : r.action.startsWith("inventory.") ? esc((r.after || r.before || {}).name || (r.after || {}).month || "Inventory") : r.action.startsWith("accounts.") ? (() => { const x = r.after || r.before || {}; return x.amount != null ? esc(`${x.type === "received" ? "received" : (x.lines || []).map((l) => l.name).join(" & ")} ${inr(x.amount)} on ${dmy(x.date)}`) : "Accounts"; })() : r.action.startsWith("team.") ? `<span data-uid="${esc((r.after || r.before || {}).member || "")}"></span>${r.after?.role ? " → " + esc(ROLES[r.after.role]?.label || r.after.role) : ""}` : `bill ${(r.after || r.before || {}).bill_no ? "No. " + esc((r.after || r.before).bill_no) + " of " : "of "}${esc(fmtDate((r.after || r.before || {}).bill_date))}`}</span></summary>
     <div class="pair"><div><div class="small muted">Before</div><pre data-json="b${i}"></pre></div><div><div class="small muted">After</div><pre data-json="a${i}"></pre></div></div></details>`).join("");
@@ -1881,7 +1955,8 @@ function applyLocal(op, path, data) {
   const seg = path.split("/"); const id = seg.at(-1); const col = seg.slice(0, -1).join("/");
   const map = col === INV_PRODUCTS ? INV.products : col === INV_MONTHS ? INV.months
     : col === "accounts/items/list" ? ACC.items : col === "accounts/tx/list" ? ACC.tx : col === "accounts/checks/list" ? ACC.checks
-    : col === "routine/people/list" ? ROU.people : col === "routine/visits/list" ? ROU.visits : null;
+    : col === "routine/people/list" ? ROU.people : col === "routine/visits/list" ? ROU.visits
+    : col === "routine/tasks/list" ? DR.tasks : col === "routine/days/list" ? DR.days : col === "routine/plans/list" ? DR.plans : col === "routine/staff/list" ? DR.staff : col === "routine/updates/list" ? DR.updates : null;
   if (path === "inventory/settings") { INV.settings = op === "set" ? clone(data) : deepMerge(clone(INV.settings) || {}, data); return; }
   if (path === "routine/settings") { ROU.settings = op === "set" ? clone(data) : deepMerge(clone(ROU.settings) || {}, data); return; }
   if (path === "accounts/settings") { ACC.settings = op === "set" ? clone(data) : deepMerge(clone(ACC.settings) || {}, data); return; }
@@ -3518,10 +3593,10 @@ document.addEventListener("submit", (e) => {
    routine/people/list/<pid>        {title, name, place, relation, phone, archived, merged_into, quick: {type} | null}
    routine/visits/list/<vid>        {date, time "HH:MM", end_time, type: in_person|video|voice,
                                      visitors: [{person_id, title, name, place}], note, review, seq} */
-const ROUTINE_SECTIONS = [["visitors", "Visitors"]];
+const ROUTINE_SECTIONS = [["daily", "Daily Routine"], ["visitors", "Visitors"]];
 const ROU = {
   people: new Map(), visits: new Map(), settings: {}, loaded: { people: false, visits: false, settings: false },
-  section: "visitors", view: "timeline", range: "all", from: "", to: "", q: "", type: "all", person: "all",
+  section: (() => { try { return localStorage.getItem("pbl-rou-section") === "visitors" ? "visitors" : "daily"; } catch { return "daily"; } })(), stale: false, view: "timeline", range: "all", from: "", to: "", q: "", type: "all", person: "all",
   form: null, personForm: null, detail: null, confirm: null, personDetail: null, merge: null, lastQuick: null,
   seeding: null, importPreview: null, busy: false, copied: null, showArchived: false, chartTable: false, pq: "",
 };
@@ -3607,17 +3682,23 @@ function rouStart() {
   db.collection(ROU_PEOPLE).onSnapshot((snap) => { ROU.people = new Map(snap.docs.map((d) => [d.id, clone(d.data())])); reapplyOutbox(ROU_PEOPLE); if (!snap.metadata.fromCache) ROU.loaded.people = true; rouChanged(); }, () => { ROU.loaded.people = true; rouChanged(); });
   db.collection(ROU_VISITS).onSnapshot((snap) => { ROU.visits = new Map(snap.docs.map((d) => [d.id, clone(d.data())])); reapplyOutbox(ROU_VISITS); if (!snap.metadata.fromCache) ROU.loaded.visits = true; rouChanged(); }, () => { ROU.loaded.visits = true; rouChanged(); });
   db.doc(ROU_SETTINGS).onSnapshot((snap) => { ROU.settings = snap.exists ? clone(snap.data()) : {}; reapplyOutbox(ROU_SETTINGS); if (!snap.metadata.fromCache) ROU.loaded.settings = true; rouChanged(); }, () => { ROU.loaded.settings = true; rouChanged(); });
+  drStart();
 }
 let rouQueued = false;
 function rouChanged() {
   if (rouQueued) return; rouQueued = true;
-  requestAnimationFrame(() => { rouQueued = false; if (S.tab === "routine" && !S.editor && !rouBusy()) render(); });
+  requestAnimationFrame(() => { rouQueued = false; if (S.tab !== "routine" || S.editor) return; if (rouBusy()) { ROU.stale = true; return; } ROU.stale = false; render(); });
 }
-function rouBusy() { return !!(ROU.form || ROU.personForm || ROU.importPreview || ROU.confirm || ROU.merge || document.activeElement?.closest?.(".rou-filters")); }
+function rouBusy() { return !!(ROU.form || ROU.personForm || ROU.importPreview || ROU.confirm || ROU.merge || document.activeElement?.closest?.(".rou-filters")
+  || DR.edit || DR.taskForm || DR.planForm || DR.onceForm || DR.updForm || DR.medEdit || DR.vitEdit || DR.drag || DR.confirm
+  || document.activeElement?.matches?.("#main input:not([type=checkbox]), #main textarea, #main select")); }
+/* a change from another phone arrived while someone was typing: show it once they leave the field */
+document.addEventListener("focusout", () => { if (S.tab === "routine" && ROU.stale) setTimeout(() => { if (ROU.stale && S.tab === "routine" && !S.editor && !rouBusy()) { ROU.stale = false; render(); } }, 400); });
 function rouRefresh() { if (S.tab === "routine" && !S.editor) render(); }
 function rouMaybeSeed() {
-  if (!ROU.loaded.people || !ROU.loaded.visits || !ROU.loaded.settings || ROU.seeding || ROU.settings.seeded_at || ROU.visits.size || ROU.people.size) return;
-  if (S.tab === "routine" && S.me?.isOwner && canRouManage()) rouSeed(true);   // runs when the owner first opens Routine
+  if (S.tab !== "routine" || !S.me?.isOwner || !canRouManage() || ROU.seeding) return;   // first-run imports happen when the owner opens Routine
+  if (ROU.loaded.people && ROU.loaded.visits && ROU.loaded.settings && !ROU.settings.seeded_at && !ROU.visits.size && !ROU.people.size) { rouSeed(true); return; }
+  drMaybeSeed();
 }
 
 /* ---------- people & stats ---------- */
@@ -3713,14 +3794,18 @@ function importRows(rows, source) {
 }
 
 /* ---------- views ---------- */
-function routineView() {
-  if (!ROU.loaded.visits && !ROU.visits.size) return `<h1>Routine</h1><div class="card"><div class="row-between"><span class="spin"></span><span class="muted">Loading…</span></div></div>`;
-  if (ROU.form) return visitFormView();
-  if (ROU.personForm) return personFormView();
+function routineHead() {
   const pending = outbox().filter((w) => w.path.startsWith("routine/")).length;
   return `<h1>Routine</h1>
-  ${ROUTINE_SECTIONS.length > 1 ? `<div class="seg" role="tablist" aria-label="Routine sections">${ROUTINE_SECTIONS.map(([k, l]) => `<button role="tab" data-act="rou-section" data-v="${k}" aria-selected="${ROU.section === k}" aria-pressed="${ROU.section === k}">${l}</button>`).join("")}</div>` : `<p class="section-label">Visitors</p>`}
-  ${pending ? `<div class="note warn">${pending} change${pending === 1 ? "" : "s"} saved on this phone, waiting for a connection to sync.</div>` : ""}
+  <div class="seg rou-menu" role="tablist" aria-label="Routine menu">${ROUTINE_SECTIONS.map(([k, l]) => `<button role="tab" data-act="rou-section" data-v="${k}" aria-selected="${ROU.section === k}" aria-pressed="${ROU.section === k}">${l}</button>`).join("")}</div>
+  ${pending ? `<div class="note warn">${pending} change${pending === 1 ? "" : "s"} saved on this phone, waiting for a connection to sync.</div>` : ""}`;
+}
+function routineView() {
+  if (ROU.form) return visitFormView();
+  if (ROU.personForm) return personFormView();
+  if (ROU.section === "daily") return DR.taskForm || DR.planForm ? dailyView() : routineHead() + dailyView();
+  if (!ROU.loaded.visits && !ROU.visits.size) return `${routineHead()}<div class="card"><div class="row-between"><span class="spin"></span><span class="muted">Loading…</span></div></div>`;
+  return `${routineHead()}
   ${ROU.seeding ? `<div class="note">Importing the visitor log… ${ROU.seeding.done} of ${ROU.seeding.total}</div>` : ""}
   ${visitorsTop()}
   <div class="seg" role="group" aria-label="Visitors view">${[["timeline", "Timeline"], ["people", "People"], ["summary", "Summary"]].map(([v, l]) => `<button data-act="rou-view" data-v="${v}" aria-pressed="${ROU.view === v}">${l}</button>`).join("")}</div>
@@ -4031,7 +4116,7 @@ document.addEventListener("click", async (e) => {
   const t = e.target.closest("[data-act]"); if (!t || !t.dataset.act.startsWith("rou-")) return;
   const a = t.dataset.act; const id = t.dataset.id;
   switch (a) {
-    case "rou-section": ROU.section = t.dataset.v; render(); break;
+    case "rou-section": ROU.section = t.dataset.v; try { localStorage.setItem("pbl-rou-section", ROU.section); } catch {} DR.edit = null; render(); window.scrollTo(0, 0); break;
     case "rou-view": ROU.view = t.dataset.v; ROU.copied = null; render(); break;
     case "rou-range": ROU.range = t.dataset.v; ROU.copied = null; render(); break;
     case "rou-add": openVisit(null); break;
@@ -4120,6 +4205,1017 @@ document.addEventListener("change", async (e) => {
 document.addEventListener("submit", (e) => {
   if (e.target.id === "rou-visit-form") { e.preventDefault(); saveVisit(); }
   if (e.target.id === "rou-person-form") { e.preventDefault(); savePerson(); }
+});
+
+/* ================= Daily Routine (one page per day, replaces the WhatsApp checklist and notebook page) ================= */
+/* Storage (same page storage, under routine/):
+   routine/tasks/list/<id>    task template {section, name, type, unit, kind: daily|weekdays|once, days, date, times, slots, target,
+                              asNeeded, details, doer, reminder, order, from, paused_from, archived_from, pauses}
+   routine/days/list/<date>   one day {occ: {<id>: {task, sched, slot, time, end, value, item, text, by, note, done, deleted}},
+                              feed: {f0600: {...}}, meds: {morning: {list, given, by, time}}, doctors, notes, qty, photos, updates}
+   routine/plans/list/<id>    {kind: meds|feed, from, data}  (effective-from versions, so past days keep what was given)
+   routine/staff/list/<id>    {name, role, detail, archived}
+   routine/updates/list/<id>  family update checklist {name, times: [{at, until}], note, order, archived} */
+const DR_TASKS = "routine/tasks/list", DR_DAYS = "routine/days/list", DR_PLANS = "routine/plans/list", DR_STAFF = "routine/staff/list", DR_UPD = "routine/updates/list", DR_LOCK = "routine/locks/daily";
+const DR_SECTIONS = ["Care & hygiene", "Nebulizer", "RT feed", "Medication", "Vitals", "Oral feed", "Output", "Doctor's comment", "Physiotherapy & therapy", "Visitors", "Notes", "Supplies used"];
+const DR_LABEL = { Notes: "Room issues, improvement & discussion" };
+const DR_PLAN_SECTIONS = new Set(["RT feed", "Medication", "Doctor's comment", "Visitors"]);   // filled from plans/lists, not task templates
+const DR_TYPES = { check: "Done / not done", range: "Time range (from–to)", multi: "Multiple times per day", value: "Value with unit", item: "Item + time", text: "Free text", qty: "Quantity used" };
+const DR_TYPE_CSV = { "Done / not done": "check", "Time range": "range", "Multiple times": "multi", "Value with unit": "value", "Item + time": "item", "Free text": "text", "Quantity used": "qty" };
+const DR_SLOTS = [["morning", "Morning", "10:00"], ["afternoon", "Afternoon", "16:00"], ["night", "Night", "22:30"]];   // name, label, overdue after
+const SLOT_TIME = { morning: "08:00", afternoon: "14:00", night: "21:00" };
+const STAFF_ROLES = [["nurse", "Staff nurse"], ["wardboy", "Ward boy"], ["cleaning", "Cleaning"], ["family", "Family / carer"], ["doctor", "Doctor"], ["therapist", "Therapist"]];
+const WEEK = [[1, "Mon"], [2, "Tue"], [3, "Wed"], [4, "Thu"], [5, "Fri"], [6, "Sat"], [0, "Sun"]];
+const DR_START = "2026-11-04";
+const DR_SEED_TASKS = `section,task,type,unit,default_schedule,default_details
+Care & hygiene,Ward boy care,Time range,,Daily 4:30 AM,"Bed sheet change, oil applying, underpad change"
+Care & hygiene,Staff nurse care,Time range,,Daily 5:00 AM,"Tracheostomy care, oral care, catheter care"
+Care & hygiene,Evening care,Done / not done,,Daily 6:00 PM,
+Care & hygiene,Floor cleaning,Multiple times,,Daily 11:00 AM; 8:00 PM,
+Care & hygiene,Restroom cleaning,Done / not done,,Daily 12:30 PM,
+Care & hygiene,Room cleaning,Done / not done,,Daily,
+Care & hygiene,Morning sleep,Time range,,Daily,
+Care & hygiene,Night sleep,Time range,,Daily,
+Care & hygiene,8 AM shift,Free text,,Daily 8:00 AM,Staff name
+Care & hygiene,8 PM shift,Free text,,Daily 8:00 PM,Staff name
+Nebulizer,Nebulizer – Morning,Item + time,,Daily 6:00 AM,Duolin + Mesna
+Nebulizer,Nebulizer – Afternoon,Item + time,,Daily 2:00 PM,Duolin + Mesna
+Nebulizer,Nebulizer – Night,Item + time,,Daily 9:30 PM,Duolin + Mesna
+Nebulizer,Budecort nebulizer,Item + time,,Daily 7:00 AM,Budecort
+Vitals,Temperature,Value with unit,°F,Morning; Afternoon; Night,
+Vitals,Pulse,Value with unit,/min,Morning; Afternoon; Night,
+Vitals,SpO2,Value with unit,%,Morning; Afternoon; Night,
+Vitals,BP,Value with unit,mmHg,Morning; Afternoon; Night,
+Vitals,Sugar,Value with unit,mg/dl,Daily 6:00 AM,
+Oral feed,Breakfast,Item + time,,Daily 9:00 AM,
+Oral feed,Lunch,Item + time,,Daily 1:30 PM,
+Oral feed,Dinner,Item + time,,Daily 8:30 PM,
+Oral feed,Fruit,Item + time,,Daily 3:30 PM,
+Oral feed,Evening snacks,Item + time,,Daily 5:00 PM,
+Oral feed,Lunch order,Free text,,Daily,
+Output,Urine output,Value with unit,ml,Multiple times,Record time range
+Output,Stools / motion,Done / not done,,Daily,
+Physiotherapy & therapy,Physiotherapy,Time range,,Daily 11:00 AM; 4:15 PM,
+Physiotherapy & therapy,Occupational therapy,Time range,,Daily,
+Physiotherapy & therapy,Finger movements,Multiple times,,Target 4 per day,50 times
+Physiotherapy & therapy,Ankle movements,Multiple times,,Target 3 per day,
+Physiotherapy & therapy,Chair sitting,Time range,,Daily 11:30 AM; 4:30 PM,
+Physiotherapy & therapy,Standing,Time range,,Daily,
+Physiotherapy & therapy,Tilting,Done / not done,,Daily,
+Physiotherapy & therapy,Outside sitting,Time range,,Daily,
+Physiotherapy & therapy,Slimmer,Time range,,Daily,
+Physiotherapy & therapy,Ball therapy,Time range,,Daily,5 minutes
+Physiotherapy & therapy,Newspaper reading,Done / not done,,Daily,
+Physiotherapy & therapy,Phone,Time range,,Daily,
+Physiotherapy & therapy,Colouring / writing practice,Done / not done,,Daily,
+Physiotherapy & therapy,Board games,Free text,,Daily,"Rope challenge, flipping chess, Jenga, Ludo"
+Supplies used,NS 500ml,Quantity used,pc,Daily,
+Supplies used,Trachea Life,Quantity used,pc,Daily,
+Supplies used,Suction tube,Quantity used,pc,Daily,
+Supplies used,Underpad,Quantity used,pc,Daily,
+Supplies used,Gauze sheet,Quantity used,pc,Daily,
+Supplies used,Surgical gauze,Quantity used,pc,Daily,
+Supplies used,Syringe 2ml,Quantity used,pc,Daily,
+Supplies used,Syringe 5ml,Quantity used,pc,Daily,
+Supplies used,Syringe 50ml,Quantity used,pc,Daily,
+Supplies used,Diaper,Quantity used,pc,Daily,
+Supplies used,Catheter size 16,Quantity used,pc,As needed,
+Supplies used,Liquid paraffin,Quantity used,,As needed,
+Supplies used,Gloves,Quantity used,pair,Daily,`;
+const DR_SEED_MEDS = `slot,item
+Morning,Tab. B-Complex
+Morning,Tab. Nicardia 10mg
+Morning,Tab. Prolomet XL
+Morning,Tab. Rador 20mg
+Morning,Tab. Strocit Plus 500mg
+Morning,Syp. Potassium Chloride (KCl)
+Afternoon,Tab. Nicardia 10mg
+Afternoon,Syp. Potassium Chloride (KCl)
+Night,Tab. Nicardia 10mg
+Night,Tab. Rosuvas
+Night,Syp. Potassium Chloride (KCl)`;
+const DR_SEED_FEED = `time,feed
+6:00 AM,Rice kanji
+8:00 AM,Rice kanji
+10:00 AM,Veg soup
+12:00 PM,Egg blend
+2:00 PM,Rice kanji
+4:00 PM,Egg blend
+6:00 PM,Rice kanji
+8:00 PM,Rava kanji
+10:00 PM,`;
+const DR_SEED_STAFF = [["Mangai", "nurse"], ["Gayathri", "nurse"], ["Yokeshwari", "nurse"], ["Francis", "wardboy"], ["Vaitheshwari", "cleaning"], ["Sudha", "cleaning"], ["Bhuvana", "cleaning"],
+  ["Nandhini", "family"], ["Dharani", "family"], ["Dr Jothi", "doctor"], ["Dr Sushmitha", "doctor"], ["Dr Santhosham", "doctor", "Critical care"], ["Dr Hariharan", "therapist", "Physiotherapist"], ["Dr Vinothini", "therapist", "Special educator"]];
+const DR_SEED_UPDATES = [["Daily Routine", [["09:00", "10:00"]], ""], ["Inventory", [["11:00"]], ""], ["Ledger", [["09:00"], ["14:00"], ["21:00"]], ""], ["Pharmacy Bill", [["21:00"]], "Payment every 5 days"], ["Visitors log", [["21:00"]], ""], ["Towards", [["14:00"]], ""]];
+
+const DR = { tasks: new Map(), days: new Map(), plans: new Map(), staff: new Map(), updates: new Map(),
+  loaded: { tasks: false, days: false, plans: false, staff: false, updates: false },
+  date: null, badge: 0, view: "day", mgr: "tasks", edit: null, taskForm: null, onceForm: null, planForm: null, updForm: null, medEdit: null, vitEdit: null,
+  confirm: null, seeding: null, copied: null, trend: 7, trendTask: "", cal: "", tables: false, showArchived: false, drag: null, alerted: false, sig: "", qty: {} };
+
+/* ---------- small helpers ---------- */
+const drId = (p) => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const drDate = () => DR.date || todayISO();
+const nowISO = () => new Date().toISOString();
+function drMe() { try { return localStorage.getItem("pbl-dr-me") || ""; } catch { return ""; } }
+function addMin(hm, m) { const [h, mi] = hm.split(":").map(Number); const t = Math.max(0, Math.min(24 * 60 - 1, h * 60 + mi + m)); return `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`; }
+function minutesOf(hm) { return /^\d{2}:\d{2}$/.test(hm || "") ? Number(hm.slice(0, 2)) * 60 + Number(hm.slice(3)) : 720; }
+const slotName = (s) => (DR_SLOTS.find((x) => x[0] === s) || [s, s])[1];
+const slotDue = (s) => (DR_SLOTS.find((x) => x[0] === s) || [])[2] || "23:59";
+const withUnit = (v, u) => (!u ? `${v}` : /^[/%]/.test(u) ? `${v}${u}` : `${v} ${u}`);
+const feedKey = (time) => "f" + time.replace(":", "");
+function drTask(id) { const t = DR.tasks.get(id); return t ? { id, ...t } : null; }
+function allTasks() { return [...DR.tasks.entries()].map(([id, t]) => ({ id, ...t })).sort((a, b) => (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name)); }
+function dayDoc(d) { return DR.days.get(d) || {}; }
+function staffList() { const r = (x) => STAFF_ROLES.findIndex(([k]) => k === x); return [...DR.staff.entries()].filter(([, s]) => !s.archived).map(([id, s]) => ({ id, ...s })).sort((a, b) => r(a.role) - r(b.role) || a.name.localeCompare(b.name)); }
+function staffByName(n) { const k = personKey(n); return k ? staffList().find((s) => personKey(s.name) === k) || null : null; }
+function byLabel(n) { if (!n) return ""; const s = staffByName(n); return s?.role === "nurse" ? `S/N ${s.name}` : n; }
+async function ensureStaff(name, role = "family") {
+  name = String(name || "").trim(); if (!name || staffByName(name) || !canRouEdit()) return;
+  await rouWrite("set", `${DR_STAFF}/${drId("s")}`, { name, role, detail: "", archived: false, created_at: nowISO(), created_by: S.uid });
+}
+function staffDatalist() { return `<datalist id="dr-staff-list">${staffList().map((s) => `<option value="${esc(s.name)}">${esc((STAFF_ROLES.find(([k]) => k === s.role) || [, ""])[1])}${s.detail ? " · " + esc(s.detail) : ""}</option>`).join("")}</datalist>`; }
+async function dayWrite(d, patch) {
+  const path = `${DR_DAYS}/${d}`;
+  if (!DR.days.has(d)) await rouWrite("set", path, { date: d, created_at: nowISO(), ...patch });
+  else await rouWrite("update", path, patch);
+}
+function parseSchedule(s) {
+  const out = { kind: "daily", days: [], times: [], slots: [], target: 0, asNeeded: false }; s = String(s || "").trim();
+  if (/^(as needed|multiple times)$/i.test(s)) { out.asNeeded = true; return out; }
+  const tg = /^target (\d+)/i.exec(s); if (tg) { out.target = Number(tg[1]); return out; }
+  if (/morning|afternoon|night/i.test(s) && !/\d/.test(s)) { out.slots = s.split(/;\s*/).map((x) => x.trim().toLowerCase()).filter((x) => SLOT_TIME[x]); return out; }
+  out.times = (s.match(/\d{1,2}:\d{2}\s*[AP]M/gi) || []).map(to24).filter(Boolean); return out;
+}
+function schedSummary(t) {
+  const when = t.kind === "once" ? `Only ${dmy(t.date)}` : t.kind === "weekdays" ? WEEK.filter(([n]) => (t.days || []).includes(n)).map(([, l]) => l).join(", ") : "Daily";
+  const what = t.slots?.length ? t.slots.map(slotName).join(", ") : t.times?.length ? t.times.map(fmtTime).join(", ") : t.target ? `${t.target} per day` : t.asNeeded ? "as needed" : "";
+  return [when, what].filter(Boolean).join(" · ");
+}
+
+/* ---------- which tasks belong to a day, and what is done ---------- */
+function taskOn(t, d) {
+  if (t.kind === "once") return t.date === d;
+  if (t.from && d < t.from) return false;
+  if (t.archived_from && d >= t.archived_from) return false;
+  if (t.paused_from && d >= t.paused_from) return false;
+  if ((t.pauses || []).some((p) => d >= p.from && d < p.to)) return false;
+  if (t.kind === "weekdays" && !(t.days || []).includes(new Date(d + "T00:00:00").getDay())) return false;
+  return true;
+}
+function occTime(o) { return o.time || (o.slot ? SLOT_TIME[o.slot] : "") || o.sched || "99:99"; }
+function occsFor(day, tid) { return Object.entries(day.occ || {}).filter(([, o]) => o.task === tid && !o.deleted).map(([id, o]) => ({ id, ...o })).sort((a, b) => occTime(a).localeCompare(occTime(b)) || a.id.localeCompare(b.id)); }
+function tasksFor(d, day = dayDoc(d)) { return allTasks().filter((t) => taskOn(t, d) || occsFor(day, t.id).length || (t.type === "qty" && Number(day.qty?.[t.id]))); }
+function drSections(tasks) { const custom = [...new Set(tasks.map((t) => t.section).filter((s) => s && !DR_SECTIONS.includes(s)))]; const i = DR_SECTIONS.indexOf("Supplies used"); return [...DR_SECTIONS.slice(0, i), ...custom, ...DR_SECTIONS.slice(i)]; }
+function unitState(d, rec, due) { if (rec) return rec.done === false ? "notdone" : "done"; const t = todayISO(); if (d < t) return "missed"; if (d === t && due && nowHM() > due) return "overdue"; return "pending"; }
+/** Scheduled "units" of a task on a day (each fixed time, slot or session) matched with what was recorded. */
+function taskUnits(t, d, day = dayDoc(d)) {
+  const occs = occsFor(day, t.id); let units;
+  if (t.type === "qty" || t.type === "text") units = [];
+  else if (t.slots?.length) units = t.slots.map((s) => ({ key: "s:" + s, slot: s, label: slotName(s), due: slotDue(s) }));
+  else if (t.times?.length) units = t.times.map((x) => ({ key: "t:" + x, sched: x, label: fmtTime(x), due: addMin(x, 30) }));
+  else if (t.target) units = Array.from({ length: t.target }, (_, i) => ({ key: "n:" + i, label: `Session ${i + 1}` }));
+  else if (t.asNeeded) units = [];
+  else units = [{ key: "d", label: "Mark done" }];
+  const used = new Set();
+  for (const u of units) { const o = occs.find((x) => !used.has(x.id) && ((u.slot && x.slot === u.slot) || (u.sched && x.sched === u.sched))); if (o) { u.occ = o; used.add(o.id); } }
+  for (const u of units) if (!u.occ && !u.slot) { const o = occs.find((x) => !used.has(x.id) && !x.slot); if (o) { u.occ = o; used.add(o.id); } }
+  for (const u of units) u.state = unitState(d, u.occ, u.due);
+  return { units, occs, extra: occs.filter((o) => !used.has(o.id)) };
+}
+function planFor(kind, d) { let best = null; for (const [id, p] of DR.plans) if (p.kind === kind && p.from <= d && (!best || p.from > best.from)) best = { id, ...p }; return best; }
+function feedUnits(d, day = dayDoc(d)) {
+  const items = planFor("feed", d)?.data?.items || []; const recs = Object.values(day.feed || {}).filter((r) => !r.deleted);
+  const times = [...new Set([...items.map((x) => x.time), ...recs.map((r) => r.time)])].sort();
+  return times.map((time) => { const rec = recs.find((r) => r.time === time) || null; return { time, planned: items.find((x) => x.time === time)?.item || "", rec, state: unitState(d, rec, addMin(time, 30)) }; });
+}
+function medUnits(d, day = dayDoc(d)) {
+  const plan = planFor("meds", d)?.data?.slots || {};
+  return DR_SLOTS.map(([slot, label, due]) => { const rec = day.meds?.[slot] && !day.meds[slot].deleted ? day.meds[slot] : null; const list = rec?.list || plan[slot] || [];
+    return { slot, label, list, rec, state: unitState(d, rec, due) }; }).filter((u) => u.list.length || u.rec);
+}
+function dayStatus(d) {
+  const day = dayDoc(d); const sec = {}; let total = 0, done = 0, overdue = 0;
+  const add = (s, st) => { const x = (sec[s] = sec[s] || { total: 0, done: 0, overdue: 0 }); x.total++; total++; if (st === "done") { x.done++; done++; } if (st === "overdue") { x.overdue++; overdue++; } };
+  for (const t of tasksFor(d, day)) for (const u of taskUnits(t, d, day).units) add(t.section, u.state);
+  for (const u of feedUnits(d, day)) add("RT feed", u.state);
+  for (const u of medUnits(d, day)) add("Medication", u.state);
+  return { total, done, overdue, sec };
+}
+
+/* ---------- family updates checklist ---------- */
+function updSlots(d) {
+  const day = dayDoc(d); const t = todayISO(); const now = nowHM();
+  return [...DR.updates.entries()].filter(([, u]) => !u.archived).sort((a, b) => (a[1].order || 0) - (b[1].order || 0)).flatMap(([id, u]) => (u.times || []).map((s) => {
+    const key = `${id}_${s.at.replace(":", "")}`; const rec = day.updates?.[key]; const late = s.until || addMin(s.at, 30);
+    const state = rec?.done ? "done" : d < t ? "missed" : d > t ? "upcoming" : now >= late ? "overdue" : now >= s.at ? "due" : "upcoming";
+    return { id, key, name: u.name, note: u.note || "", at: s.at, until: s.until || "", rec, state };
+  }));
+}
+function drAlertCount() { if (!DR.loaded.updates || !S.caps?.db) return 0; return updSlots(todayISO()).filter((s) => s.state === "due" || s.state === "overdue").length; }
+function drAlertOnOpen() {
+  if (DR.alerted || !DR.loaded.updates || !DR.loaded.days || !tabAllowed("routine")) return;
+  DR.alerted = true; const n = drAlertCount();
+  if (n) flash(`${n} family update${n === 1 ? " is" : "s are"} due or overdue. See Routine → Daily Routine → Updates.`);
+}
+function drNotifyTick() {
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  const d = todayISO(); const now = nowHM(); let sent = {}; try { sent = JSON.parse(localStorage.getItem("pbl-dr-notified") || "{}"); } catch {}
+  const fire = (key, title, body) => { if (sent[key]) return; sent[key] = d; try { new Notification(title, { body, tag: key }); } catch {} };
+  for (const s of updSlots(d)) if (s.state === "due" || s.state === "overdue") fire(d + s.key, "Family update due", `${s.name} – ${fmtTime(s.at)}${s.note ? " (" + s.note + ")" : ""}`);
+  const day = dayDoc(d);
+  for (const t of tasksFor(d, day)) if (t.reminder) for (const u of taskUnits(t, d, day).units) if (!u.occ && u.sched && now >= u.sched) fire(`${d}${t.id}${u.key}`, "Routine reminder", `${t.name} – ${u.label}`);
+  for (const k of Object.keys(sent)) if (sent[k] !== d) delete sent[k];
+  try { localStorage.setItem("pbl-dr-notified", JSON.stringify(sent)); } catch {}
+}
+
+/* ---------- loading ---------- */
+function drStart() {
+  const db = S.caps.db;
+  const sub = (col, key) => db.collection(col).onSnapshot((snap) => { DR[key] = new Map(snap.docs.map((d) => [d.id, clone(d.data())])); reapplyOutbox(col); if (!snap.metadata.fromCache) DR.loaded[key] = true; drChanged(); }, () => { DR.loaded[key] = true; drChanged(); });
+  sub(DR_TASKS, "tasks"); sub(DR_DAYS, "days"); sub(DR_PLANS, "plans"); sub(DR_STAFF, "staff"); sub(DR_UPD, "updates");
+  setInterval(drTick, 30000);
+}
+let drTabsQueued = false;
+/** Redraw the tab bar only when the Routine badge number changes, at most once per frame. */
+function drBadgeSoon() {
+  if (drTabsQueued) return; drTabsQueued = true;
+  requestAnimationFrame(() => { drTabsQueued = false; const n = drAlertCount(); if (n !== DR.badge && !S.editor) { DR.badge = n; renderTabs(); } });
+}
+function drChanged() { drBadgeSoon(); drAlertOnOpen(); rouChanged(); }
+function drSig() { const d = todayISO(); return `${d}|${dayStatus(d).overdue}|${updSlots(d).map((s) => s.state[0]).join("")}`; }
+function drTick() {
+  if (!S.caps?.db || !DR.loaded.tasks) return;
+  drBadgeSoon(); drNotifyTick();
+  const sig = drSig(); if (sig === DR.sig) return; DR.sig = sig;
+  if (S.tab === "routine" && ROU.section === "daily" && !S.editor && !rouBusy()) render();
+}
+function drMaybeSeed() {
+  if (!Object.values(DR.loaded).every(Boolean) || !ROU.loaded.settings || DR.seeding || ROU.settings.daily_seeded_at || DR.tasks.size) return;
+  if (S.me?.isOwner && canRouManage()) drSeed(true);
+}
+
+/* ---------- seed: template, medicines, feed plan, staff, updates and the filled sample day 04/11/2026 ---------- */
+function drSeedWrites() {
+  const now = nowISO(); const W = []; const ids = new Map();
+  parseCsv(DR_SEED_TASKS).slice(1).forEach(([section, name, type, unit, sched, details], i) => {
+    if (!name) return; const id = "t" + String(i + 1).padStart(3, "0"); ids.set(name, id);
+    W.push([`${DR_TASKS}/${id}`, { section, name, type: DR_TYPE_CSV[type] || "check", unit: unit || "", ...parseSchedule(sched), date: null, details: details || "", doer: "", reminder: false,
+      order: (i + 1) * 10, from: DR_START, pauses: [], paused_from: null, archived_from: null, created_at: now, created_by: S.uid }]);
+  });
+  const slots = { morning: [], afternoon: [], night: [] }; for (const [slot, item] of parseCsv(DR_SEED_MEDS).slice(1)) if (item) slots[slot.trim().toLowerCase()]?.push(item.trim());
+  const items = parseCsv(DR_SEED_FEED).slice(1).filter((r) => r[0]).map(([time, feed]) => ({ time: to24(time), item: (feed || "").trim() }));
+  W.push([`${DR_PLANS}/pmeds${DR_START.replaceAll("-", "")}`, { kind: "meds", from: DR_START, data: { slots }, created_at: now, created_by: S.uid }]);
+  W.push([`${DR_PLANS}/pfeed${DR_START.replaceAll("-", "")}`, { kind: "feed", from: DR_START, data: { items }, created_at: now, created_by: S.uid }]);
+  [...DR_SEED_STAFF, ["Pavadharani", "family"]].forEach(([name, role, detail], i) => W.push([`${DR_STAFF}/s${String(i + 1).padStart(3, "0")}`, { name, role, detail: detail || "", archived: false, created_at: now }]));
+  DR_SEED_UPDATES.forEach(([name, times, note], i) => W.push([`${DR_UPD}/u${i + 1}`, { name, times: times.map(([at, until]) => ({ at, until: until || "" })), note, order: (i + 1) * 10, archived: false, created_at: now }]));
+  W.push([`${DR_DAYS}/${DR_START}`, drSampleDay((n) => ids.get(n), slots, items, now)]);
+  return W;
+}
+function drSampleDay(T, slots, items, now) {
+  const occ = {}; let n = 0;
+  const add = (name, o) => { occ["o" + String(++n).padStart(3, "0")] = { task: T(name), sched: null, slot: null, time: "", end: "", value: "", item: "", text: "", by: "", note: "", done: true, at: now, ...o }; };
+  add("Ward boy care", { sched: "04:30", time: "04:30", end: "05:00", by: "Francis", note: "Bed sheet change, oil applying, underpad change" });
+  add("Staff nurse care", { sched: "05:00", time: "05:00", end: "05:30", by: "Yokeshwari", note: "Tracheostomy care, oral care, catheter care" });
+  add("Morning sleep", { time: "05:00", end: "09:20" });
+  add("Floor cleaning", { sched: "11:00", time: "11:00", by: "Vaitheshwari" });
+  add("Restroom cleaning", { sched: "12:30", time: "12:30", by: "Sudha" });
+  add("Evening care", { sched: "18:00", time: "18:00" });
+  add("Floor cleaning", { sched: "20:00", time: "20:20", by: "Bhuvana" });
+  add("Nebulizer – Morning", { sched: "06:00", time: "06:00", item: "Duolin + Mesna", by: "Yokeshwari" });
+  add("Nebulizer – Afternoon", { sched: "14:00", time: "14:00", item: "Duolin + Mesna", by: "Mangai" });
+  for (const [slot, by, vals] of [["morning", "Mangai", ["97", "82", "99", "110/70"]], ["afternoon", "Gayathri", ["97", "90", "98", "120/70"]]])
+    ["Temperature", "Pulse", "SpO2", "BP"].forEach((name, i) => add(name, { slot, value: vals[i], by }));
+  add("Breakfast", { sched: "09:00", time: "09:40", item: "Pongal" });
+  add("Lunch", { sched: "13:30", time: "14:30", item: "Rasam rice" });
+  add("Physiotherapy", { sched: "11:00", time: "11:15", end: "11:25", by: "Dr Hariharan" });
+  add("Chair sitting", { sched: "11:30", time: "11:30", end: "12:30" });
+  add("Newspaper reading", {});
+  add("Occupational therapy", { time: "13:30", end: "13:40" });
+  add("Physiotherapy", { sched: "16:15", time: "16:15", end: "16:25" });
+  add("Ball therapy", { time: "16:35", note: "5 minutes" });
+  add("Chair sitting", { sched: "16:30", time: "16:35", end: "17:35" });
+  add("Colouring / writing practice", { time: "17:05", by: "Dr Vinothini", note: "Writing practice" });
+  add("Board games", { text: "Rope challenge, flipping chess" });
+  for (const t of ["06:30", "10:00", "12:30", "15:00"]) add("Finger movements", { time: t });
+  const givers = ["Yokeshwari", "Mangai", "Pavadharani", "Nandhini", "Gayathri", "Nandhini", "Gayathri", "Yokeshwari"];
+  const feed = {}; items.forEach((x, i) => { if (givers[i]) feed[feedKey(x.time)] = { time: x.time, item: x.item, given_at: x.time, by: givers[i], note: "", done: true, at: now }; });
+  const meds = {}; for (const [slot, by] of [["morning", "Mangai"], ["afternoon", "Gayathri"], ["night", "Yokeshwari"]]) meds[slot] = { list: slots[slot], given: slots[slot].map(() => true), by, time: "", done: true, at: now };
+  const doctors = {}; [["Dr Jothi", "12:50", "Rounds"], ["Dr Sushmitha", "", "Consulting today"], ["", "13:30", "Occupational therapy 1:30 PM to 1:40 PM"], ["Dr Vinothini", "17:05", "Special educator – writing practice"], ["Dr Santhosham", "17:25", "Critical care – advised to plan Friday decannulation"]]
+    .forEach(([name, time, comment], i) => { doctors["c" + (i + 1)] = { name, time, comment, by: "", at: now }; });
+  return { date: DR_START, created_at: now, occ, feed, meds, doctors, notes: { room: "Restroom issue", improvement: "Writing practice", other: "" }, qty: {}, photos: {}, updates: {} };
+}
+async function drSeed(auto) {
+  if (DR.seeding || !canRouManage()) return;
+  if (ROU.settings.daily_seeded_at) { flash("The daily routine was already loaded."); return; }
+  DR.seeding = { done: 0, total: 0 }; rouRefresh();
+  try {
+    if (auto) {
+      const lease = await S.caps.db.doc(DR_LOCK).acquire({ holder: S.uid, ttlMs: 60000 }).catch(() => ({ acquired: true }));
+      if (!lease.acquired) return;
+      const fresh = await S.caps.db.doc(ROU_SETTINGS).get().catch(() => null);
+      if (fresh?.exists && fresh.data().daily_seeded_at) return;
+    }
+    const W = drSeedWrites(); DR.seeding.total = W.length;
+    for (const [path, doc] of W) { await rouWrite("set", path, doc); DR.seeding.done++; if (DR.seeding.done % 10 === 0) rouRefresh(); }
+    await rouWrite("set", ROU_SETTINGS, { ...ROU.settings, daily_seeded_at: nowISO() });
+    const nt = W.filter(([p]) => p.startsWith(DR_TASKS)).length, ns = W.filter(([p]) => p.startsWith(DR_STAFF)).length;
+    writeAudit("routine.daily_seed", null, "routine", null, { tasks: nt, staff: ns });
+    flash(`Loaded the daily routine: ${nt} tasks, the medicine list and feed plan, ${ns} staff, the update checklist and the sample day 04/11/2026.`);
+  } catch (e) { flash(dbErrorText(e).replace("save this bill", "load the daily routine")); }
+  finally { DR.seeding = null; rouRefresh(); }
+}
+
+/* ---------- views ---------- */
+function dailyView() {
+  if (!DR.loaded.tasks || !DR.loaded.days) return `<div class="card"><div class="row-between"><span class="spin"></span><span class="muted">Loading the daily routine…</span></div></div>`;
+  if (DR.taskForm) return taskFormView();
+  if (DR.planForm) return planFormView();
+  const n = drAlertCount();
+  return `${DR.seeding ? `<div class="note">Loading the daily routine… ${DR.seeding.done} of ${DR.seeding.total}</div>` : ""}
+  ${!DR.tasks.size && !DR.seeding ? `<div class="card"><p class="muted">No routine tasks yet.</p>${canRouManage() && !ROU.settings.daily_seeded_at ? `<button class="btn btn-primary btn-block" data-act="dr-seed">Load the routine template and sample day</button>` : ""}</div>` : ""}
+  <div class="seg" role="group" aria-label="Daily Routine view">${[["day", "Day"], ["updates", `Updates${n ? ` (${n})` : ""}`], ["trends", "Trends"], ["manage", "Manage"]].map(([v, l]) => `<button data-act="dr-view" data-v="${v}" aria-pressed="${DR.view === v}">${l}</button>`).join("")}</div>
+  ${staffDatalist()}
+  ${DR.view === "updates" ? updatesView() : DR.view === "trends" ? trendsView() : DR.view === "manage" ? manageView() : dayView()}`;
+}
+function dateBar() {
+  const d = drDate();
+  return `<div class="dr-datebar"><button class="btn btn-ghost" data-act="dr-day" data-n="-1" aria-label="Previous day">‹</button>
+    <input class="inp" type="date" id="dr-date" value="${esc(d)}" aria-label="Day">
+    <button class="btn btn-ghost" data-act="dr-day" data-n="1" aria-label="Next day">›</button></div>
+    <div class="row-between"><b>${esc(fmtDate(d))}</b>${d !== todayISO() ? `<button class="btn-link" data-act="dr-today">Go to today</button>` : `<span class="small muted">Today</span>`}</div>`;
+}
+const stateWord = { done: "Done", notdone: "Not done", overdue: "Overdue", missed: "Not recorded", pending: "Pending", due: "Due now", upcoming: "Later" };
+function dayView() {
+  const d = drDate(); const day = dayDoc(d); const ro = !canRouEdit(); const st = dayStatus(d); const tasks = tasksFor(d, day);
+  const pct = st.total ? Math.round((st.done / st.total) * 100) : 0;
+  const ups = d === todayISO() ? updSlots(d).filter((s) => s.state === "due" || s.state === "overdue") : [];
+  return `<section class="card">
+    ${dateBar()}
+    <div class="dr-prog"><div class="row-between"><b id="dr-progress">${st.done} of ${st.total} done</b>${st.overdue ? `<span class="pill bad">${st.overdue} overdue</span>` : ""}</div>
+      <div class="dr-bar" role="progressbar" aria-label="Tasks done" aria-valuemin="0" aria-valuemax="${st.total}" aria-valuenow="${st.done}"><i style="width:${pct}%"></i></div></div>
+    ${ups.length ? `<button class="note warn dr-upnote" data-act="dr-view" data-v="updates"><b>${ups.length} family update${ups.length === 1 ? "" : "s"} to send:</b> ${esc(ups.map((s) => `${s.name} ${fmtTime(s.at)}${s.state === "overdue" ? " (overdue)" : ""}`).join(", "))}</button>` : ""}
+    ${ro ? `<p class="small muted">Your role can view the routine only.</p>` : `<label class="field"><span>Recording as (fills “done by”)</span><input class="inp" list="dr-staff-list" id="dr-me" value="${esc(drMe())}" placeholder="Your name" autocomplete="off"></label>
+      <div class="duo"><button class="btn btn-primary" data-act="dr-task-new">+ Add task</button><button class="btn btn-ghost" data-act="dr-once">+ Note/task for this day only</button></div>
+      ${DR.onceForm ? onceFormView() : ""}`}
+  </section>
+  ${drSections(tasks).map((sec) => sectionView(sec, d, day, tasks, st, ro)).join("")}
+  ${photosView(d, day, ro)}
+  ${shareView(d)}`;
+}
+function sectionView(sec, d, day, tasks, st, ro) {
+  const mine = tasks.filter((t) => t.section === sec); let body = "";
+  if (sec === "RT feed") body = feedView(d, day, ro);
+  else if (sec === "Medication") body = medsView(d, day, ro);
+  else if (sec === "Vitals") body = vitalsView(d, day, mine, ro) + mine.filter((t) => !(t.type === "value" && t.slots?.length)).map((t) => taskRow(t, d, day, ro)).join("");
+  else if (sec === "Doctor's comment") body = doctorsView(d, day, ro);
+  else if (sec === "Visitors") body = dayVisitors(d, ro);
+  else if (sec === "Notes") body = notesView(day, ro);
+  else if (sec === "Supplies used") body = mine.map((t) => qtyRow(t, day, ro)).join("") || `<p class="small muted">No supplies in the list.</p>`;
+  if (sec !== "Vitals" && sec !== "Supplies used") body += mine.map((t) => (t.type === "qty" ? qtyRow(t, day, ro) : taskRow(t, d, day, ro))).join("");
+  if (!body.trim() && !DR_SECTIONS.includes(sec)) return "";
+  const s = st.sec[sec];
+  return `<section class="card dr-sec" data-sec="${esc(sec)}"><div class="row-between"><h2>${esc(DR_LABEL[sec] || sec)}</h2>${s ? `<span class="small muted">${s.done} of ${s.total}${s.overdue ? ` · <b class="bad-ink">${s.overdue} overdue</b>` : ""}</span>` : ""}</div>${body || `<p class="small muted">Nothing scheduled.</p>`}</section>`;
+}
+function chipText(t, o) {
+  const when = o.time ? fmtTime(o.time) + (o.end ? `–${fmtTime(o.end)}` : "") : o.slot ? slotName(o.slot) : "";
+  const what = t.type === "value" ? withUnit(o.value, t.unit) : t.type === "item" ? o.item : "";
+  return [what, when, o.by].filter(Boolean).join(" · ") || "Done";
+}
+function taskRow(t, d, day, ro) {
+  const { units, extra, occs } = taskUnits(t, d, day); const overdue = units.some((u) => u.state === "overdue");
+  const editing = DR.edit?.kind === "occ" && DR.edit.tid === t.id;
+  const done = (o) => { const range = t.type === "range" && !o.end && o.done !== false && d === todayISO();
+    return `<button class="dr-chip ${o.done === false ? "notdone" : "done"}" data-act="dr-occ-edit" data-tid="${esc(t.id)}" data-id="${esc(o.id)}" ${ro ? "disabled" : ""} aria-label="${esc(t.name)}: ${esc(chipText(t, o))}. Edit">${o.done === false ? "❌" : "✅"} ${esc(chipText(t, o))}${range ? " (started)" : ""}</button>${range && !ro ? `<button class="dr-chip" data-act="dr-end" data-id="${esc(o.id)}">End now</button>` : ""}`; };
+  let body;
+  if (t.type === "text") body = occs.map((o) => `<button class="dr-text" data-act="dr-occ-edit" data-tid="${esc(t.id)}" data-id="${esc(o.id)}" ${ro ? "disabled" : ""}>${esc(o.text)}${o.by ? ` <span class="small muted">· ${esc(o.by)}</span>` : ""}</button>`).join("") || `<span class="small muted">—</span>`;
+  else body = units.map((u) => (u.occ ? done(u.occ) : ro ? `<span class="dr-chip ${u.state}">${esc(u.label)} · ${stateWord[u.state]}</span>`
+    : `<button class="dr-chip ${u.state}" data-act="dr-tap" data-tid="${esc(t.id)}" data-unit="${esc(u.key)}" aria-label="${esc(t.name)} ${esc(u.label)}: tap when done">${u.state === "overdue" ? "⚠ " : ""}${esc(u.label)}${u.state === "overdue" ? " · overdue" : u.state === "missed" ? " · not recorded" : ""}</button>`)).join("") + extra.map(done).join("");
+  return `<div class="dr-task ${overdue ? "overdue" : ""}" data-task-row="${esc(t.id)}">
+    <div class="row-between"><div><b>${esc(t.name)}</b>${t.unit ? ` <span class="small muted">(${esc(t.unit)})</span>` : ""}${t.details ? `<div class="small muted">${esc(t.details)}</div>` : ""}</div>
+      ${!ro ? `<button class="btn-link" data-act="dr-occ-new" data-tid="${esc(t.id)}" aria-label="Add ${esc(t.name)}">+ Add</button>` : ""}</div>
+    <div class="dr-units">${body}</div>
+    ${editing ? editorView() : ""}
+  </div>`;
+}
+function qtyRow(t, day, ro) {
+  const n = DR.qty[t.id] ?? Number(day.qty?.[t.id] || 0);
+  return `<div class="dr-qty"><span>${esc(t.name)}${t.unit ? ` <span class="small muted">(${esc(t.unit)})</span>` : ""}</span>
+    ${ro ? `<b class="num">${n}</b>` : `<span class="dr-step"><button class="btn btn-ghost" data-act="dr-qty" data-tid="${esc(t.id)}" data-n="-1" aria-label="One less ${esc(t.name)}">−</button><b class="num" id="q-${esc(t.id)}">${n}</b><button class="btn btn-ghost" data-act="dr-qty" data-tid="${esc(t.id)}" data-n="1" aria-label="One more ${esc(t.name)}">+</button></span>`}</div>`;
+}
+function feedView(d, day, ro) {
+  const us = feedUnits(d, day);
+  if (!us.length) return `<p class="small muted">No feed plan for this day. Set one in Manage → Medicines & feed.</p>`;
+  return `<div class="dr-feed">${us.map((u) => { const open = DR.edit?.kind === "feed" && DR.edit.time === u.time;
+    return `<div class="dr-frow ${u.state}"><span class="num dr-ftime">${fmtTime(u.time)}</span>
+      <span class="dr-fmain">${u.rec ? `<b>${esc(u.rec.item || "—")}</b> <span class="small muted">${esc([u.rec.by, u.rec.given_at && u.rec.given_at !== u.time ? "at " + fmtTime(u.rec.given_at) : ""].filter(Boolean).join(" · "))}</span>` : `<span>${esc(u.planned || "—")}</span>`}</span>
+      ${u.rec ? `<button class="dr-chip ${u.state}" data-act="dr-feed-edit" data-time="${u.time}" ${ro ? "disabled" : ""} aria-label="${fmtTime(u.time)} feed ${u.state === "done" ? "given" : "not given"}. Edit">${u.state === "done" ? "✅" : "❌"}</button>`
+        : ro ? `<span class="small">${stateWord[u.state]}</span>` : `<button class="dr-chip ${u.state}" data-act="dr-feed-tap" data-time="${u.time}" aria-label="${fmtTime(u.time)} feed given">${u.state === "overdue" ? "⚠ Overdue · " : ""}Given</button>`}
+    </div>${open ? editorView() : ""}`; }).join("")}</div>`;
+}
+function medsView(d, day, ro) {
+  const us = medUnits(d, day);
+  if (!us.length) return `<p class="small muted">No medicine list for this day. Set one in Manage → Medicines & feed.</p>`;
+  return `<div class="dr-slots">${us.map((u) => {
+    if (!ro && (DR.medEdit === u.slot || !u.rec)) return `<form class="dr-slot ${u.state}" data-mslot="${u.slot}"><div class="row-between"><b>${u.label}</b>${u.state === "overdue" ? `<span class="pill bad">Overdue</span>` : ""}</div>
+      ${u.list.map((m, i) => `<label class="pick"><input type="checkbox" data-med="${i}" ${u.rec ? (u.rec.given?.[i] !== false ? "checked" : "") : "checked"}> ${esc(m)}</label>`).join("")}
+      <label class="field"><span>S/N</span><input class="inp" list="dr-staff-list" data-mby value="${esc(u.rec?.by || drMe())}" autocomplete="off"></label>
+      <div class="duo"><button class="btn btn-primary" type="submit">${u.rec ? "Save" : `${u.label} given`}</button>${DR.medEdit === u.slot ? `<button type="button" class="btn btn-ghost" data-act="dr-med-cancel">Cancel</button>` : ""}</div></form>`;
+    return `<div class="dr-slot ${u.state}"><div class="row-between"><b>${u.label}</b>${u.rec && !ro ? `<button class="btn-link" data-act="dr-med-edit" data-slot="${u.slot}">Edit</button>` : ""}</div>
+      ${u.list.map((m, i) => `<div class="small">${u.rec ? (u.rec.given?.[i] !== false ? "✅" : "❌") : "·"} ${esc(m)}</div>`).join("")}
+      <div class="small muted">${u.rec ? esc([byLabel(u.rec.by), u.rec.time ? fmtTime(u.rec.time) : ""].filter(Boolean).join(" · ")) : stateWord[u.state]}</div></div>`;
+  }).join("")}</div>`;
+}
+const VITAL_SHORT = { Temperature: "T", Pulse: "PR", SpO2: "SpO2", BP: "BP" };
+function vitalsView(d, day, tasks, ro) {
+  const vt = tasks.filter((t) => t.type === "value" && t.slots?.length); if (!vt.length) return "";
+  return `<div class="dr-slots">${DR_SLOTS.filter(([s]) => vt.some((t) => t.slots.includes(s))).map(([s, label, due]) => {
+    const recs = vt.filter((t) => t.slots.includes(s)).map((t) => ({ t, o: occsFor(day, t.id).find((o) => o.slot === s) }));
+    const n = recs.filter((r) => r.o).length; const by = recs.find((r) => r.o?.by)?.o.by || ""; const state = n === recs.length ? "done" : unitState(d, null, due);
+    if (!ro && (DR.vitEdit === s || !n)) return `<form class="dr-slot ${state}" data-vslot="${s}"><div class="row-between"><b>${label}</b>${state === "overdue" ? `<span class="pill bad">Overdue</span>` : ""}</div>
+      <div class="dr-vgrid">${recs.map(({ t, o }) => `<label class="field"><span>${esc(t.name)}${t.unit ? ` (${esc(t.unit)})` : ""}</span><input class="inp" data-vt="${esc(t.id)}" value="${esc(o?.value || "")}" inputmode="${t.unit === "mmHg" ? "text" : "decimal"}" placeholder="${t.unit === "mmHg" ? "110/70" : ""}" autocomplete="off"></label>`).join("")}</div>
+      <label class="field"><span>S/N</span><input class="inp" list="dr-staff-list" data-vby value="${esc(by || drMe())}" autocomplete="off"></label>
+      <div class="dr-verr"></div>
+      <div class="duo"><button class="btn btn-primary" type="submit">Save ${label.toLowerCase()} vitals</button>${DR.vitEdit === s ? `<button type="button" class="btn btn-ghost" data-act="dr-vit-cancel">Cancel</button>` : ""}</div></form>`;
+    return `<div class="dr-slot ${state}"><div class="row-between"><b>${label}</b>${!ro ? `<button class="btn-link" data-act="dr-vit-edit" data-slot="${s}">Edit</button>` : ""}</div>
+      ${n ? `<div class="dr-vals">${recs.map(({ t, o }) => `<span><span class="small muted">${esc(VITAL_SHORT[t.name] || t.name)}</span> <b class="num">${o ? esc(o.value) : "—"}</b> <span class="small muted">${esc(t.unit || "")}</span></span>`).join("")}</div><div class="small muted">${esc(byLabel(by))}</div>` : `<p class="small muted">${stateWord[state]}</p>`}</div>`;
+  }).join("")}</div>`;
+}
+function doctorsView(d, day, ro) {
+  const list = Object.entries(day.doctors || {}).filter(([, c]) => !c.deleted).sort((a, b) => (a[1].time || "99").localeCompare(b[1].time || "99"));
+  const open = DR.edit?.kind === "doc";
+  return `${list.map(([id, c]) => `<div class="dr-doc"><button class="dr-text" data-act="dr-doc-edit" data-id="${esc(id)}" ${ro ? "disabled" : ""}><b>${esc(c.name || "Note")}</b>${c.time ? ` <span class="small muted">${fmtTime(c.time)}</span>` : ""}<br><span>${esc(c.comment)}</span></button>${open && DR.edit.id === id ? editorView() : ""}</div>`).join("") || `<p class="small muted">No comments yet.</p>`}
+    ${!ro ? (open && !DR.edit.id ? editorView() : `<button class="btn btn-ghost" data-act="dr-doc-new">+ Add comment</button>`) : ""}`;
+}
+function dayVisitors(d, ro) {
+  const vs = visitList().filter((v) => v.date === d);
+  return `${vs.length ? `<ul class="acc-checks">${vs.map((v) => `<li><span class="num">${esc(fmtTime(v.time))}</span>${typeBadge(v.type)}<span>${esc((v.visitors || []).map((x) => [visitorLabel(x), x.place].filter(Boolean).join(" – ")).join(", "))}</span></li>`).join("")}</ul>` : `<p class="small muted">No visitors recorded for this day.</p>`}
+    ${!ro ? `<button class="btn btn-ghost" data-act="dr-add-visit">+ Add visit</button>` : ""}`;
+}
+const NOTE_KEYS = [["room", "Room issues"], ["improvement", "Any improvement"], ["other", "Other discussion"]];
+function notesView(day, ro) { return NOTE_KEYS.map(([k, l]) => `<label class="field"><span>${l}</span><textarea class="inp" rows="2" data-note="${k}" ${ro ? "readonly" : ""}>${esc(day.notes?.[k] || "")}</textarea></label>`).join(""); }
+function photosView(d, day, ro) {
+  const ph = Object.entries(day.photos || {}).filter(([, p]) => !p.deleted);
+  return `<section class="card"><h2>Photos of the day</h2>
+    ${ph.length ? `<div class="dr-thumbs">${ph.map(([id, p]) => `<span class="dr-thumb"><button class="thumb" data-act="dr-photo" data-asset="${esc(p.asset)}" aria-label="Open photo"><img src="/_blob/${esc(p.asset)}" alt=""></button>${!ro && p.who === S.uid ? `<button class="btn-link danger-text small" data-act="dr-photo-del" data-id="${esc(id)}">Remove</button>` : ""}</span>`).join("")}</div>` : `<p class="small muted">No photos yet. Add the scanned notebook page here.</p>`}
+    ${!ro && S.caps.assets ? `<button class="btn btn-ghost" data-act="dr-photo-add">+ Add photo</button>` : ""}</section>`;
+}
+function shareView(d) {
+  return `<section class="card"><h2>Share and export</h2>
+    <div class="duo"><button class="btn btn-primary" data-act="dr-wa">Copy for WhatsApp</button><button class="btn btn-ghost" data-act="dr-finger">Finger-movement message</button></div>
+    ${DR.copied ? `<div class="note ok">${esc(DR.copied)}</div>` : ""}
+    ${S.caps.downloads ? `<div class="duo"><button class="btn btn-ghost" data-act="dr-pdf">Printable daily sheet (PDF)</button><button class="btn btn-ghost" data-act="dr-csv">Export CSV (all days)</button></div>` : ""}
+    <details><summary class="small">Preview the WhatsApp text</summary><pre class="dr-pre" id="dr-wa-text">${esc(drReportText(d))}</pre></details>
+  </section>`;
+}
+function onceFormView() {
+  const v = DR.onceForm;
+  return `<form class="add-panel" id="dr-once-form"><b>Only for ${esc(dmy(drDate()))}</b>
+    <label class="field"><span>What *</span><input class="inp" id="dr-once-name" data-of="name" value="${esc(v.name)}" placeholder="e.g. Room shift from 115 to 111" maxlength="80"></label>
+    <div class="dates"><label class="field"><span>Section</span><select class="inp" data-of="section">${drSections(allTasks()).filter((s) => !DR_PLAN_SECTIONS.has(s)).map((s) => `<option value="${esc(s)}" ${v.section === s ? "selected" : ""}>${esc(DR_LABEL[s] || s)}</option>`).join("")}</select></label>
+      <label class="field"><span>Kind</span><select class="inp" data-of="type"><option value="check" ${v.type === "check" ? "selected" : ""}>Task to tick</option><option value="text" ${v.type === "text" ? "selected" : ""}>Note</option></select></label></div>
+    <label class="field"><span>Time (optional)</span><input class="inp" type="time" data-of="time" value="${esc(v.time)}"></label>
+    <div id="dr-once-err"></div>
+    <div class="duo"><button class="btn btn-primary" type="submit">Add</button><button type="button" class="btn btn-ghost" data-act="dr-once-cancel">Cancel</button></div></form>`;
+}
+
+/* --- inline editor for one occurrence / feed / doctor's comment --- */
+function editorView() {
+  const e = DR.edit; const v = e.values; const f = (k) => e.fields.includes(k);
+  const inp = (k, label, extra = "") => `<label class="field"><span>${label}</span><input class="inp" data-ev="${k}" value="${esc(v[k] || "")}" ${extra} autocomplete="off"></label>`;
+  return `<form class="dr-edit" id="dr-edit-form"><b class="small">${esc(e.title)}</b>
+    ${f("name") ? inp("name", "Doctor / person", 'list="dr-staff-list"') : ""}
+    ${f("slot") ? `<label class="field"><span>Slot</span><select class="inp" data-ev="slot"><option value="">—</option>${(e.slots || []).map((s) => `<option value="${s}" ${v.slot === s ? "selected" : ""}>${slotName(s)}</option>`).join("")}</select></label>` : ""}
+    <div class="dates">${f("time") ? inp("time", f("end") ? "From" : "Time", 'type="time"') : ""}${f("end") ? inp("end", "To", 'type="time"') : ""}</div>
+    ${f("value") ? inp("value", `Value${e.unit ? ` (${esc(e.unit)})` : ""}`, `inputmode="${e.unit === "mmHg" ? "text" : "decimal"}" placeholder="${e.unit === "mmHg" ? "110/70" : ""}"`) : ""}
+    ${f("item") ? inp("item", "Item given") : ""}
+    ${f("text") ? `<label class="field"><span>Text</span><textarea class="inp" rows="2" data-ev="text">${esc(v.text || "")}</textarea></label>` : ""}
+    ${f("comment") ? `<label class="field"><span>Comment</span><textarea class="inp" rows="2" data-ev="comment">${esc(v.comment || "")}</textarea></label>` : ""}
+    ${f("by") ? inp("by", "Done by", 'list="dr-staff-list"') : ""}
+    ${f("note") ? inp("note", "Note (optional)") : ""}
+    ${f("done") ? `<div class="seg" role="group" aria-label="Status"><button type="button" data-act="dr-ev-done" data-v="1" aria-pressed="${v.done !== false}">✅ Done</button><button type="button" data-act="dr-ev-done" data-v="0" aria-pressed="${v.done === false}">❌ Not done</button></div>` : ""}
+    <div id="dr-ev-err"></div>
+    <div class="inv-actions"><button class="btn btn-primary" type="submit">Save</button>${e.id || e.rec ? `<button type="button" class="btn btn-danger" data-act="dr-ev-del">Delete</button>` : ""}<button type="button" class="btn btn-ghost" data-act="dr-ev-cancel">Cancel</button></div>
+  </form>`;
+}
+const OCC_FIELDS = { check: ["time", "by", "note", "done"], range: ["time", "end", "by", "note", "done"], multi: ["time", "end", "by", "note", "done"], value: ["time", "value", "by", "note"], item: ["time", "item", "by", "note", "done"], text: ["text", "by"] };
+function openOcc(tid, id, preset = {}) {
+  const t = drTask(tid); const d = drDate(); const o = id ? dayDoc(d).occ?.[id] : null;
+  const fields = [...(OCC_FIELDS[t.type] || OCC_FIELDS.check)]; if (t.slots?.length && t.type !== "text") fields.unshift("slot");
+  DR.edit = { kind: "occ", tid, id: id || null, title: t.name, unit: t.unit, slots: t.slots || [], fields,
+    values: o ? { ...o } : { sched: null, slot: null, time: d === todayISO() ? nowHM() : "", end: "", value: "", item: t.type === "item" ? t.details || "" : "", text: "", by: t.doer || drMe(), note: "", done: true, ...preset } };
+  render(); drFocusEditor();
+}
+function drFocusEditor() { const el = document.querySelector("#dr-edit-form [data-ev]:not([type=time])") || document.querySelector("#dr-edit-form [data-ev]"); el?.focus(); el?.closest(".dr-task, .dr-feed, .dr-sec")?.scrollIntoView({ block: "nearest" }); }
+async function saveEdit() {
+  const e = DR.edit; const v = e.values; const d = drDate(); const err = (m) => { $("#dr-ev-err").innerHTML = `<div class="note bad">${esc(m)}</div>`; };
+  for (const k of ["time", "end"]) if (v[k] && !/^\d{2}:\d{2}$/.test(v[k])) return err("Pick a valid time.");
+  if (v.time && v.end && v.end < v.time) return err("The end time is before the start time.");
+  try {
+    if (e.kind === "occ") {
+      const t = drTask(e.tid); const value = String(v.value || "").trim().replace(/\s+/g, "");
+      if (e.fields.includes("value") && !value) return err("Enter the value.");
+      if (t.unit === "mmHg" && !/^\d{2,3}\/\d{2,3}$/.test(value)) return err("Write BP like 110/70.");
+      if (e.fields.includes("text") && !String(v.text || "").trim()) return err("Write something first.");
+      if (e.fields.includes("slot") && !v.slot && t.type === "value") return err("Pick the slot.");
+      const occ = { task: e.tid, sched: v.sched || null, slot: v.slot || null, time: v.time || "", end: v.end || "", value, item: String(v.item || "").trim(), text: String(v.text || "").trim(),
+        by: String(v.by || "").trim(), note: String(v.note || "").trim(), done: v.done !== false, deleted: false, at: nowISO(), who: S.uid };
+      await dayWrite(d, { occ: { [e.id || drId("o")]: occ } }); await ensureStaff(occ.by);
+    } else if (e.kind === "feed") {
+      await dayWrite(d, { feed: { [feedKey(e.time)]: { time: e.time, item: String(v.item || "").trim(), given_at: v.time || "", by: String(v.by || "").trim(), note: String(v.note || "").trim(), done: v.done !== false, deleted: false, at: nowISO() } } });
+      await ensureStaff(v.by);
+    } else if (e.kind === "doc") {
+      if (!String(v.comment || "").trim()) return err("Write the comment.");
+      await dayWrite(d, { doctors: { [e.id || drId("c")]: { name: String(v.name || "").trim(), time: v.time || "", comment: v.comment.trim(), by: drMe(), deleted: false, at: nowISO() } } });
+      await ensureStaff(v.name, "doctor");
+    }
+  } catch (x) { return err(dbErrorText(x).replace("save this bill", "save this")); }
+  DR.edit = null; render();
+}
+async function deleteEdit() {
+  const e = DR.edit; const d = drDate();
+  try {
+    if (e.kind === "occ") await dayWrite(d, { occ: { [e.id]: { deleted: true, at: nowISO() } } });
+    if (e.kind === "feed") await dayWrite(d, { feed: { [feedKey(e.time)]: { deleted: true } } });
+    if (e.kind === "doc") await dayWrite(d, { doctors: { [e.id]: { deleted: true } } });
+  } catch (x) { flash(dbErrorText(x)); }
+  DR.edit = null; render();
+}
+async function drTap(tid, key) {
+  const t = drTask(tid); const d = drDate(); const u = taskUnits(t, d).units.find((x) => x.key === key);
+  const preset = { sched: u?.sched || null, slot: u?.slot || null, time: d === todayISO() ? nowHM() : u?.sched || "" };
+  if (t.type === "value" || t.type === "text") return openOcc(tid, null, preset);
+  const occ = { task: tid, ...preset, end: "", value: "", item: t.type === "item" ? t.details || "" : "", text: "", by: t.doer || drMe(), note: "", done: true, deleted: false, at: nowISO(), who: S.uid };
+  try { await dayWrite(d, { occ: { [drId("o")]: occ } }); await ensureStaff(occ.by); } catch (x) { flash(dbErrorText(x)); }
+  render();
+}
+
+/* ---------- report (WhatsApp, PDF) ---------- */
+function drReport(d) {
+  const day = dayDoc(d); const tasks = tasksFor(d, day); const out = []; const tm = (o) => (o.time ? fmtTime(o.time) + (o.end ? ` to ${fmtTime(o.end)}` : "") : "");
+  for (const sec of drSections(tasks)) {
+    const rows = []; const mine = tasks.filter((t) => t.section === sec);
+    if (sec === "RT feed") for (const u of feedUnits(d, day)) rows.push(u.rec ? { name: fmtTime(u.time), detail: u.rec.item, when: u.rec.given_at && u.rec.given_at !== u.time ? `given ${fmtTime(u.rec.given_at)}` : "", state: u.state, by: byLabel(u.rec.by) } : { name: fmtTime(u.time), detail: u.planned, state: u.state });
+    if (sec === "Medication") for (const u of medUnits(d, day)) { if (!u.rec) { rows.push({ name: u.label, state: u.state }); continue; }
+      const no = u.list.filter((m, i) => u.rec.given?.[i] === false); rows.push({ name: u.label, when: u.rec.time ? fmtTime(u.rec.time) : "", detail: u.list.filter((m, i) => u.rec.given?.[i] !== false).join(", ") + (no.length ? ` (not given: ${no.join(", ")})` : ""), state: "done", by: byLabel(u.rec.by) }); }
+    if (sec === "Vitals") for (const [s, label] of DR_SLOTS) { const st = mine.filter((t) => t.type === "value" && t.slots?.includes(s)); if (!st.length) continue; let any = false;
+      for (const t of st) { const o = occsFor(day, t.id).find((x) => x.slot === s); if (o) { any = true; rows.push({ kind: "v", name: t.name, detail: withUnit(o.value, t.unit), when: label, by: byLabel(o.by) }); } }
+      if (!any) rows.push({ name: `${label} vitals`, state: unitState(d, null, slotDue(s)) }); }
+    if (sec === "Doctor's comment") for (const c of Object.values(day.doctors || {}).filter((c) => !c.deleted).sort((a, b) => (a.time || "99").localeCompare(b.time || "99"))) rows.push({ name: c.name || "Note", when: c.time ? fmtTime(c.time) : "", detail: c.comment });
+    if (sec === "Visitors") { const vs = visitList().filter((v) => v.date === d); for (const v of vs) rows.push({ name: fmtTime(v.time), detail: (v.visitors || []).map((x) => [visitorLabel(x), x.place].filter(Boolean).join(", ")).join("; ") + (VISIT_TYPES[v.type].wa ? ` (${VISIT_TYPES[v.type].wa})` : "") }); if (!vs.length) rows.push({ name: "None" }); }
+    if (sec === "Notes") for (const [k, l] of NOTE_KEYS) rows.push({ name: l, detail: day.notes?.[k] || "None" });
+    for (const t of mine) {
+      if (sec === "Vitals" && t.type === "value" && t.slots?.length) continue;
+      if (t.type === "qty") { const n = Number(day.qty?.[t.id] || 0); if (n) rows.push({ name: t.name, detail: `${n}${t.unit ? " " + t.unit : ""}` }); continue; }
+      const { units, occs } = taskUnits(t, d, day);
+      if (t.type === "text") { for (const o of occs) rows.push({ name: t.name, detail: o.text, by: byLabel(o.by) }); continue; }
+      if (t.type === "value") for (const o of occs) rows.push({ kind: "v", name: t.name, detail: withUnit(o.value, t.unit), when: o.slot ? slotName(o.slot) : tm(o), by: byLabel(o.by) });
+      else if (t.type === "multi") { const ok = occs.filter((o) => o.done !== false); if (occs.length) rows.push({ name: t.name, when: ok.map(tm).filter(Boolean).join(", "), state: ok.length ? "done" : "notdone", count: t.target ? `${ok.length} of ${t.target}` : "", by: [...new Set(ok.map((o) => byLabel(o.by)).filter(Boolean))].join(", ") }); }
+      else for (const o of occs) rows.push({ name: t.name, when: tm(o), detail: [o.item, o.note].filter(Boolean).join(" – "), state: o.done === false ? "notdone" : "done", by: byLabel(o.by) });
+      for (const u of units) if (!u.occ && (u.sched || u.slot)) rows.push({ name: t.name, when: u.label, state: u.state });
+    }
+    out.push({ section: sec, label: DR_LABEL[sec] || sec, rows });
+  }
+  return out;
+}
+function drRowText(r) {
+  if (r.kind === "v") return `${r.name} – ${r.detail} (${[r.when, r.by].filter(Boolean).join(", ")})`;
+  const mark = { done: " ✅", notdone: " ❌", pending: " ⏳ pending", overdue: " ⏳ pending (overdue)", missed: " – not recorded" }[r.state] || "";
+  const parts = [r.when, r.detail].filter(Boolean);
+  return `${r.name}${parts.length ? " – " + parts.join(" – ") : ""}${mark}${r.count ? ` (${r.count})` : ""}${r.by ? ` (${r.by})` : ""}`;
+}
+function drReportText(d) {
+  const st = dayStatus(d);
+  return [`*Daily Routine – ${dmy(d)}*`, `${st.done} of ${st.total} done`, ...drReport(d).filter((s) => s.rows.length).flatMap((s) => ["", `*${s.label}*`, ...s.rows.map(drRowText)])].join("\n");
+}
+function fingerText(d) {
+  const t = allTasks().find((x) => fuzzyKey(x.name) === fuzzyKey("Finger movements")); if (!t) return "";
+  const occs = occsFor(dayDoc(d), t.id).filter((o) => o.done !== false && o.time);
+  return ["OCCUPATIONAL THERAPY", dmy(d), `Fingers movement${t.details ? " " + t.details : ""}`, occs.map((o) => "@" + fmtTime(o.time)).join(" ")].join("\n");
+}
+async function drShare(text, okMsg) {
+  if (navigator.share && matchMedia("(pointer: coarse)").matches) {
+    try { await navigator.share({ text }); DR.copied = "Shared."; render(); return; } catch (e) { if (e?.name === "AbortError") return; }
+  }
+  try { await navigator.clipboard.writeText(text); DR.copied = okMsg; }
+  catch { DR.copied = null; flash("Copying isn't allowed here. Open “Preview the WhatsApp text” and copy it by hand."); }
+  render();
+}
+async function drPdf(d) {
+  await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+  await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js");
+  const doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" }); const st = dayStatus(d);
+  doc.setFontSize(15); doc.text(`Daily Routine – ${dmy(d)}`, 40, 42); doc.setFontSize(10); doc.setTextColor(90); doc.text(`${st.done} of ${st.total} done`, 40, 58);
+  let y = 70; const word = (r) => (r.kind === "v" ? "" : stateWord[r.state] || "");
+  for (const s of drReport(d).filter((x) => x.rows.length)) {
+    doc.autoTable({ startY: y, head: [[s.label, "Time", "Details", "Status", "By"]], styles: { fontSize: 8.5, cellPadding: 3 }, headStyles: { fillColor: [15, 110, 102] }, columnStyles: { 0: { cellWidth: 110 }, 2: { cellWidth: 170 } },
+      body: s.rows.map((r) => [r.name, r.when || "", r.detail || "", word(r) + (r.count ? ` (${r.count})` : ""), r.by || ""]) });
+    y = doc.lastAutoTable.finalY + 10;
+  }
+  return doc.output("blob");
+}
+function drCsv() {
+  const L = [["date", "section", "task", "scheduled", "time", "end", "value", "unit", "item", "quantity", "status", "done_by", "note"]];
+  for (const d of [...DR.days.keys()].sort()) {
+    const day = dayDoc(d);
+    for (const o of Object.values(day.occ || {}).filter((o) => !o.deleted).sort((a, b) => occTime(a).localeCompare(occTime(b)))) { const t = drTask(o.task); if (!t) continue;
+      L.push([dmy(d), t.section, t.name, o.slot ? slotName(o.slot) : o.sched ? fmtTime(o.sched) : "", fmtTime(o.time), fmtTime(o.end), o.value || o.text || "", t.unit, o.item, "", o.done === false ? "Not done" : "Done", o.by, o.note]); }
+    for (const r of Object.values(day.feed || {}).filter((r) => !r.deleted)) L.push([dmy(d), "RT feed", "RT feed", fmtTime(r.time), fmtTime(r.given_at), "", "", "", r.item, "", r.done === false ? "Not done" : "Done", r.by, r.note]);
+    for (const [slot, r] of Object.entries(day.meds || {})) if (!r.deleted) L.push([dmy(d), "Medication", slotName(slot), slotName(slot), fmtTime(r.time), "", "", "", (r.list || []).filter((m, i) => r.given?.[i] !== false).join("; "), "", "Done", r.by, ""]);
+    for (const [tid, n] of Object.entries(day.qty || {})) { const t = drTask(tid); if (t && Number(n)) L.push([dmy(d), t.section, t.name, "", "", "", "", t.unit, "", n, "", "", ""]); }
+    for (const c of Object.values(day.doctors || {}).filter((c) => !c.deleted)) L.push([dmy(d), "Doctor's comment", c.name, "", fmtTime(c.time), "", c.comment, "", "", "", "", "", ""]);
+    for (const [k, l] of NOTE_KEYS) if (day.notes?.[k]) L.push([dmy(d), "Notes", l, "", "", "", day.notes[k], "", "", "", "", "", ""]);
+  }
+  return "﻿" + L.map((l) => l.map((x) => csvCell(x ?? "")).join(",")).join("\r\n") + "\r\n";
+}
+
+/* --- updates checklist --- */
+function updatesView() {
+  const d = drDate(); const slots = updSlots(d); const ro = !canRouEdit(); const items = [...DR.updates.entries()].filter(([, u]) => !u.archived).sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+  const due = slots.filter((s) => s.state === "due").length, late = slots.filter((s) => s.state === "overdue").length, sent = slots.filter((s) => s.state === "done").length;
+  const notif = !("Notification" in window) ? `<p class="small muted">This device can't show notifications here, so due updates show as a badge on the Routine tab and a note when the app opens.</p>`
+    : Notification.permission === "granted" ? `<p class="small muted">Reminders are on for this device while the app is open.</p>`
+    : Notification.permission === "denied" ? `<p class="small muted">Notifications are blocked here, so due updates show as a badge on the Routine tab.</p>`
+    : `<button class="btn btn-ghost btn-block" data-act="dr-notify">Turn on reminders on this device</button>`;
+  return `<section class="card">${dateBar()}
+    <p><b>${sent} of ${slots.length} sent</b>${late ? ` · <span class="pill bad">${late} overdue</span>` : ""}${due ? ` · <span class="pill warn">${due} due now</span>` : ""}</p>${notif}</section>
+  <section class="card"><h2>Updates to send the family</h2>
+    ${items.map(([id, u]) => `<div class="dr-upd"><div class="row-between"><div><b>${esc(u.name)}</b>${u.note ? `<div class="small muted">${esc(u.note)}</div>` : ""}</div>${!ro ? `<button class="btn-link" data-act="dr-upd-edit" data-id="${esc(id)}">Edit</button>` : ""}</div>
+      ${slots.filter((s) => s.id === id).map((s) => `<div class="dr-uslot ${s.state}"><span class="num">${fmtTime(s.at)}${s.until ? `–${fmtTime(s.until)}` : ""}</span>
+        <span class="small">${s.rec?.done ? `✅ Sent ${s.rec.time ? fmtTime(s.rec.time) : ""}${s.rec.by ? " · " + esc(s.rec.by) : ""}` : s.state === "overdue" ? "⚠ Overdue" : stateWord[s.state]}</span>
+        ${ro ? "" : s.rec?.done ? `<button class="btn-link" data-act="dr-upd-undo" data-key="${esc(s.key)}">Undo</button>` : `<button class="dr-chip ${s.state}" data-act="dr-upd-tick" data-key="${esc(s.key)}" aria-label="Mark ${esc(s.name)} ${fmtTime(s.at)} sent">Mark sent</button>`}</div>`).join("")}
+      ${DR.updForm?.id === id ? updFormView() : ""}</div>`).join("") || `<p class="muted small">No update items.</p>`}
+    ${!ro ? (DR.updForm && !DR.updForm.id ? updFormView() : `<button class="btn btn-ghost btn-block" data-act="dr-upd-new">+ Add update item</button>`) : ""}
+  </section>`;
+}
+function updFormView() {
+  const v = DR.updForm.values;
+  return `<form class="add-panel" id="dr-upd-form"><label class="field"><span>Name *</span><input class="inp" data-uf="name" value="${esc(v.name)}" maxlength="60"></label>
+    ${v.rows.map((r, i) => `<div class="dates"><label class="field"><span>Due at</span><input class="inp" type="time" data-ur="${i}" data-k="at" value="${esc(r.at)}"></label><label class="field"><span>Until (optional)</span><input class="inp" type="time" data-ur="${i}" data-k="until" value="${esc(r.until)}"></label></div>`).join("")}
+    <div class="duo"><button type="button" class="btn btn-ghost" data-act="dr-upd-row">+ Another time</button>${v.rows.length > 1 ? `<button type="button" class="btn btn-ghost" data-act="dr-upd-rowdel">Remove last time</button>` : ""}</div>
+    <label class="field"><span>Note</span><input class="inp" data-uf="note" value="${esc(v.note)}" placeholder="e.g. Payment every 5 days"></label>
+    <div id="dr-upd-err"></div>
+    <div class="inv-actions"><button class="btn btn-primary" type="submit">Save</button>${DR.updForm.id ? `<button type="button" class="btn btn-danger" data-act="dr-upd-del">Remove item</button>` : ""}<button type="button" class="btn btn-ghost" data-act="dr-upd-cancel">Cancel</button></div></form>`;
+}
+
+/* --- trends --- */
+function lineChart(id, title, unit, series, n) {
+  const pts = series.flatMap((s) => s.pts); const head = `<h2>${esc(title)}${unit ? ` <span class="small muted">(${esc(unit)})</span>` : ""}</h2>`;
+  if (!pts.length) return `<section class="card">${head}<p class="small muted">No readings in these ${n} days.</p></section>`;
+  if (DR.tables) return `<section class="card">${head}<div class="tbl-wrap"><table><thead><tr><th>When</th>${series.map((s) => `<th class="r">${esc(s.name)}</th>`).join("")}</tr></thead><tbody>${[...new Set(pts.map((p) => p.when))].map((w) => `<tr><td>${esc(w)}</td>${series.map((s) => `<td class="r num">${s.pts.find((p) => p.when === w)?.y ?? "—"}</td>`).join("")}</tr>`).join("")}</tbody></table></div></section>`;
+  const W = 320, H = 140, L = 30, R = 8, T = 8, B = 18; const ys = pts.map((p) => p.y); let lo = Math.min(...ys), hi = Math.max(...ys); if (hi - lo < 2) { lo -= 1; hi += 1; } const pad = (hi - lo) * 0.12; lo -= pad; hi += pad;
+  const X = (x) => L + (x / n) * (W - L - R), Y = (y) => T + (1 - (y - lo) / (hi - lo)) * (H - T - B); const r1 = (v) => Math.round(v);
+  return `<section class="card dr-chart">${head}${series.length > 1 ? `<div class="legend">${series.map((s) => `<span><i class="sw ${s.cls}"></i>${esc(s.name)}</span>`).join("")}</div>` : ""}
+    <svg viewBox="0 0 ${W} ${H}" class="dr-svg" role="img" aria-label="${esc(title)}: ${pts.length} readings from ${r1(Math.min(...ys))} to ${r1(Math.max(...ys))}. Switch to tables for exact numbers.">
+      <line class="grid" x1="${L}" x2="${W - R}" y1="${T}" y2="${T}"/><line class="grid" x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}"/>
+      <text class="axis" x="${L - 4}" y="${T + 4}" text-anchor="end">${r1(hi)}</text><text class="axis" x="${L - 4}" y="${H - B}" text-anchor="end">${r1(lo)}</text>
+      <text class="axis" x="${L}" y="${H - 4}">${esc(series[0].first)}</text><text class="axis" x="${W - R}" y="${H - 4}" text-anchor="end">${esc(series[0].last)}</text>
+      ${series.map((s) => `<path class="ln ${s.cls}" d="${s.pts.map((p, i) => `${i ? "L" : "M"}${X(p.x).toFixed(1)},${Y(p.y).toFixed(1)}`).join(" ")}"/>${s.pts.map((p) => `<circle class="pt ${s.cls}" cx="${X(p.x).toFixed(1)}" cy="${Y(p.y).toFixed(1)}" r="4" tabindex="0" data-tip="${esc(`${s.name === title ? "" : s.name + " "}${p.when}: ${p.label}`)}"><title>${esc(p.when)}: ${esc(p.label)}</title></circle>`).join("")}`).join("")}
+    </svg><p class="small muted dr-tip">Tap a point to read it.</p></section>`;
+}
+function barChart(title, unit, vals, days, target) {
+  const head = `<h2>${esc(title)}${unit ? ` <span class="small muted">(${esc(unit)})</span>` : ""}</h2>`;
+  if (!vals.some(Boolean)) return `<section class="card">${head}<p class="small muted">Nothing recorded in these ${days.length} days.</p></section>`;
+  if (DR.tables) return `<section class="card">${head}<div class="tbl-wrap"><table><thead><tr><th>Date</th><th class="r">${esc(unit || "Count")}</th></tr></thead><tbody>${days.map((d, i) => `<tr><td>${dmy(d)}</td><td class="r num">${vals[i]}</td></tr>`).join("")}</tbody></table></div></section>`;
+  const W = 320, H = 130, L = 30, R = 8, T = 8, B = 18; const max = Math.max(1, ...vals, target || 0); const bw = (W - L - R) / days.length; const Y = (v) => T + (1 - v / max) * (H - T - B);
+  return `<section class="card dr-chart">${head}<svg viewBox="0 0 ${W} ${H}" class="dr-svg" role="img" aria-label="${esc(title)} per day. Switch to tables for exact numbers.">
+    <line class="grid" x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}"/><text class="axis" x="${L - 4}" y="${T + 4}" text-anchor="end">${max}</text><text class="axis" x="${L - 4}" y="${H - B}" text-anchor="end">0</text>
+    ${target ? `<line class="target" x1="${L}" x2="${W - R}" y1="${Y(target)}" y2="${Y(target)}"/><text class="axis" x="${W - R}" y="${Y(target) - 3}" text-anchor="end">target ${target}</text>` : ""}
+    ${vals.map((v, i) => `<rect class="dr-barr" x="${(L + i * bw + 1).toFixed(1)}" width="${Math.max(1, bw - 2).toFixed(1)}" y="${Y(v).toFixed(1)}" height="${Math.max(0, H - B - Y(v)).toFixed(1)}" rx="2" tabindex="0" data-tip="${esc(`${dmy(days[i])}: ${v}${unit ? " " + unit : ""}`)}"><title>${dmy(days[i])}: ${v}</title></rect>`).join("")}
+    <text class="axis" x="${L}" y="${H - 4}">${esc(shortDm(days[0]))}</text><text class="axis" x="${W - R}" y="${H - 4}" text-anchor="end">${esc(shortDm(days.at(-1)))}</text>
+  </svg><p class="small muted dr-tip">Tap a bar to read it.</p></section>`;
+}
+function trendsView() {
+  const n = DR.trend; const end = todayISO(); const start = addDays(end, -(n - 1)); const days = Array.from({ length: n }, (_, i) => addDays(start, i));
+  const find = (nm) => allTasks().find((t) => fuzzyKey(t.name) === fuzzyKey(nm))?.id;
+  const reads = (tid) => (tid ? days.flatMap((d, i) => occsFor(dayDoc(d), tid).filter((o) => String(o.value || "").trim()).map((o) => ({ d, x: i + minutesOf(occTime(o)) / 1440, o, when: `${shortDm(d)} ${o.slot ? slotName(o.slot) : fmtTime(o.time)}` }))) : []);
+  const series = (tid, name, cls, unit, pick = (v) => parseFloat(v)) => ({ name, cls, first: shortDm(days[0]), last: shortDm(days.at(-1)), pts: reads(tid).map((r) => ({ x: r.x, y: pick(r.o.value), when: r.when, label: `${r.o.value} ${unit}` })).filter((p) => Number.isFinite(p.y)) });
+  const bp = find("BP");
+  const urine = find("Urine output"); const urineVals = days.map((d) => occsFor(dayDoc(d), urine).reduce((a, o) => a + (parseFloat(o.value) || 0), 0));
+  const choices = allTasks().filter((t) => ["multi", "range", "check", "item"].includes(t.type) && t.kind !== "once");
+  const tsel = DR.trendTask && DR.tasks.has(DR.trendTask) ? DR.trendTask : find("Finger movements") || choices[0]?.id; const tt = tsel ? drTask(tsel) : null;
+  const doneVals = days.map((d) => (tt ? occsFor(dayDoc(d), tt.id).filter((o) => o.done !== false).length : 0));
+  return `<section class="card"><div class="seg" role="group" aria-label="Range">${[[7, "Last 7 days"], [30, "Last 30 days"]].map(([v, l]) => `<button data-act="dr-trend" data-v="${v}" aria-pressed="${n === v}">${l}</button>`).join("")}</div>
+    <button class="btn-link" data-act="dr-tables">${DR.tables ? "Show charts" : "Show as tables"}</button></section>
+  ${lineChart("bp", "BP", "mmHg", [series(bp, "Systolic", "s1", "mmHg", (v) => parseFloat(String(v).split("/")[0])), series(bp, "Diastolic", "s2", "mmHg", (v) => parseFloat(String(v).split("/")[1]))], n)}
+  ${[["Temperature", "°F"], ["SpO2", "%"], ["Pulse", "/min"], ["Sugar", "mg/dl"]].map(([nm, u]) => lineChart(nm, nm, u, [series(find(nm), nm, "s1", u)], n)).join("")}
+  ${barChart("Urine output per day", "ml", urineVals, days)}
+  <section class="card"><label class="field"><span>Task completion per day</span><select class="inp" id="dr-trend-task">${choices.map((t) => `<option value="${esc(t.id)}" ${t.id === tsel ? "selected" : ""}>${esc(t.name)}</option>`).join("")}</select></label></section>
+  ${tt ? barChart(`${tt.name} sessions done`, "", doneVals, days, tt.target || tt.times?.length || 0) : ""}
+  ${calendarView()}`;
+}
+function calendarView() {
+  const m = DR.cal || todayISO().slice(0, 7); const [y, mo] = m.split("-").map(Number); const lead = (new Date(y, mo - 1, 1).getDay() + 6) % 7; const nd = new Date(y, mo, 0).getDate(); const t = todayISO();
+  const cells = [...Array(lead).fill(`<span></span>`), ...Array.from({ length: nd }, (_, i) => { const d = `${m}-${String(i + 1).padStart(2, "0")}`; const st = d <= t ? dayStatus(d) : null; const pct = st?.total ? Math.round((st.done / st.total) * 100) : null;
+    return `<button class="dr-cal-day ${d === t ? "today" : ""} ${d === drDate() ? "sel" : ""}" data-act="dr-open-day" data-d="${d}" ${pct != null ? `style="background:color-mix(in srgb, var(--v-in) ${Math.round(pct * 0.5)}%, var(--surface))"` : ""} aria-label="${dmy(d)}${pct != null ? `, ${pct}% done` : ""}"><span>${i + 1}</span><small>${pct != null ? pct + "%" : ""}</small></button>`; })];
+  return `<section class="card"><div class="row-between"><button class="btn btn-ghost" data-act="dr-cal" data-n="-1" aria-label="Previous month">‹</button><h2>${new Date(y, mo - 1, 1).toLocaleDateString("en-GB", { month: "long", year: "numeric" })}</h2><button class="btn btn-ghost" data-act="dr-cal" data-n="1" aria-label="Next month">›</button></div>
+    <div class="dr-cal">${WEEK.map(([, l]) => `<span class="small muted">${l}</span>`).join("")}${cells.join("")}</div><p class="small muted">Each day shows how much of its routine was done. Tap a day to open it.</p></section>`;
+}
+
+/* --- manage: tasks, medicines & feed, staff --- */
+function manageView() {
+  return `<div class="seg" role="group" aria-label="Manage">${[["tasks", "Tasks"], ["plans", "Medicines & feed"], ["staff", "Staff"]].map(([v, l]) => `<button data-act="dr-mgr" data-v="${v}" aria-pressed="${DR.mgr === v}">${l}</button>`).join("")}</div>
+  ${DR.mgr === "plans" ? plansView() : DR.mgr === "staff" ? staffView() : manageTasksView()}`;
+}
+function taskStatus(t) { const d = todayISO(); return t.archived_from && d >= t.archived_from ? "archived" : t.paused_from && d >= t.paused_from ? "paused" : t.kind === "once" && t.date < d ? "past" : "active"; }
+function manageTasksView() {
+  const ro = !canRouEdit(); const all = allTasks().filter((t) => taskStatus(t) !== "past"); const shown = all.filter((t) => (DR.showArchived ? taskStatus(t) === "archived" : taskStatus(t) !== "archived"));
+  return `<section class="card"><div class="row-between"><h2>Routine tasks</h2>${!ro ? `<button class="btn btn-primary" data-act="dr-task-new">+ Add task</button>` : ""}</div>
+    <p class="small muted">Drag ⠿ (or use the arrow keys on it) to reorder. New tasks start today; past days stay as they were.</p>
+    <div class="chips"><button class="chip" data-act="dr-show-arch" aria-pressed="${DR.showArchived}">Archived</button></div>
+    ${drSections(all).map((sec) => { const ts = shown.filter((t) => t.section === sec); if (!ts.length) return "";
+      return `<h3 class="small dr-mhead">${esc(DR_LABEL[sec] || sec)}</h3><div class="dr-mlist">${ts.map((t) => { const st = taskStatus(t);
+        return `<div class="dr-mrow" data-mrow="${esc(t.id)}">${!ro ? `<button class="drag-h" aria-label="Reorder ${esc(t.name)}">⠿</button>` : ""}
+          <div class="dr-mmain"><b>${esc(t.name)}</b> ${st !== "active" ? `<span class="pill warn">${st === "paused" ? "Paused" : "Archived"}</span>` : ""}<div class="small muted">${esc(DR_TYPES[t.type])}${t.unit ? ` (${esc(t.unit)})` : ""} · ${esc(schedSummary(t))}${t.details ? ` · ${esc(t.details)}` : ""}${t.reminder ? " · reminder on" : ""}</div>
+          ${!ro ? `<div class="dr-mact"><button class="btn-link" data-act="dr-task-edit" data-id="${esc(t.id)}">Edit</button>
+            ${st !== "archived" ? `<button class="btn-link" data-act="dr-task-pause" data-id="${esc(t.id)}">${st === "paused" ? "Resume" : "Pause"}</button>` : ""}
+            <button class="btn-link" data-act="dr-task-archive" data-id="${esc(t.id)}">${st === "archived" ? "Restore" : "Archive"}</button>
+            ${canRouManage() ? `<button class="btn-link danger-text" data-act="dr-task-del" data-id="${esc(t.id)}">Delete</button>` : ""}</div>` : ""}
+          ${DR.confirm === "task:" + t.id ? `<div class="note bad confirm"><span>Delete “${esc(t.name)}”? Its past entries will no longer show. Archive keeps them.</span><button class="btn btn-danger" data-act="dr-task-del-yes" data-id="${esc(t.id)}">Delete</button><button class="btn btn-ghost" data-act="dr-confirm-no">Keep</button></div>` : ""}</div></div>`; }).join("")}</div>`; }).join("") || `<p class="muted small">No tasks.</p>`}
+  </section>`;
+}
+function dupTask(name, id) { const k = fuzzyKey(name); if (k.length < 3) return null; return allTasks().find((t) => t.id !== id && taskStatus(t) !== "archived" && (fuzzyKey(t.name) === k || lev(fuzzyKey(t.name), k) <= 1)) || null; }
+function openTaskForm(id) {
+  const t = id ? drTask(id) : null;
+  DR.taskForm = { id: id || null, values: t ? { name: t.name, section: t.section, newSection: "", type: t.type, unit: t.unit || "", kind: t.kind || "daily", days: [...(t.days || [])], date: t.date || todayISO(), times: [...(t.times || [])], slots: [...(t.slots || [])], target: t.target ? String(t.target) : "", asNeeded: !!t.asNeeded, details: t.details || "", doer: t.doer || "", reminder: !!t.reminder }
+    : { name: "", section: "Care & hygiene", newSection: "", type: "check", unit: "", kind: "daily", days: [], date: todayISO(), times: [], slots: [], target: "", asNeeded: false, details: "", doer: "", reminder: false } };
+  render(); window.scrollTo(0, 0); $("#tf-name")?.focus();
+}
+function taskFormView() {
+  const f = DR.taskForm; const v = f.values; const secs = drSections(allTasks()).filter((s) => !DR_PLAN_SECTIONS.has(s)); const dup = v.name.trim() && dupTask(v.name, f.id);
+  return `<div class="row-between"><button class="btn-link" data-act="dr-task-cancel">‹ Cancel</button><h1 style="flex:1">${f.id ? "Edit task" : "Add task"}</h1></div>${staffDatalist()}
+  <form class="card" id="dr-task-form" novalidate>
+    <label class="field"><span>Task name *</span><input class="inp" id="tf-name" data-tf="name" value="${esc(v.name)}" maxlength="60" autocomplete="off"></label>
+    <div id="tf-dup">${dup ? `<div class="note warn small">There is already a task called <b>${esc(dup.name)}</b> (${esc(dup.section)}).</div>` : ""}</div>
+    <label class="field"><span>Section</span><select class="inp" data-tf="section">${secs.map((s) => `<option value="${esc(s)}" ${v.section === s ? "selected" : ""}>${esc(DR_LABEL[s] || s)}</option>`).join("")}<option value="__new" ${v.section === "__new" ? "selected" : ""}>New section…</option></select></label>
+    ${v.section === "__new" ? `<label class="field"><span>New section name *</span><input class="inp" data-tf="newSection" value="${esc(v.newSection)}" maxlength="40"></label>` : ""}
+    <label class="field"><span>Type</span><select class="inp" data-tf="type">${Object.entries(DR_TYPES).map(([k, l]) => `<option value="${k}" ${v.type === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+    ${v.type === "value" || v.type === "qty" ? `<label class="field"><span>Unit</span><input class="inp" data-tf="unit" list="dr-units" value="${esc(v.unit)}" maxlength="12" placeholder="ml, mmHg, °F, mg/dl, %"><datalist id="dr-units">${["ml", "mmHg", "°F", "mg/dl", "%", "/min", "pc", "pair"].map((u) => `<option value="${u}">`).join("")}</datalist></label>` : ""}
+    <fieldset class="dr-fs"><legend class="small">Schedule</legend>
+      <div class="seg" role="group" aria-label="Schedule">${[["daily", "Every day"], ["weekdays", "Some days"], ["once", "One day only"]].map(([k, l]) => `<button type="button" data-act="dr-tf-kind" data-v="${k}" aria-pressed="${v.kind === k}">${l}</button>`).join("")}</div>
+      ${v.kind === "weekdays" ? `<div class="chips">${WEEK.map(([n, l]) => `<label class="pick"><input type="checkbox" data-tfday="${n}" ${v.days.includes(n) ? "checked" : ""}> ${l}</label>`).join("")}</div>` : ""}
+      ${v.kind === "once" ? `<label class="field"><span>Date</span><input class="inp" type="date" data-tf="date" value="${esc(v.date)}"></label>` : ""}
+      ${v.type !== "qty" && v.type !== "text" ? `<div class="small muted">Use fixed times, Morning/Afternoon/Night, or a target count. Leave all empty for “once a day”.</div>
+        <div class="dr-times">${v.times.map((x, i) => `<span class="dr-timechip"><input class="inp" type="time" data-tftime="${i}" value="${esc(x)}" aria-label="Time ${i + 1}"><button type="button" class="btn-link danger-text" data-act="dr-tf-time-del" data-i="${i}" aria-label="Remove time ${i + 1}">✕</button></span>`).join("")}<button type="button" class="btn btn-ghost" data-act="dr-tf-time-add">+ Time</button></div>
+        <div class="chips">${DR_SLOTS.map(([s, l]) => `<label class="pick"><input type="checkbox" data-tfslot="${s}" ${v.slots.includes(s) ? "checked" : ""}> ${l}</label>`).join("")}</div>
+        <div class="dates"><label class="field"><span>Target per day</span><input class="inp" type="number" min="0" max="20" data-tf="target" value="${esc(v.target)}" placeholder="e.g. 4"></label>
+        <label class="pick" style="align-self:end"><input type="checkbox" data-tfb="asNeeded" ${v.asNeeded ? "checked" : ""}> As needed</label></div>` : ""}
+    </fieldset>
+    <label class="field"><span>Default details</span><input class="inp" data-tf="details" value="${esc(v.details)}" maxlength="80" placeholder="e.g. 50 times, Duolin + Mesna"></label>
+    <label class="field"><span>Who usually does it (optional)</span><input class="inp" list="dr-staff-list" data-tf="doer" value="${esc(v.doer)}" autocomplete="off"></label>
+    <label class="pick"><input type="checkbox" data-tfb="reminder" ${v.reminder ? "checked" : ""}> Reminder at the scheduled times</label>
+    <div id="tf-err"></div>
+    <button class="btn btn-primary btn-block" type="submit">${f.id ? "Save task" : "Add task"}</button>
+  </form>`;
+}
+async function saveTask() {
+  const f = DR.taskForm; const v = f.values; const err = (m) => { $("#tf-err").innerHTML = `<div class="note bad">${esc(m)}</div>`; };
+  const name = v.name.trim(); if (!name) return err("Enter the task name.");
+  const section = v.section === "__new" ? v.newSection.trim() : v.section; if (!section) return err("Name the new section.");
+  if (v.kind === "weekdays" && !v.days.length) return err("Pick at least one day of the week.");
+  if (v.kind === "once" && !isISODate(v.date)) return err("Pick the date.");
+  const now = nowISO(); const timed = v.type !== "qty" && v.type !== "text";
+  const doc = { section, name, type: v.type, unit: v.type === "value" || v.type === "qty" ? v.unit.trim() : "", kind: v.kind, days: v.kind === "weekdays" ? [...v.days].sort() : [], date: v.kind === "once" ? v.date : null,
+    times: timed ? [...new Set(v.times.filter((x) => /^\d{2}:\d{2}$/.test(x)))].sort() : [], slots: timed ? DR_SLOTS.map(([s]) => s).filter((s) => v.slots.includes(s)) : [],
+    target: timed ? Math.max(0, Math.min(20, Number(v.target) || 0)) : 0, asNeeded: timed && !!v.asNeeded, details: v.details.trim(), doer: v.doer.trim(), reminder: !!v.reminder, updated_at: now };
+  try {
+    if (f.id) await rouWrite("update", `${DR_TASKS}/${f.id}`, doc);
+    else { const id = drId("t"); await rouWrite("set", `${DR_TASKS}/${id}`, { ...doc, order: Math.max(0, ...allTasks().map((t) => t.order || 0)) + 10, from: v.kind === "once" ? v.date : todayISO(), pauses: [], paused_from: null, archived_from: null, created_at: now, created_by: S.uid });
+      writeAudit("routine.task_add", null, id, null, { name, section }); }
+    await ensureStaff(doc.doer);
+  } catch (e) { return err(dbErrorText(e).replace("save this bill", "save this task")); }
+  flash(f.id ? `“${name}” saved.` : v.kind === "once" ? `“${name}” added for ${dmy(v.date)} only.` : `“${name}” added. It shows from today on.`);
+  DR.taskForm = null; render(); window.scrollTo(0, 0);
+}
+async function drReorder(list) {
+  const ids = [...list.querySelectorAll("[data-mrow]")].map((r) => r.dataset.mrow); const orders = ids.map((id) => DR.tasks.get(id)?.order || 0).sort((a, b) => a - b);
+  for (let i = 1; i < orders.length; i++) if (orders[i] <= orders[i - 1]) orders[i] = orders[i - 1] + 1;
+  try { for (const [i, id] of ids.entries()) if ((DR.tasks.get(id)?.order || 0) !== orders[i]) await rouWrite("update", `${DR_TASKS}/${id}`, { order: orders[i] }); } catch (e) { flash(dbErrorText(e)); }
+}
+function plansView() {
+  const ro = !canRouEdit(); const t = todayISO(); const meds = planFor("meds", t); const feed = planFor("feed", t);
+  const hist = [...DR.plans.entries()].map(([id, p]) => ({ id, ...p })).sort((a, b) => b.from.localeCompare(a.from));
+  return `<section class="card"><div class="row-between"><h2>Medicines</h2>${!ro ? `<button class="btn btn-ghost" data-act="dr-plan" data-v="meds">Change</button>` : ""}</div>
+    ${meds ? `<p class="small muted">Since ${dmy(meds.from)}</p>${DR_SLOTS.map(([s, l]) => `<div><b class="small">${l}</b><ul class="dr-list">${(meds.data.slots[s] || []).map((m) => `<li>${esc(m)}</li>`).join("") || "<li class='muted'>None</li>"}</ul></div>`).join("")}` : `<p class="muted small">No medicine list yet.</p>`}</section>
+  <section class="card"><div class="row-between"><h2>RT feed plan</h2>${!ro ? `<button class="btn btn-ghost" data-act="dr-plan" data-v="feed">Change</button>` : ""}</div>
+    ${feed ? `<p class="small muted">Since ${dmy(feed.from)}</p><div class="tbl-wrap"><table><tbody>${feed.data.items.map((x) => `<tr><td class="num">${fmtTime(x.time)}</td><td>${esc(x.item || "—")}</td></tr>`).join("")}</tbody></table></div>` : `<p class="muted small">No feed plan yet.</p>`}</section>
+  <section class="card"><h2>History</h2><p class="small muted">Each change applies from its date. Earlier days keep what was planned and given then.</p>
+    <ul class="acc-checks">${hist.map((p) => `<li><span>${p.kind === "meds" ? "Medicines" : "Feed plan"} from ${dmy(p.from)}</span><span class="small muted">${p.kind === "meds" ? Object.values(p.data.slots || {}).flat().length + " items" : (p.data.items || []).length + " feeds"}</span></li>`).join("")}</ul></section>`;
+}
+function openPlan(kind) {
+  const cur = planFor(kind, todayISO());
+  DR.planForm = { kind, values: { from: todayISO(), slots: Object.fromEntries(DR_SLOTS.map(([s]) => [s, (cur?.data?.slots?.[s] || []).join("\n")])), rows: (cur?.data?.items || []).map((x) => ({ ...x })) } };
+  if (kind === "feed" && !DR.planForm.values.rows.length) DR.planForm.values.rows = [{ time: "06:00", item: "" }];
+  render(); window.scrollTo(0, 0);
+}
+function planFormView() {
+  const f = DR.planForm; const v = f.values;
+  return `<div class="row-between"><button class="btn-link" data-act="dr-plan-cancel">‹ Cancel</button><h1 style="flex:1">${f.kind === "meds" ? "Change medicines" : "Change RT feed plan"}</h1></div>
+  <form class="card" id="dr-plan-form"><label class="field"><span>Effective from</span><input class="inp" type="date" data-pl="from" value="${esc(v.from)}"></label>
+    ${f.kind === "meds" ? DR_SLOTS.map(([s, l]) => `<label class="field"><span>${l} (one per line)</span><textarea class="inp" rows="5" data-plslot="${s}">${esc(v.slots[s])}</textarea></label>`).join("")
+      : `${v.rows.map((r, i) => `<div class="dr-plrow"><input class="inp" type="time" data-plr="${i}" data-k="time" value="${esc(r.time)}" aria-label="Feed ${i + 1} time"><input class="inp" data-plr="${i}" data-k="item" value="${esc(r.item)}" aria-label="Feed ${i + 1} item" placeholder="Feed"><button type="button" class="btn-link danger-text" data-act="dr-plan-rowdel" data-i="${i}" aria-label="Remove feed ${i + 1}">✕</button></div>`).join("")}
+        <button type="button" class="btn btn-ghost" data-act="dr-plan-row">+ Add feed time</button>`}
+    <div id="pl-err"></div>
+    <button class="btn btn-primary btn-block" type="submit">Save</button></form>`;
+}
+async function savePlan() {
+  const f = DR.planForm; const v = f.values; const err = (m) => { $("#pl-err").innerHTML = `<div class="note bad">${esc(m)}</div>`; };
+  if (!isISODate(v.from)) return err("Pick the date it starts.");
+  const data = f.kind === "meds" ? { slots: Object.fromEntries(DR_SLOTS.map(([s]) => [s, v.slots[s].split("\n").map((x) => x.trim()).filter(Boolean)])) }
+    : { items: v.rows.filter((r) => /^\d{2}:\d{2}$/.test(r.time)).map((r) => ({ time: r.time, item: r.item.trim() })).sort((a, b) => a.time.localeCompare(b.time)) };
+  try { await rouWrite("set", `${DR_PLANS}/p${f.kind}${v.from.replaceAll("-", "")}`, { kind: f.kind, from: v.from, data, created_at: nowISO(), created_by: S.uid }); writeAudit("routine.plan", null, f.kind, null, { from: v.from }); }
+  catch (e) { return err(dbErrorText(e)); }
+  flash(`${f.kind === "meds" ? "Medicines" : "Feed plan"} saved from ${dmy(v.from)}.`); DR.planForm = null; render();
+}
+function staffView() {
+  const ro = !canRouEdit();
+  return `<section class="card"><h2>Staff and carers</h2><p class="small muted">These names fill the “done by” and S/N lists. New names typed there are added here.</p>
+    <div class="tbl-wrap"><table><tbody>${staffList().map((s) => `<tr><td class="wrap"><b>${esc(s.name)}</b>${s.detail ? `<div class="small muted">${esc(s.detail)}</div>` : ""}</td>
+      <td>${ro ? esc((STAFF_ROLES.find(([k]) => k === s.role) || [, s.role])[1]) : `<select class="inp" data-staff-role="${esc(s.id)}" aria-label="Role of ${esc(s.name)}">${STAFF_ROLES.map(([k, l]) => `<option value="${k}" ${s.role === k ? "selected" : ""}>${l}</option>`).join("")}</select>`}</td>
+      <td>${!ro ? `<button class="btn-link danger-text" data-act="dr-staff-del" data-id="${esc(s.id)}" aria-label="Remove ${esc(s.name)}">Remove</button>` : ""}</td></tr>`).join("")}</tbody></table></div>
+    ${!ro ? `<form class="add-panel" id="dr-staff-form"><div class="dates"><label class="field"><span>Name</span><input class="inp" id="dr-staff-name" maxlength="40" autocomplete="off"></label>
+      <label class="field"><span>Role</span><select class="inp" id="dr-staff-role">${STAFF_ROLES.map(([k, l]) => `<option value="${k}">${l}</option>`).join("")}</select></label></div><button class="btn btn-primary" type="submit">Add</button></form>` : ""}</section>`;
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click", async (e) => {
+  const t = e.target.closest("[data-act]"); if (!t || !t.dataset.act.startsWith("dr-")) return;
+  const a = t.dataset.act; const id = t.dataset.id; const d = drDate();
+  switch (a) {
+    case "dr-view": DR.view = t.dataset.v; DR.edit = null; DR.copied = null; render(); window.scrollTo(0, 0); break;
+    case "dr-mgr": DR.mgr = t.dataset.v; render(); break;
+    case "dr-seed": drSeed(false); break;
+    case "dr-day": DR.date = addDays(d, Number(t.dataset.n)); DR.edit = null; DR.medEdit = DR.vitEdit = null; DR.copied = null; render(); break;
+    case "dr-today": DR.date = null; DR.edit = null; DR.copied = null; render(); break;
+    case "dr-open-day": DR.date = t.dataset.d; DR.view = "day"; render(); window.scrollTo(0, 0); break;
+    case "dr-tap": t.disabled = true; drTap(t.dataset.tid, t.dataset.unit); break;
+    case "dr-occ-edit": openOcc(t.dataset.tid, id); break;
+    case "dr-occ-new": openOcc(t.dataset.tid, null); break;
+    case "dr-end": try { await dayWrite(d, { occ: { [id]: { end: nowHM() } } }); } catch (x) { flash(dbErrorText(x)); } render(); break;
+    case "dr-ev-done": DR.edit.values.done = t.dataset.v === "1"; t.parentElement.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === t))); break;
+    case "dr-ev-cancel": DR.edit = null; render(); break;
+    case "dr-ev-del": deleteEdit(); break;
+    case "dr-feed-tap": { const u = feedUnits(d).find((x) => x.time === t.dataset.time); t.disabled = true;
+      try { await dayWrite(d, { feed: { [feedKey(u.time)]: { time: u.time, item: u.planned, given_at: d === todayISO() ? nowHM() : u.time, by: drMe(), note: "", done: true, deleted: false, at: nowISO() } } }); } catch (x) { flash(dbErrorText(x)); }
+      render(); break; }
+    case "dr-feed-edit": { const u = feedUnits(d).find((x) => x.time === t.dataset.time);
+      DR.edit = { kind: "feed", time: u.time, rec: u.rec, title: `${fmtTime(u.time)} feed`, fields: ["time", "item", "by", "note", "done"], values: { time: u.rec.given_at || "", item: u.rec.item || "", by: u.rec.by || "", note: u.rec.note || "", done: u.rec.done !== false } };
+      render(); drFocusEditor(); break; }
+    case "dr-med-edit": DR.medEdit = t.dataset.slot; render(); break;
+    case "dr-med-cancel": DR.medEdit = null; render(); break;
+    case "dr-vit-edit": DR.vitEdit = t.dataset.slot; render(); break;
+    case "dr-vit-cancel": DR.vitEdit = null; render(); break;
+    case "dr-doc-new": DR.edit = { kind: "doc", id: null, title: "Doctor's comment", fields: ["name", "time", "comment"], values: { name: "", time: d === todayISO() ? nowHM() : "", comment: "" } }; render(); drFocusEditor(); break;
+    case "dr-doc-edit": { const c = dayDoc(d).doctors?.[id]; DR.edit = { kind: "doc", id, title: "Doctor's comment", fields: ["name", "time", "comment"], values: { name: c.name || "", time: c.time || "", comment: c.comment || "" } }; render(); drFocusEditor(); break; }
+    case "dr-add-visit": ROU.section = "visitors"; openVisit(null); ROU.form.values.date = d; render(); break;
+    case "dr-qty": { const tid = t.dataset.tid; const cur = DR.qty[tid] ?? Number(dayDoc(d).qty?.[tid] || 0); const n = Math.max(0, cur + Number(t.dataset.n)); DR.qty[tid] = n; const el = document.getElementById("q-" + tid); if (el) el.textContent = n;
+      clearTimeout(DR.qtyTimer); DR.qtyTimer = setTimeout(async () => { const pend = { ...DR.qty }; try { await dayWrite(d, { qty: pend }); } catch (x) { flash(dbErrorText(x)); } for (const k of Object.keys(pend)) if (DR.qty[k] === pend[k]) delete DR.qty[k]; rouChanged(); }, 700); break; }
+    case "dr-photo": openViewer("/_blob/" + t.dataset.asset); break;
+    case "dr-photo-add": $("#dr-photo-file").click(); break;
+    case "dr-photo-del": try { const p = dayDoc(d).photos?.[id]; await dayWrite(d, { photos: { [id]: { deleted: true } } }); if (p?.asset && S.caps.assets) S.caps.assets.delete(p.asset).catch(() => {}); } catch (x) { flash(dbErrorText(x)); } render(); break;
+    case "dr-wa": drShare(drReportText(d), `Copied the ${dmy(d)} routine. Paste it into WhatsApp.`); break;
+    case "dr-finger": { const txt = fingerText(d); if (!txt) { flash("There is no Finger movements task."); break; } drShare(txt, "Copied the finger-movement message."); break; }
+    case "dr-pdf": t.disabled = true; t.textContent = "Preparing…"; try { saveFile(`daily-routine-${d}.pdf`, await drPdf(d)); } catch (x) { flash(x.message || "The sheet couldn't be made."); } rouRefresh(); break;
+    case "dr-csv": saveFile(`daily-routine-${todayISO()}.csv`, drCsv()); break;
+    case "dr-once": DR.onceForm = { name: "", section: "Notes", type: "check", time: "" }; render(); $("#dr-once-name")?.focus(); break;
+    case "dr-once-cancel": DR.onceForm = null; render(); break;
+    case "dr-task-new": DR.onceForm = null; openTaskForm(null); break;
+    case "dr-task-edit": openTaskForm(id); break;
+    case "dr-task-cancel": DR.taskForm = null; render(); break;
+    case "dr-tf-kind": DR.taskForm.values.kind = t.dataset.v; render(); break;
+    case "dr-tf-time-add": DR.taskForm.values.times.push(""); render(); document.querySelector(`[data-tftime="${DR.taskForm.values.times.length - 1}"]`)?.focus(); break;
+    case "dr-tf-time-del": DR.taskForm.values.times.splice(Number(t.dataset.i), 1); render(); break;
+    case "dr-task-pause": case "dr-task-archive": {
+      const tk = DR.tasks.get(id); const today = todayISO(); const field = a === "dr-task-pause" ? "paused_from" : "archived_from"; const on = tk[field] && today >= tk[field];
+      const patch = on ? { [field]: null, pauses: [...(tk.pauses || []), { from: tk[field], to: today }] } : { [field]: today };
+      try { await rouWrite("update", `${DR_TASKS}/${id}`, patch); flash(`“${tk.name}” ${on ? (field === "paused_from" ? "resumed" : "restored") : field === "paused_from" ? "paused from today" : "archived. Past days keep it"}.`); } catch (x) { flash(dbErrorText(x)); }
+      render(); break; }
+    case "dr-task-del": DR.confirm = "task:" + id; render(); break;
+    case "dr-confirm-no": DR.confirm = null; render(); break;
+    case "dr-task-del-yes": { const tk = DR.tasks.get(id); DR.confirm = null; try { await rouWrite("delete", `${DR_TASKS}/${id}`); writeAudit("routine.task_delete", null, id, tk, null); flash(`“${tk.name}” deleted.`); } catch (x) { flash(dbErrorText(x)); } render(); break; }
+    case "dr-show-arch": DR.showArchived = !DR.showArchived; render(); break;
+    case "dr-plan": openPlan(t.dataset.v); break;
+    case "dr-plan-cancel": DR.planForm = null; render(); break;
+    case "dr-plan-row": DR.planForm.values.rows.push({ time: "", item: "" }); render(); break;
+    case "dr-plan-rowdel": DR.planForm.values.rows.splice(Number(t.dataset.i), 1); render(); break;
+    case "dr-staff-del": try { await rouWrite("update", `${DR_STAFF}/${id}`, { archived: true }); } catch (x) { flash(dbErrorText(x)); } render(); break;
+    case "dr-trend": DR.trend = Number(t.dataset.v); render(); break;
+    case "dr-tables": DR.tables = !DR.tables; render(); break;
+    case "dr-cal": { const [y, m] = (DR.cal || todayISO().slice(0, 7)).split("-").map(Number); const dt = new Date(y, m - 1 + Number(t.dataset.n), 1); DR.cal = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`; render(); break; }
+    case "dr-notify": try { await Notification.requestPermission(); } catch {} render(); break;
+    case "dr-upd-tick": try { await dayWrite(d, { updates: { [t.dataset.key]: { done: true, time: d === todayISO() ? nowHM() : "", by: drMe(), at: nowISO() } } }); } catch (x) { flash(dbErrorText(x)); } renderTabs(); render(); break;
+    case "dr-upd-undo": try { await dayWrite(d, { updates: { [t.dataset.key]: { done: false } } }); } catch (x) { flash(dbErrorText(x)); } renderTabs(); render(); break;
+    case "dr-upd-new": DR.updForm = { id: null, values: { name: "", rows: [{ at: "", until: "" }], note: "" } }; render(); break;
+    case "dr-upd-edit": { const u = DR.updates.get(id); DR.updForm = { id, values: { name: u.name, rows: (u.times || []).map((x) => ({ at: x.at, until: x.until || "" })), note: u.note || "" } }; render(); break; }
+    case "dr-upd-cancel": DR.updForm = null; render(); break;
+    case "dr-upd-row": DR.updForm.values.rows.push({ at: "", until: "" }); render(); break;
+    case "dr-upd-rowdel": DR.updForm.values.rows.pop(); render(); break;
+    case "dr-upd-del": try { await rouWrite("update", `${DR_UPD}/${DR.updForm.id}`, { archived: true }); } catch (x) { flash(dbErrorText(x)); } DR.updForm = null; renderTabs(); render(); break;
+  }
+});
+/* charts: tap or focus a point/bar to read it */
+const drTip = (el) => { const c = el.closest?.(".dr-chart"); const tip = c?.querySelector(".dr-tip"); if (tip && el.dataset.tip) tip.textContent = el.dataset.tip; };
+document.addEventListener("click", (e) => { const el = e.target.closest?.(".pt, .dr-barr"); if (el) drTip(el); });
+document.addEventListener("focusin", (e) => { if (e.target.matches?.(".pt, .dr-barr")) drTip(e.target); });
+/* drag to reorder tasks (pointer) and arrow keys on the handle */
+document.addEventListener("pointerdown", (e) => {
+  const h = e.target.closest?.(".drag-h"); if (!h) return; e.preventDefault(); const row = h.closest("[data-mrow]");
+  DR.drag = { row, list: row.parentElement, moved: false }; row.classList.add("dragging"); try { h.setPointerCapture(e.pointerId); } catch {}
+});
+document.addEventListener("pointermove", (e) => {
+  if (!DR.drag) return; const { row, list } = DR.drag;
+  const over = [...list.children].find((c) => { if (c === row) return false; const r = c.getBoundingClientRect(); return e.clientY >= r.top && e.clientY <= r.bottom; });
+  if (!over) return; const r = over.getBoundingClientRect(); list.insertBefore(row, e.clientY < r.top + r.height / 2 ? over : over.nextSibling); DR.drag.moved = true;
+});
+const drDragEnd = () => { if (!DR.drag) return; const { row, list, moved } = DR.drag; row.classList.remove("dragging"); DR.drag = null; if (moved) drReorder(list).then(() => rouRefresh()); };
+document.addEventListener("pointerup", drDragEnd); document.addEventListener("pointercancel", drDragEnd);
+document.addEventListener("keydown", (e) => {
+  const h = e.target.closest?.(".drag-h"); if (!h || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return; e.preventDefault();
+  const row = h.closest("[data-mrow]"); const list = row.parentElement; const sib = e.key === "ArrowUp" ? row.previousElementSibling : row.nextElementSibling; if (!sib) return;
+  list.insertBefore(row, e.key === "ArrowUp" ? sib : sib.nextSibling); h.focus(); drReorder(list);
+});
+document.addEventListener("input", (e) => {
+  const t = e.target;
+  if (DR.edit && t.dataset.ev) { DR.edit.values[t.dataset.ev] = t.value; return; }
+  if (DR.onceForm && t.dataset.of) { DR.onceForm[t.dataset.of] = t.value; return; }
+  if (DR.updForm && t.dataset.uf) { DR.updForm.values[t.dataset.uf] = t.value; return; }
+  if (DR.updForm && t.dataset.ur) { DR.updForm.values.rows[Number(t.dataset.ur)][t.dataset.k] = t.value; return; }
+  if (DR.planForm) { if (t.dataset.pl) DR.planForm.values[t.dataset.pl] = t.value; if (t.dataset.plslot) DR.planForm.values.slots[t.dataset.plslot] = t.value; if (t.dataset.plr) DR.planForm.values.rows[Number(t.dataset.plr)][t.dataset.k] = t.value; return; }
+  if (DR.taskForm) {
+    const v = DR.taskForm.values;
+    if (t.dataset.tf) { v[t.dataset.tf] = t.value; if (t.dataset.tf === "name") { const dup = t.value.trim() && dupTask(t.value, DR.taskForm.id); $("#tf-dup").innerHTML = dup ? `<div class="note warn small">There is already a task called <b>${esc(dup.name)}</b> (${esc(dup.section)}).</div>` : ""; } }
+    if (t.dataset.tftime) v.times[Number(t.dataset.tftime)] = t.value;
+  }
+});
+document.addEventListener("change", async (e) => {
+  const t = e.target; const d = drDate();
+  if (DR.edit && t.dataset.ev) { DR.edit.values[t.dataset.ev] = t.value; return; }
+  if (DR.onceForm && t.dataset.of) { DR.onceForm[t.dataset.of] = t.value; return; }
+  if (DR.taskForm) {
+    const v = DR.taskForm.values;
+    if (t.dataset.tf === "section" || t.dataset.tf === "type") { v[t.dataset.tf] = t.value; render(); return; }
+    if (t.dataset.tfday) { const n = Number(t.dataset.tfday); v.days = t.checked ? [...new Set([...v.days, n])] : v.days.filter((x) => x !== n); return; }
+    if (t.dataset.tfslot) { v.slots = t.checked ? [...new Set([...v.slots, t.dataset.tfslot])] : v.slots.filter((x) => x !== t.dataset.tfslot); return; }
+    if (t.dataset.tfb) { v[t.dataset.tfb] = t.checked; return; }
+    if (t.dataset.tf) { v[t.dataset.tf] = t.value; return; }
+  }
+  if (t.id === "dr-date" && isISODate(t.value)) { DR.date = t.value; DR.edit = null; DR.copied = null; t.blur(); render(); return; }
+  if (t.id === "dr-me") { try { localStorage.setItem("pbl-dr-me", t.value.trim()); } catch {} ensureStaff(t.value).catch(() => {}); return; }
+  if (t.id === "dr-trend-task") { DR.trendTask = t.value; render(); return; }
+  if (t.dataset.note) { try { await dayWrite(d, { notes: { [t.dataset.note]: t.value.trim() } }); } catch (x) { flash(dbErrorText(x)); } return; }
+  if (t.dataset.staffRole) { try { await rouWrite("update", `${DR_STAFF}/${t.dataset.staffRole}`, { role: t.value }); } catch (x) { flash(dbErrorText(x)); } return; }
+  if (t.id === "dr-photo-file") {
+    const files = [...(t.files || [])]; t.value = ""; if (!files.length || !S.caps.assets) return;
+    for (const file of files) { try { const blob = await compressImage(file); const up = await S.caps.assets.upload(blob, { type: "image/jpeg" }); await dayWrite(d, { photos: { [drId("ph")]: { asset: up.id, by: drMe(), who: S.uid, at: nowISO(), deleted: false } } }); } catch (x) { flash(x?.message || dbErrorText(x)); } }
+    flash(`Photo${files.length > 1 ? "s" : ""} added to ${dmy(d)}.`); render();
+  }
+});
+document.addEventListener("submit", async (e) => {
+  const f = e.target; const d = drDate();
+  if (f.id === "dr-edit-form") { e.preventDefault(); saveEdit(); }
+  if (f.id === "dr-task-form") { e.preventDefault(); saveTask(); }
+  if (f.id === "dr-plan-form") { e.preventDefault(); savePlan(); }
+  if (f.id === "dr-once-form") {
+    e.preventDefault(); const v = DR.onceForm; const name = v.name.trim(); if (!name) { $("#dr-once-err").innerHTML = `<div class="note bad">Write what it is.</div>`; return; }
+    try { await rouWrite("set", `${DR_TASKS}/${drId("t")}`, { section: v.section, name, type: v.type, unit: "", kind: "once", days: [], date: d, times: v.time && v.type !== "text" ? [v.time] : [], slots: [], target: 0, asNeeded: false, details: "", doer: "", reminder: false,
+      order: Math.max(0, ...allTasks().map((t) => t.order || 0)) + 10, from: d, pauses: [], paused_from: null, archived_from: null, created_at: nowISO(), created_by: S.uid }); }
+    catch (x) { $("#dr-once-err").innerHTML = `<div class="note bad">${esc(dbErrorText(x))}</div>`; return; }
+    DR.onceForm = null; flash(`Added “${name}” for ${dmy(d)} only.`); render();
+  }
+  if (f.dataset.mslot) {
+    e.preventDefault(); const slot = f.dataset.mslot; const u = medUnits(d).find((x) => x.slot === slot); const by = f.querySelector("[data-mby]").value.trim();
+    const given = u.list.map((m, i) => !!f.querySelector(`[data-med="${i}"]`)?.checked);
+    try { await dayWrite(d, { meds: { [slot]: { list: u.list, given, by, time: u.rec?.time || (d === todayISO() ? nowHM() : ""), done: true, deleted: false, at: nowISO() } } }); await ensureStaff(by, "nurse"); } catch (x) { flash(dbErrorText(x)); return; }
+    DR.medEdit = null; render();
+  }
+  if (f.dataset.vslot) {
+    e.preventDefault(); const slot = f.dataset.vslot; const day = dayDoc(d); const by = f.querySelector("[data-vby]").value.trim(); const occ = {};
+    for (const inp of f.querySelectorAll("[data-vt]")) {
+      const t = drTask(inp.dataset.vt); const value = inp.value.trim().replace(/\s+/g, ""); const old = occsFor(day, t.id).find((o) => o.slot === slot);
+      if (value && t.unit === "mmHg" && !/^\d{2,3}\/\d{2,3}$/.test(value)) { f.querySelector(".dr-verr").innerHTML = `<div class="note bad">Write BP like 110/70.</div>`; return; }
+      if (value && t.unit !== "mmHg" && !Number.isFinite(parseFloat(value))) { f.querySelector(".dr-verr").innerHTML = `<div class="note bad">${esc(t.name)} should be a number.</div>`; return; }
+      if (value) occ[old?.id || drId("o")] = { task: t.id, sched: null, slot, time: old?.time || (d === todayISO() ? nowHM() : ""), end: "", value, item: "", text: "", by, note: old?.note || "", done: true, deleted: false, at: nowISO(), who: S.uid };
+      else if (old) occ[old.id] = { deleted: true };
+    }
+    if (!Object.keys(occ).length) { f.querySelector(".dr-verr").innerHTML = `<div class="note bad">Enter at least one reading.</div>`; return; }
+    try { await dayWrite(d, { occ }); await ensureStaff(by, "nurse"); } catch (x) { flash(dbErrorText(x)); return; }
+    DR.vitEdit = null; render();
+  }
+  if (f.id === "dr-upd-form") {
+    e.preventDefault(); const u = DR.updForm; const v = u.values; const err = (m) => { $("#dr-upd-err").innerHTML = `<div class="note bad">${esc(m)}</div>`; };
+    if (!v.name.trim()) return err("Enter the name."); const times = v.rows.filter((r) => /^\d{2}:\d{2}$/.test(r.at)).map((r) => ({ at: r.at, until: /^\d{2}:\d{2}$/.test(r.until) && r.until > r.at ? r.until : "" })).sort((a, b) => a.at.localeCompare(b.at));
+    if (!times.length) return err("Add at least one time.");
+    const doc = { name: v.name.trim(), times, note: v.note.trim() };
+    try { if (u.id) await rouWrite("update", `${DR_UPD}/${u.id}`, doc); else await rouWrite("set", `${DR_UPD}/${drId("u")}`, { ...doc, order: Math.max(0, ...[...DR.updates.values()].map((x) => x.order || 0)) + 10, archived: false, created_at: nowISO() }); }
+    catch (x) { return err(dbErrorText(x)); }
+    DR.updForm = null; renderTabs(); render();
+  }
+  if (f.id === "dr-staff-form") {
+    e.preventDefault(); const name = $("#dr-staff-name").value.trim(); if (!name) return;
+    if (staffByName(name)) { flash(`${name} is already in the list.`); return; }
+    try { await rouWrite("set", `${DR_STAFF}/${drId("s")}`, { name, role: $("#dr-staff-role").value, detail: "", archived: false, created_at: nowISO() }); flash(`${name} added.`); } catch (x) { flash(dbErrorText(x)); }
+    render();
+  }
 });
 
 boot();

@@ -14,7 +14,8 @@ async function nav(pg, name) {
 
 const step = async (n, f) => { try { await f(); pass++; console.log("ok - " + n); } catch (e) { fail++; console.log("FAIL - " + n + "\n   " + e.message.split("\n").slice(0, 5).join("\n   ")); } };
 const LIBS = { "jspdf/2.5.1/jspdf.umd.min.js": "jspdf/dist/jspdf.umd.min.js", "jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js": "jspdf-autotable/dist/jspdf.plugin.autotable.min.js" };
-const ctx = await browser.newContext({ ...devices["Pixel 7"] });
+const ctx = await browser.newContext({ ...devices["Pixel 7"], timezoneId: "Asia/Kolkata" });
+await ctx.clock.setFixedTime(new Date("2026-11-04T12:00:00+05:30"));   // the stock register seed is dated around 04/11/2026
 await ctx.route("https://cdnjs.cloudflare.com/ajax/libs/**", (route) => { const k = Object.keys(LIBS).find((x) => route.request().url().endsWith(x)); return k ? route.fulfill({ path: DIR + "libs/node_modules/" + LIBS[k], contentType: "text/javascript" }) : route.abort(); });
 await ctx.route("https://fonts.*/**", (r) => r.abort());
 const page = await ctx.newPage();
@@ -234,7 +235,7 @@ await step("optional billing link subtracts billed quantities (off by default)",
   await page.getByLabel("Tot. Amt., row 1").fill("100");
   await page.getByRole("button", { name: "Submit" }).click();
   await page.getByText("Stock reduced for 1 item.").waitFor();
-  const today = new Date(); const d = today.getDate();
+  const d = 4;   // the page clock is pinned to 04/11/2026
   const u = (await log()).filter((x) => x[0] === "update" && x[1] === "inventory/months/list/2026-11").at(-1)[2];
   assert.ok(u.counts.p015[d] != null, JSON.stringify(u));
 });

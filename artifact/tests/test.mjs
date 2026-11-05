@@ -56,9 +56,11 @@ await step("Home dashboard shows Pharmacy figures; old #summary link opens Pharm
   await nav(page, "Pharmacy");
 });
 await step("photo -> compress -> upload + Claude read -> review with mismatch", async () => {
+  // the stand-in Claude answers at once, so record every progress step the page shows instead of polling for it
+  await page.evaluate(() => { window.__steps = new Set(); new MutationObserver(() => document.querySelectorAll(".steps li").forEach((li) => window.__steps.add(li.textContent.trim()))).observe(document.body, { subtree: true, childList: true, characterData: true }); });
   await page.locator("#gallery").setInputFiles(DIR + "sample-bill.png");
-  await page.getByText("Reading the bill with Claude").waitFor();
   await page.getByRole("heading", { name: "Review bill" }).waitFor();
+  assert.ok((await page.evaluate(() => [...window.__steps])).some((x) => /reading the bill with Claude/i.test(x)), "progress showed the Claude step");
   assert.equal(await page.locator("#ed-date").inputValue(), "2026-11-02");
   assert.equal(await page.locator("#ed-billno").inputValue(), "4471");
   await page.getByText("1 row highlighted").waitFor();

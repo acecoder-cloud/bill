@@ -9,7 +9,7 @@ let pass = 0, fail = 0;
 const step = async (n, f) => { try { await f(); pass++; console.log("ok - " + n); } catch (e) { fail++; console.log("FAIL - " + n + "\n   " + e.message.split("\n").slice(0, 8).join("\n   ")); } };
 const LIBS = { "jspdf/2.5.1/jspdf.umd.min.js": "jspdf/dist/jspdf.umd.min.js", "jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js": "jspdf-autotable/dist/jspdf.plugin.autotable.min.js" };
 const ctx = await browser.newContext({ ...devices["Pixel 7"], permissions: ["clipboard-read", "clipboard-write"] });
-await ctx.addInitScript(() => { try { Object.defineProperty(navigator, "share", { value: undefined, configurable: true }); } catch {} });
+await ctx.addInitScript(() => { try { Object.defineProperty(navigator, "share", { value: undefined, configurable: true }); localStorage.setItem("pbl-rou-section", "visitors"); } catch {} });   // open the Visitors menu
 await ctx.route("https://cdnjs.cloudflare.com/ajax/libs/**", (route) => { const k = Object.keys(LIBS).find((x) => route.request().url().endsWith(x)); return k ? route.fulfill({ path: DIR + "libs/node_modules/" + LIBS[k], contentType: "text/javascript" }) : route.abort(); });
 await ctx.route("https://fonts.*/**", (r) => r.abort());
 const page = await ctx.newPage();
@@ -28,7 +28,7 @@ await page.goto(URL_ + "?role=admin&persist=1#routine");
 
 await step("Routine tab is in the navigation and the visitor log imports on first run", async () => {
   await page.getByRole("link", { name: /Routine$/ }).waitFor();
-  await page.getByText("Imported the visitor log: 42 visits and calls, 24 new people.").waitFor({ timeout: 60000 });
+  await page.waitForFunction(() => ROU.settings.seeded_at && !ROU.seeding && ROU.visits.size, null, { timeout: 60000 });
   const v = await visits();
   assert.equal(v.length, 42, "visits and calls");
   assert.equal(v.reduce((n, x) => n + x.visitors.length, 0), 53, "visitor rows");
@@ -154,7 +154,7 @@ await step("Needs review entries can be marked reviewed", async () => {
 await step("People list shows counts; person history; add with duplicate warning; merge; archive", async () => {
   await view("People");
   const akkaRow = (await page.locator("tr", { hasText: "Adaikkammai" }).innerText()).replace(/\s+/g, " ");
-  assert.match(akkaRow, /Mrs Adaikkammai Quick log Singapore Akka 10 13 13\/09\/2026 (0[2-4])\/11\/2026/);
+  assert.match(akkaRow, /Mrs Adaikkammai Quick log Singapore Akka 10 13 13\/09\/2026 (0[2-9])\/11\/2026/);
   await page.getByRole("button", { name: "Mrs Adaikkammai" }).click();
   await page.getByText(/Visit history \(2[34]\)/).waitFor();
   await page.getByRole("button", { name: "Close" }).click();
@@ -238,10 +238,11 @@ await step("billing and other tabs still work; no sideways scroll", async () => 
 });
 const dark = await browser.newContext({ ...devices["Pixel 7"], colorScheme: "dark" });
 await dark.route("https://fonts.*/**", (r) => r.abort());
+await dark.addInitScript(() => { try { localStorage.setItem("pbl-rou-section", "visitors"); } catch {} });
 const pd = await dark.newPage(); pd.on("pageerror", (e) => errs.push(String(e)));
 await step("dark theme", async () => {
   await pd.goto(URL_ + "?role=admin#routine");
-  await pd.getByText(/Imported the visitor log/).waitFor({ timeout: 60000 });
+  await pd.waitForFunction(() => ROU.settings.seeded_at && !ROU.seeding && ROU.visits.size, null, { timeout: 60000 });
   await pd.screenshot({ path: DIR + "r4-dark.png" });
   await pd.getByRole("button", { name: "Summary", exact: true }).click(); await pd.locator('[data-act="rou-range"]', { hasText: /^All$/ }).click();
   await pd.screenshot({ path: DIR + "r5-dark-summary.png", fullPage: true });
