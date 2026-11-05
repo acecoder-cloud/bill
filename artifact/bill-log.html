@@ -525,6 +525,15 @@ pre.wa { margin: 0; padding: 12px; border-radius: 12px; background: var(--surfac
 .btn-checked { background: var(--ok-bg); color: var(--ok-ink); border-color: color-mix(in srgb, var(--ok-ink) 45%, transparent); font-weight: 800; }
 .scan-item.scan-short .pill { flex: none; white-space: nowrap; }
 .scan-item.scan-short { flex-direction: row; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 0; border-left: 0; background: none; overflow-wrap: anywhere; }
+.inv-head-acts { display: inline-flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.iscan-cells { display: grid; grid-template-columns: repeat(auto-fill, minmax(66px, 1fr)); gap: 6px; }
+.iscan-cell { display: flex; flex-direction: column; gap: 2px; font-size: .78rem; font-weight: 700; color: var(--muted); }
+.iscan-cell .inp { min-height: 40px; padding: 4px 8px; text-align: center; }
+.iscan-cell small { font-weight: 600; }
+.iscan-cell.st-new .inp { background: var(--ok-bg); border-color: color-mix(in srgb, var(--ok-ink) 40%, transparent); }
+.iscan-cell.st-conflict .inp, .iscan-cell.st-bad .inp { border: 2px solid var(--bad-line); }
+.iscan-cell.st-conflict small, .iscan-cell.st-bad small { color: var(--bad-ink); }
+.iscan-cell.circled .inp { border-radius: 99px; }
 .scan-row { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--line); padding-top: 8px; }
 .audit { display: flex; flex-direction: column; gap: 8px; }
 .audit details { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
@@ -1318,7 +1327,7 @@ function paintAdmin() {
   const team = $("#team"); if (team) paintNames(team).then(() => showLabelBoxes(team));
   const a = S.audit; const box = $("#audit-list"); if (!box || !a?.rows) return;
   if (!a.rows.length) { box.innerHTML = `<p class="muted">No activity yet.</p>`; return; }
-  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed", "roles.update": "Role permissions changed", "inventory.seed": "Stock register loaded", "inventory.add": "Product added", "inventory.edit": "Product edited", "inventory.archive": "Product archived", "inventory.restore": "Product restored", "inventory.delete": "Product deleted", "inventory.month": "Stock month started", "inventory.import": "Stock CSV imported", "inventory.delivered": "Order delivered", "accounts.add": "Account entry added", "accounts.edit": "Account entry edited", "accounts.delete": "Account entry deleted", "accounts.seed": "WhatsApp ledger imported", "accounts.import": "Account entries imported", "routine.add": "Visit logged", "routine.edit": "Visit edited", "routine.delete": "Visit deleted", "routine.merge": "People merged", "routine.seed": "Visitor log imported", "routine.import": "Visits imported", "routine.daily_seed": "Daily routine loaded", "routine.task_add": "Routine task added", "routine.task_delete": "Routine task deleted", "routine.plan": "Medicine/feed plan changed", "routine.scan_save": "Notebook scan saved", "routine.scan_delete": "Notebook scan deleted", "routine.relink": "Scanned entries moved onto routine tasks" };
+  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed", "roles.update": "Role permissions changed", "inventory.seed": "Stock register loaded", "inventory.add": "Product added", "inventory.edit": "Product edited", "inventory.archive": "Product archived", "inventory.restore": "Product restored", "inventory.delete": "Product deleted", "inventory.month": "Stock month started", "inventory.import": "Stock CSV imported", "inventory.delivered": "Order delivered", "accounts.add": "Account entry added", "accounts.edit": "Account entry edited", "accounts.delete": "Account entry deleted", "accounts.seed": "WhatsApp ledger imported", "accounts.import": "Account entries imported", "routine.add": "Visit logged", "routine.edit": "Visit edited", "routine.delete": "Visit deleted", "routine.merge": "People merged", "routine.seed": "Visitor log imported", "routine.import": "Visits imported", "routine.daily_seed": "Daily routine loaded", "routine.task_add": "Routine task added", "routine.task_delete": "Routine task deleted", "routine.plan": "Medicine/feed plan changed", "routine.scan_save": "Notebook scan saved", "routine.scan_delete": "Notebook scan deleted", "routine.relink": "Scanned entries moved onto routine tasks", "inventory.scan_save": "Register scan saved", "inventory.scan_delete": "Register scan deleted" };
   box.innerHTML = a.rows.map((r, i) => `<details><summary><b>${esc(label[r.action] || r.action)}</b>
     <span class="small muted">by <span data-uid="${esc(r.actor)}"></span> · ${esc(fmtDT(r.at))} · ${r.action === "roles.update" ? "Admin / Staff / Viewer permissions" : r.action.startsWith("inventory.") ? esc((r.after || r.before || {}).name || (r.after || {}).month || "Inventory") : r.action.startsWith("accounts.") ? (() => { const x = r.after || r.before || {}; return x.amount != null ? esc(`${x.type === "received" ? "received" : (x.lines || []).map((l) => l.name).join(" & ")} ${inr(x.amount)} on ${dmy(x.date)}`) : "Accounts"; })() : r.action.startsWith("team.") ? `<span data-uid="${esc((r.after || r.before || {}).member || "")}"></span>${r.after?.role ? " → " + esc(ROLES[r.after.role]?.label || r.after.role) : ""}` : `bill ${(r.after || r.before || {}).bill_no ? "No. " + esc((r.after || r.before).bill_no) + " of " : "of "}${esc(fmtDate((r.after || r.before || {}).bill_date))}`}</span></summary>
     <div class="pair"><div><div class="small muted">Before</div><pre data-json="b${i}"></pre></div><div><div class="small muted">After</div><pre data-json="a${i}"></pre></div></div></details>`).join("");
@@ -1855,6 +1864,7 @@ const INV = {
   loaded: { products: false, settings: false },
   view: "list", q: "", cat: "all", status: "active", lowOnly: false, expOnly: false, sort: "sno", showArchived: false,
   regMonth: null, regDay: null, cell: null, form: null, detail: null, confirm: null, importPreview: null, busy: null, seeding: false,
+  scans: new Map(), scansLoaded: false, review: null, scanConfirm: null,
 };
 const UNITS = ["Tablet", "Pcs", "Pack", "Bottle", "Box", "Pouch", "ml", "Roll"];
 const INV_PRODUCTS = "inventory/products/items";
@@ -1992,7 +2002,7 @@ function applyLocal(op, path, data) {
   const map = col === INV_PRODUCTS ? INV.products : col === INV_MONTHS ? INV.months
     : col === "accounts/items/list" ? ACC.items : col === "accounts/tx/list" ? ACC.tx : col === "accounts/checks/list" ? ACC.checks
     : col === "routine/people/list" ? ROU.people : col === "routine/visits/list" ? ROU.visits
-    : col === "routine/tasks/list" ? DR.tasks : col === "routine/days/list" ? DR.days : col === "routine/plans/list" ? DR.plans : col === "routine/staff/list" ? DR.staff : col === "routine/updates/list" ? DR.updates : col === "routine/scans/list" ? DR.scans : null;
+    : col === "routine/tasks/list" ? DR.tasks : col === "routine/days/list" ? DR.days : col === "routine/plans/list" ? DR.plans : col === "routine/staff/list" ? DR.staff : col === "routine/updates/list" ? DR.updates : col === "routine/scans/list" ? DR.scans : col === "inventory/scans/list" ? INV.scans : null;
   if (path === "inventory/settings") { INV.settings = op === "set" ? clone(data) : deepMerge(clone(INV.settings) || {}, data); return; }
   if (path === "routine/settings") { ROU.settings = op === "set" ? clone(data) : deepMerge(clone(ROU.settings) || {}, data); return; }
   if (path === "accounts/settings") { ACC.settings = op === "set" ? clone(data) : deepMerge(clone(ACC.settings) || {}, data); return; }
@@ -2056,6 +2066,11 @@ function invStart() {
     watchMonth(monthKey(invTodayISO()));
     invChanged(); maybeAutoSeed();
   }, () => { INV.loaded.settings = true; invChanged(); });
+  db.collection("inventory/scans/list").onSnapshot((snap) => {   // register scans (photos/PDF of the paper register)
+    INV.scans = new Map(snap.docs.map((d) => [d.id, clone(d.data())])); reapplyOutbox("inventory/scans/list");
+    if (!snap.metadata.fromCache && !INV.scansLoaded) { INV.scansLoaded = true; setTimeout(processPendingScans, 1500); }
+    invChanged();
+  }, () => { INV.scansLoaded = true; });
   flushOutbox();
 }
 function watchMonth(mk) {
@@ -2073,7 +2088,7 @@ function invChanged() {
   if (invQueued) return; invQueued = true;
   requestAnimationFrame(() => { invQueued = false; renderTabs(); if (S.tab === "inventory" && !S.editor && !invBusy()) render(); else if (S.tab === "inventory") invRefreshLive(); else if (S.tab === "home" && !S.editor) render(); });
 }
-function invBusy() { return !!(INV.form || INV.importPreview || INV.confirm || document.activeElement?.closest?.("#inv-cellbar, .inv-filters")); }
+function invBusy() { return !!(INV.form || INV.importPreview || INV.confirm || INV.review || INV.scanConfirm || DR.scan?.kind === "inventory" || document.activeElement?.closest?.("#inv-cellbar, .inv-filters")); }
 function invRefresh() { if (S.tab === "inventory" && !S.editor) render(); else renderTabs(); }
 
 /* ---------- stock maths ---------- */
@@ -2174,16 +2189,19 @@ function maybeAutoSeed() {
 function inventoryView() {
   if (!INV.loaded.products && !INV.products.size) return `<h1>Inventory</h1><div class="card"><div class="row-between"><span class="spin"></span><span class="muted">Loading stock register…</span></div></div>`;
   if (INV.form) return invFormView();
+  if (DR.scan?.kind === "inventory") return scanCaptureView();
+  if (INV.review && INV.scans.get(INV.review.id)) return invReviewView();
   const pending = outbox().length;
   const alerts = invAlertCount(); const reorderN = reorderRows().length;
   return `
-  <div class="row-between"><h1>Inventory</h1>${canInvManage() ? `<button class="btn btn-primary" data-act="inv-add">+ Add Product</button>` : ""}</div>
+  <div class="row-between"><h1>Inventory</h1><span class="inv-head-acts">${canInvCount() && INV.products.size ? `<button class="btn btn-ghost" data-act="scan-open-capture" data-kind="inventory">📷 Scan register${[...INV.scans.values()].filter((x) => ["pending", "reading", "review", "failed"].includes(x.status)).length ? ` <span class="pill warn">${[...INV.scans.values()].filter((x) => ["pending", "reading", "review", "failed"].includes(x.status)).length}</span>` : ""}</button>` : ""}${canInvManage() ? `<button class="btn btn-primary" data-act="inv-add">+ Add Product</button>` : ""}</span></div>
   ${pending ? `<div class="note warn">${pending} change${pending === 1 ? "" : "s"} saved on this phone, waiting for a connection to sync.</div>` : ""}
   ${!INV.products.size ? invEmptyView() : `
   <div class="seg inv-tabs" role="group" aria-label="Inventory view">
     ${[["list", `Stock list${alerts ? ` · ${alerts}` : ""}`], ["register", "Daily register"], ["reorder", `Reorder${reorderN ? ` · ${reorderN}` : ""}`]].map(([v, l]) => `<button data-act="inv-view" data-v="${v}" aria-pressed="${INV.view === v}">${l}</button>`).join("")}
   </div>
   ${INV.view === "register" ? registerView() : INV.view === "reorder" ? reorderView() : listView()}
+  ${invScansView()}
   ${invToolsView()}`}`;
 }
 function invEmptyView() {
@@ -3840,7 +3858,7 @@ function routineHead() {
 function routineView() {
   if (ROU.form) return visitFormView();
   if (ROU.personForm) return personFormView();
-  if (ROU.section === "daily") return DR.taskForm || DR.planForm || DR.scan || DR.review ? dailyView() : routineHead() + dailyView();
+  if (ROU.section === "daily") return DR.taskForm || DR.planForm || (DR.scan && DR.scan.kind !== "inventory") || DR.review ? dailyView() : routineHead() + dailyView();
   if (!ROU.loaded.visits && !ROU.visits.size) return `${routineHead()}<div class="card"><div class="row-between"><span class="spin"></span><span class="muted">Loading…</span></div></div>`;
   return `${routineHead()}
   ${ROU.seeding ? `<div class="note">Importing the visitor log… ${ROU.seeding.done} of ${ROU.seeding.total}</div>` : ""}
@@ -4592,7 +4610,7 @@ async function drSeed(auto) {
 function dailyView() {
   if (!DR.loaded.tasks || !DR.loaded.days) return `<div class="card"><div class="row-between"><span class="spin"></span><span class="muted">Loading the daily routine…</span></div></div>`;
   if (DR.review && DR.scans.get(DR.review.id)) return reviewView();
-  if (DR.scan) return scanCaptureView();
+  if (DR.scan && DR.scan.kind !== "inventory") return scanCaptureView();
   if (DR.taskForm) return taskFormView();
   if (DR.planForm) return planFormView();
   const n = drAlertCount();
@@ -5308,9 +5326,10 @@ function scanPendingCount() { return [...DR.scans.values()].filter((s) => s.stat
 function scanReviewCount() { return [...DR.scans.values()].filter((s) => s.status === "review").length; }
 
 /* ---------- capture ---------- */
-function openScan() {
+function openScan(kind = "routine") {
+  if (kind === "inventory") { DR.scan = { kind, month: INV.view === "register" && INV.regMonth ? INV.regMonth : monthKey(invTodayISO()), pages: [], busy: false, err: "", camera: false, notice: false }; render(); window.scrollTo(0, 0); return; }
   if (!scanOn()) { flash("Scanning the notebook is turned off in Manage → Scanning."); return; }
-  ROU.section = "daily"; DR.view = "day"; DR.scan = { date: drDate(), pages: [], busy: false, err: "", camera: false, notice: false };
+  ROU.section = "daily"; DR.view = "day"; DR.scan = { kind, date: drDate(), pages: [], busy: false, err: "", camera: false, notice: false };
   render(); window.scrollTo(0, 0);
 }
 /** Straighten (EXIF), shrink to ~2000 px on the long side, lift contrast a little, JPEG 0.85. */
@@ -5337,9 +5356,9 @@ async function addScanFiles(files, source) {
 }
 function scanCaptureView() {
   const sc = DR.scan; const n = sc.pages.length;
-  return `<div class="row-between"><button class="btn-link" data-act="scan-cancel">‹ Cancel</button><h1 style="flex:1">Scan notebook</h1></div>
+  return `<div class="row-between"><button class="btn-link" data-act="scan-cancel">‹ Cancel</button><h1 style="flex:1">${sc.kind === "inventory" ? "Scan stock register" : "Scan notebook"}</h1></div>
   <section class="card">
-    <p class="small muted">Photograph each notebook page, or upload the CamScanner PDF. Claude reads the handwriting; you check everything before it is saved.</p>
+    <p class="small muted">${sc.kind === "inventory" ? `Photograph each page of the stock register, or upload the CamScanner PDF. Claude reads every row and day column; you check the counts before they go into ${esc(monthLabel(sc.month))}.` : "Photograph each notebook page, or upload the CamScanner PDF. Claude reads the handwriting; you check everything before it is saved."}</p>
     <div class="scan-opts">
       <button class="sheet-opt" data-act="scan-cam">${ICON.cam}<span><b>${n && sc.camera ? "Add another page" : "Take photo"}</b><small>Rear camera, one page at a time</small></span></button>
       <button class="sheet-opt" data-act="scan-photos">${ICON.upload}<span><b>Upload photos</b><small>Several pages from the gallery</small></span></button>
@@ -5442,7 +5461,7 @@ async function startScanRead() {
   if (!localNoticeSeen()) { if (!sc.notice) { sc.notice = true; render(); return; } try { localStorage.setItem("pbl-scan-notice", "1"); } catch {} }
   const id = drId("sc"); const blobs = sc.pages.map((p) => p.blob); scanBlobs.set(id, blobs);
   await idbScan.put(id, { pages: blobs, pdfs: sc.pdfs || [] });
-  try { await rouWrite("set", `${DR_SCANS}/${id}`, { date: sc.date, status: "pending", pages: [], pdfs: [], page_count: blobs.length, source: sc.source || "photo", result: null, error: "", created_at: nowISO(), created_by: S.uid, by: drMe() }); }
+  try { await rouWrite("set", `${sc.kind === "inventory" ? INV_SCANS : DR_SCANS}/${id}`, { kind: sc.kind || "routine", ...(sc.kind === "inventory" ? { month: sc.month } : { date: sc.date }), status: "pending", pages: [], pdfs: [], page_count: blobs.length, source: sc.source || "photo", result: null, error: "", created_at: nowISO(), created_by: S.uid, by: drMe() }); }
   catch (e) { sc.err = dbErrorText(e); render(); return; }
   for (const p of sc.pages) URL.revokeObjectURL(p.url);
   DR.scan = null;
@@ -5452,40 +5471,43 @@ async function startScanRead() {
 async function scanPageBlobs(id) {
   if (scanBlobs.has(id)) return scanBlobs.get(id);
   const local = await idbScan.get(id); if (local?.pages?.length) { scanBlobs.set(id, local.pages); return local.pages; }
-  const s = DR.scans.get(id); if (!s?.pages?.length) return [];
+  const s = getScan(id); if (!s?.pages?.length) return [];
   const blobs = await Promise.all(s.pages.map((a) => fetch("/_blob/" + a).then((r) => { if (!r.ok) throw new Error("page"); return r.blob(); })));
   scanBlobs.set(id, blobs); return blobs;
 }
 const scanReading = new Set();
 /** Upload the pages (if not yet), read them with Claude, then wait for review. Safe to call again for pending scans. */
+const getScan = (id) => DR.scans.get(id) || INV.scans.get(id);
+const scanPath = (id) => `${INV.scans.has(id) ? INV_SCANS : DR_SCANS}/${id}`;
 async function readScan(id, openAfter) {
-  if (scanReading.has(id)) return; const path = `${DR_SCANS}/${id}`; let s = DR.scans.get(id); if (!s) return;
+  if (scanReading.has(id)) return; const path = scanPath(id); let s = getScan(id); if (!s) return; const inv = s.kind === "inventory";
   if (!navigator.onLine) return;
   scanReading.add(id);
   try {
     const blobs = await scanPageBlobs(id).catch(() => []);
     if (!blobs.length) { if (s.status === "pending") return; throw { message: "The page images aren't available on this phone." }; }
-    await rouWrite("update", path, { status: "reading", error: "" }); rouRefresh();
+    await rouWrite("update", path, { status: "reading", error: "" }); rouRefresh(); invRefresh();
     if (!s.pages?.length && S.caps.assets) {
       const pages = []; for (const b of blobs) pages.push((await S.caps.assets.upload(b, { type: "image/jpeg" })).id);
       const pdfs = []; for (const f of (await idbScan.get(id))?.pdfs || []) { try { pdfs.push((await S.caps.assets.upload(f, { type: "application/pdf" })).id); } catch {} }
       await rouWrite("update", path, { pages, pdfs });
     }
-    s = DR.scans.get(id);
-    const result = await scanRead(blobs, s.date);
+    s = getScan(id);
+    const result = inv ? await invScanRead(blobs, s.month) : await scanRead(blobs, s.date);
     await rouWrite("update", path, { status: "review", result, error: "", read_at: nowISO(), tier: ROU.settings.scan_model || "default" });
-    if (DR.scans.get(id)?.pages?.length) await idbScan.del(id);
-    if (openAfter && S.tab === "routine") openReview(id);
-    else flash("A notebook scan is ready to check. Open it from Notebook scans.");
+    if (getScan(id)?.pages?.length) await idbScan.del(id);
+    if (openAfter && inv && S.tab === "inventory") openInvReview(id);
+    else if (openAfter && !inv && S.tab === "routine") openReview(id);
+    else flash(inv ? "A stock register scan is ready to check. Open it from Inventory → Register scans." : "A notebook scan is ready to check. Open it from Notebook scans.");
   } catch (e) {
     const offline = !navigator.onLine || e?.code === "unavailable" || e?.code === "network";
     await rouWrite("update", path, offline ? { status: "pending" } : { status: "failed", error: e?.code ? sampleErrorText(e) : e?.message || "The pages couldn't be read." }).catch(() => {});
-    if (!offline) flash("The notebook pages couldn't be read. Try Re-read, or retake clearer photos.");
-  } finally { scanReading.delete(id); rouRefresh(); }
+    if (!offline) flash("The pages couldn't be read. Try Re-read, or retake clearer photos.");
+  } finally { scanReading.delete(id); rouRefresh(); invRefresh(); }
 }
 async function processPendingScans() {
-  if (!navigator.onLine || !DR.loaded.scans) return;
-  for (const [id, s] of DR.scans) if (s.status === "pending" || (s.status === "reading" && !scanReading.has(id))) { const local = scanBlobs.has(id) || (await idbScan.get(id)); if (local || s.pages?.length) await readScan(id, false); }
+  if (!navigator.onLine || (!DR.loaded.scans && !INV.scansLoaded)) return;
+  for (const [id, s] of [...DR.scans, ...INV.scans]) if (s.status === "pending" || (s.status === "reading" && !scanReading.has(id))) { const local = scanBlobs.has(id) || (await idbScan.get(id)); if (local || s.pages?.length) await readScan(id, false); }
 }
 window.addEventListener("online", () => setTimeout(processPendingScans, 2500));
 
@@ -5751,6 +5773,7 @@ function scansStrip(d, ro) {
   </div>`).join("")}</section>`;
 }
 async function deleteScan(id, removeValues) {
+  if (INV.scans.has(id)) return invDeleteScan(id, removeValues);
   const s = DR.scans.get(id); DR.confirm = null;
   try {
     if (removeValues) {
@@ -5803,7 +5826,7 @@ document.addEventListener("click", async (e) => {
   const t = e.target.closest("[data-act]"); if (!t || !t.dataset.act.startsWith("scan-")) return;
   const a = t.dataset.act; const sc = DR.scan; const R = DR.review; const id = t.dataset.id;
   switch (a) {
-    case "scan-open-capture": openScan(); break;
+    case "scan-open-capture": openScan(t.dataset.kind || "routine"); break;
     case "scan-cancel": (sc?.pages || []).forEach((p) => URL.revokeObjectURL(p.url)); DR.scan = null; render(); break;
     case "scan-cam": sc.camera = true; sc.retake = null; $("#scan-cam").click(); break;
     case "scan-cam-done": sc.camera = false; render(); break;
@@ -5865,6 +5888,222 @@ document.addEventListener("change", async (e) => {
     if (t.id === "scan-cam" && sc.retake != null) { try { const b = await prepPage(files[0]); const old = sc.pages[sc.retake]; URL.revokeObjectURL(old.url); sc.pages[sc.retake] = { blob: b, url: URL.createObjectURL(b), from: "photo" }; } catch (x) { sc.err = x.message; } sc.retake = null; render(); return; }
     addScanFiles(files, t.id === "scan-pdf" ? "pdf" : t.id === "scan-cam" ? "camera" : "photos");
   }
+});
+
+/* ================= Scan the paper stock register into Inventory ================= */
+/* inventory/scans/list/<id>  {kind: "inventory", month: YYYY-MM, status, pages, pdfs, result: {month, rows, unmatched}, …}
+   Saved counts remember their scan in the month doc: src: {pid: {day: scanId}} (so a scan's counts can be taken back). */
+const INV_SCANS = "inventory/scans/list";
+function scanMonth(x) {
+  const s = scanStr(x); let m = /^(\d{4})-(\d{1,2})$/.exec(s); if (m) return `${m[1]}-${m[2].padStart(2, "0")}`;
+  m = /^(\d{1,2})[/.-](\d{2}|\d{4})$/.exec(s); if (m) return `${m[2].length === 2 ? "20" + m[2] : m[2]}-${m[1].padStart(2, "0")}`;
+  const d = scanDate(s); return d ? d.slice(0, 7) : "";
+}
+function invScanPrompt(month, n) {
+  const list = sortedProducts(true).map(([, p]) => `${p.sno}. ${p.name}${p.unit ? ` (${p.unit})` : ""}${p.status === "stopped" ? " [stopped]" : ""}`).join("\n");
+  return `These ${n} images are pages of a handwritten monthly stock register from a hospital room (India).
+The header reads like "CURRENT STOCK NOVEMBER 1.11.26 - 30.11.26": that gives the month. Expected month if the header is unreadable: ${month}.
+Columns: S.No, Stock name, Requirement minimum use, Monthly use, then one column per day of the month (1, 2, 3 … 31). Each day cell is the stock count that day.
+For every row return the S.No, the product name matched to the product list below (its spelling) and the name exactly as written in "raw".
+Copy each day cell exactly as written, for example "3", "3P", "96 pc", "½", "¾", "5½", "2P". Leave out days whose cell is empty, a dot or a dash. Never guess.
+A count with a pencil circle around it means low stock: still give the count, and list that day in "circled_days".
+"STOP" written next to the name means the product is stopped: "stop": true. A date written next to the name (e.g. 12/11/2026) is the expected delivery date of an order.
+Give "confidence" ("high", "medium" or "low") per row and "page_index" (1-based image number). Lines that are not product rows go in "unmatched_text".
+Reply with only this JSON:
+{"month":"2026-11","pages":[{"page_index":1,"month":"2026-11","first_sno":1,"last_sno":32}],
+"rows":[{"sno":16,"name":"Gauze Pack","raw":"GAUZE PACK 12/11/2026","stop":false,"expected_delivery":"12/11/2026","min_level":"2","monthly_use":"4 PACK","counts":{"1":"3P","2":"3P","3":"3P","4":"2P"},"circled_days":[4],"confidence":"high","page_index":1}],
+"unmatched_text":["PENCIL CIRCLE - LOW STOCK"]}
+Product list (S.No. name):
+${list}`;
+}
+function normInvScan(raw) {
+  const o = raw && typeof raw === "object" ? raw : {}; const arr = (x) => (Array.isArray(x) ? x.filter((r) => r && typeof r === "object") : []);
+  return {
+    month: scanMonth(o.month),
+    rows: arr(o.rows).map((r) => ({
+      sno: Number.isFinite(Number(r.sno)) ? Number(r.sno) : null, name: scanStr(r.name), raw: scanStr(r.raw), stop: r.stop === true,
+      due: scanDate(r.expected_delivery), min: scanStr(r.min_level), monthly: scanStr(r.monthly_use),
+      counts: Object.fromEntries(Object.entries(r.counts && typeof r.counts === "object" ? r.counts : {}).filter(([d, v]) => /^\d{1,2}$/.test(d) && Number(d) >= 1 && Number(d) <= 31 && scanStr(v) && !/^[.\-–—]$/.test(scanStr(v))).map(([d, v]) => [String(Number(d)), scanStr(v)])),
+      circled: (Array.isArray(r.circled_days) ? r.circled_days : []).map(Number).filter((n) => n >= 1 && n <= 31),
+      conf: scanConf(r.confidence), page: Number.isInteger(r.page_index) ? r.page_index : null,
+    })).filter((r) => r.name || r.raw || r.sno != null),
+    unmatched: (Array.isArray(o.unmatched_text) ? o.unmatched_text : []).map(scanStr).filter(Boolean),
+  };
+}
+async function invScanRead(blobs, month) {
+  const sample = S.caps.sample; if (!sample) throw { message: "Reading photos with Claude isn't available in this view." };
+  const lim = await sample.limits().catch(() => null); if (!lim?.images) throw { code: "images_unavailable" };
+  const per = Math.max(1, lim.images.maxCount || 5); const tier = ROU.settings.scan_model === "complex" ? "complex" : undefined; const out = { month: "", rows: [], unmatched: [] };
+  for (let i = 0; i < blobs.length; i += per) {
+    const chunk = blobs.slice(i, i + per);
+    const r = normInvScan(await sample.json(invScanPrompt(month, chunk.length), { images: chunk, ...(tier ? { modelTier: tier } : {}) }));
+    out.month = out.month || r.month; for (const x of r.rows) { if (x.page) x.page += i; out.rows.push(x); } out.unmatched.push(...r.unmatched);
+  }
+  return out;
+}
+/** Match a written row to a product: S.No first (when the name agrees), then the name. */
+function invMatch(row) {
+  const k = fuzzyKey(row.name || row.raw); const all = sortedProducts(true).map(([pid, p]) => ({ pid, p }));
+  const near = (p) => { const pk = fuzzyKey(p.name); return !!k && (pk === k || pk.startsWith(k) || k.startsWith(pk) || lev(pk, k) <= 2); };
+  const bySno = all.find((x) => Number(x.p.sno) === Number(row.sno));
+  if (bySno && (near(bySno.p) || !k)) return bySno.pid;
+  return (all.find((x) => fuzzyKey(x.p.name) === k) || all.find((x) => near(x.p)))?.pid || null;
+}
+const leadNum = (x) => { const m = /^\s*([\d.]+(?:\s*[½¼¾]|\s*\d+\/\d+)?|[½¼¾])/.exec(scanStr(x)); const v = m ? parseCount(m[1]) : null; return typeof v === "number" && !Number.isNaN(v) ? v : null; };
+const leadUnit = (x) => { const w = scanStr(x).replace(/^[\d.\s½¼¾/]+/, "").trim().toLowerCase(); return UNITS.find((u) => w.startsWith(u.toLowerCase().slice(0, 3))) || ""; };
+function openInvReview(id) {
+  const s = INV.scans.get(id); if (!s?.result) return; const r = s.result; const month = r.month || s.month || monthKey(invTodayISO());
+  watchMonth(month);
+  INV.review = { id, month, readMonth: r.month || "", showAll: false, unmatched: r.unmatched || [], confirmDiscard: false,
+    rows: (r.rows || []).map((x, i) => ({ ...x, id: "r" + i, pid: invMatch(x), vals: { ...x.counts }, choice: "keep", include: true, opts: { stop: true, due: true, dueChange: false, minFill: true, min: false, monthlyFill: true, monthly: false, flag: true } })) };
+  DR.scan = null; render(); window.scrollTo(0, 0);
+}
+function invRowStatus(row, mk) {
+  const p = row.pid && row.pid !== "__new" ? INV.products.get(row.pid) : null;
+  if (!p && row.pid !== "__new") return { st: "needs", cells: {}, ch: [] };
+  const saved = p ? monthCounts(mk, row.pid) : {}; const cells = {}; let n = 0, same = 0, c = 0, bad = 0;
+  for (const [d, raw] of Object.entries(row.vals)) {
+    if (Number(d) > daysIn(mk)) continue; const v = parseCount(raw); if (v == null) continue;
+    if (Number.isNaN(v) || v < 0) { cells[d] = { st: "bad" }; bad++; continue; }
+    const sv = saved[d]; if (sv == null) { cells[d] = { st: "new", v }; n++; } else if (Math.abs(sv - v) < 1e-9) { cells[d] = { st: "same", v }; same++; } else { cells[d] = { st: "conflict", v, sv }; c++; }
+  }
+  const ch = [];
+  if (p && canInvManage()) {
+    if (row.stop && p.status !== "stopped") ch.push("stop");
+    if (row.due && dueOf(p) !== row.due) ch.push(dueOf(p) ? "due-change" : "due");
+    const mn = leadNum(row.min), mu = leadNum(row.monthly);
+    if (mn != null && mn !== p.min_level) ch.push(p.min_level == null ? "min" : "min-change");
+    if (mu != null && mu !== p.monthly_use) ch.push(p.monthly_use == null ? "monthly" : "monthly-change");
+  }
+  if (p && row.circled.length && !INV.months.get(mk)?.flags?.[row.pid]) ch.push("flag");
+  const st = row.pid === "__new" ? "new" : bad ? "check" : c ? "conflict" : n || ch.some((x) => !x.endsWith("-change")) ? "new" : ch.length ? "conflict" : "same";
+  return { st, cells, ch, n, same, c, bad };
+}
+function invReviewView() {
+  const R = INV.review; const s = INV.scans.get(R.id); const local = scanBlobs.get(R.id) || [];
+  const urls = local.length ? (R.urls = R.urls || local.map((b) => URL.createObjectURL(b))) : (s?.pages || []).map((a) => "/_blob/" + a);
+  const st = R.rows.map((row) => ({ row, s: invRowStatus(row, R.month) }));
+  const sum = (k) => st.reduce((a, x) => a + (x.s[k] || 0), 0); const needs = st.filter((x) => x.s.st === "needs").length;
+  const shown = R.showAll ? st : st.filter((x) => x.s.st !== "same");
+  return `<div class="row-between"><button class="btn-link" data-act="iscan-back">‹ Back</button><h1 style="flex:1">Check stock register</h1></div>
+  <div class="scan-review">
+    <div class="scan-pane">${urls.length ? `<div class="scan-carousel" id="scan-carousel">${urls.map((u, i) => `<button class="scan-page" data-act="scan-zoom" data-src="${esc(u)}" aria-label="Page ${i + 1}, open full screen"><img src="${esc(u)}" alt="Register page ${i + 1}"><span class="pill">Page ${i + 1} of ${urls.length}</span></button>`).join("")}</div>` : `<p class="small muted">The page images are not on this device.</p>`}</div>
+    <div class="scan-fields">
+      <section class="card"><div class="dates"><label class="field"><span>Register month</span><input class="inp" type="month" id="iscan-month" value="${esc(R.month)}"></label>
+        <div class="small muted" style="align-self:end">${R.readMonth ? `Read as ${esc(monthLabel(R.readMonth))}` : "No month found on the pages"}</div></div>
+        <p class="small"><b>${sum("n")}</b> counts to add · <b>${sum("same")}</b> already saved · <b class="${sum("c") ? "bad-ink" : ""}">${sum("c")}</b> differ${needs ? ` · <b class="bad-ink">${needs} row${needs === 1 ? "" : "s"} need a product</b>` : ""}${sum("bad") ? ` · <b class="bad-ink">${sum("bad")} unreadable</b>` : ""}</p>
+        <p class="small muted">${R.rows.length} rows read. Counts that differ keep what is saved unless you pick the scan. Nothing is saved until you press Save.</p>
+        <label class="pick small"><input type="checkbox" id="iscan-all" ${R.showAll ? "checked" : ""}> Show rows that are already saved too</label></section>
+      <section class="card">${shown.map(({ row, s: rs }) => invReviewRow(row, rs, R.month)).join("") || `<p class="muted">Every row is already saved. Nothing to add.</p>`}</section>
+      ${R.unmatched.length ? `<section class="card"><h2>Other writing on the pages</h2><ul class="dr-list">${R.unmatched.map((u) => `<li>${esc(u)}</li>`).join("")}</ul></section>` : ""}
+      <div class="scan-actions"><button class="btn btn-primary" data-act="iscan-save">Save to ${esc(monthLabel(R.month))}</button><button class="btn btn-danger" data-act="iscan-discard">Discard</button></div>
+      ${R.confirmDiscard ? `<div class="note bad confirm"><span>Discard this scan? Its pages are deleted and nothing is saved.</span><button class="btn btn-danger" data-act="iscan-discard-yes">Discard</button><button class="btn btn-ghost" data-act="iscan-discard-no">Keep</button></div>` : ""}
+    </div>
+  </div>`;
+}
+const CH_LABEL = { stop: () => "Mark as stopped (STOP written)", due: (r) => `Set expected delivery ${dmy(r.due)}`, "due-change": (r, p) => `Change expected delivery ${dmy(dueOf(p))} → ${dmy(r.due)}`,
+  min: (r) => `Set minimum level ${leadNum(r.min)}`, "min-change": (r, p) => `Change minimum level ${fmtCount(p.min_level)} → ${leadNum(r.min)}`,
+  monthly: (r) => `Set monthly use ${leadNum(r.monthly)}`, "monthly-change": (r, p) => `Change monthly use ${fmtCount(p.monthly_use)} → ${leadNum(r.monthly)}`, flag: (r) => `Mark low stock (pencil circle on day ${r.circled.join(", ")})` };
+/** Filling an empty field is on by default; changing a saved value is off until ticked. */
+const CH_OPT = { stop: "stop", due: "due", "due-change": "dueChange", min: "minFill", "min-change": "min", monthly: "monthlyFill", "monthly-change": "monthly", flag: "flag" };
+function invReviewRow(row, rs, mk) {
+  const p = row.pid && row.pid !== "__new" ? INV.products.get(row.pid) : null; const [lab, tone] = ({ new: ["Adds counts", "ok"], same: ["Already saved", ""], conflict: ["Differs: choose", "bad"], needs: ["Needs a product", "bad"], check: ["Unreadable count", "bad"] })[rs.st];
+  const days = Object.keys(row.vals).map(Number).sort((a, b) => a - b);
+  return `<div class="scan-item conf-${row.conf} st-${rs.st}" data-page="${row.page || ""}" data-irow="${row.id}">
+    <div class="row-between"><b>${esc(p ? `${p.sno} · ${p.name}` : row.pid === "__new" ? `New: ${row.name || row.raw}` : `${row.sno ?? "?"} · ${row.name || row.raw}`)}</b><span class="scan-pills">${row.conf !== "high" ? `<span class="pill ${row.conf === "low" ? "bad" : "warn"}">${row.conf === "low" ? "Please check" : "Check"}</span>` : ""}<span class="pill ${tone}">${lab}</span></span></div>
+    ${row.raw && fuzzyKey(row.raw) !== fuzzyKey(p?.name || "") ? `<div class="small muted">Written: “${esc(row.raw)}”</div>` : ""}
+    ${!p ? `<label class="field"><span>Match to product</span><select class="inp" data-imatch="${row.id}"><option value="">— leave out —</option>${canInvManage() ? `<option value="__new" ${row.pid === "__new" ? "selected" : ""}>Add as a new product</option>` : ""}${sortedProducts(true).map(([pid, x]) => `<option value="${esc(pid)}">${esc(`${x.sno} · ${x.name}`)}</option>`).join("")}</select></label>` : ""}
+    ${days.length ? `<div class="iscan-cells">${days.map((d) => { const c = rs.cells[d] || {}; return `<label class="iscan-cell st-${c.st || "none"} ${row.circled.includes(d) ? "circled" : ""}"><span>${d}${row.circled.includes(d) ? " ◯" : ""}</span><input class="inp" data-iv="${row.id}" data-d="${d}" value="${esc(row.vals[d])}" aria-label="Day ${d} count${c.st === "conflict" ? `, saved ${fmtCount(c.sv)}` : ""}">${c.st === "conflict" ? `<small>saved ${fmtCount(c.sv)}</small>` : c.st === "bad" ? `<small>unreadable</small>` : ""}</label>`; }).join("")}</div>` : `<p class="small muted">No counts written.</p>`}
+    ${(rs.ch || []).map((k) => `<label class="pick small"><input type="checkbox" data-iopt="${row.id}" data-k="${CH_OPT[k]}" ${row.opts[CH_OPT[k]] ? "checked" : ""}> ${esc(CH_LABEL[k](row, p))}</label>`).join("")}
+    ${rs.c ? `<div class="seg" role="group" aria-label="Which counts to keep"><button data-act="iscan-choice" data-id="${row.id}" data-v="keep" aria-pressed="${row.choice === "keep"}">Keep saved</button><button data-act="iscan-choice" data-id="${row.id}" data-v="scan" aria-pressed="${row.choice === "scan"}">Use scan</button></div>` : ""}
+  </div>`;
+}
+async function saveInvReview() {
+  const R = INV.review; const mk = R.month; const now = nowISO(); const counts = {}, src = {}, flags = {}; let added = 0, same = 0, kept = 0, prodN = 0;
+  try {
+    for (const row of R.rows) {
+      let rs = invRowStatus(row, mk); if (rs.st === "needs" || !row.pid) continue; let pid = row.pid;
+      if (pid === "__new") {
+        if (!canInvManage()) continue; pid = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+        const sno = row.sno && ![...INV.products.values()].some((x) => Number(x.sno) === row.sno) ? row.sno : nextSno();
+        await invWrite("set", `${INV_PRODUCTS}/${pid}`, { sno, name: row.name || row.raw, category: "", unit: leadUnit(row.monthly), min_level: leadNum(row.min), monthly_use: leadNum(row.monthly), opening_stock: null, expected_delivery: row.due || null, batch: "", status: row.stop ? "stopped" : "active", notes: "Added from a register scan", archived: false, created_at: now, created_by: S.uid });
+        prodN++; rs = invRowStatus({ ...row, pid }, mk);
+      }
+      for (const [d, c] of Object.entries(rs.cells)) {
+        if (c.st === "same") { same++; continue; } if (c.st === "bad") continue;
+        if (c.st === "conflict" && row.choice !== "scan") { kept++; continue; }
+        (counts[pid] ||= {})[d] = c.v; (src[pid] ||= {})[d] = R.id; added++;
+      }
+      const p = INV.products.get(pid); const upd = {};
+      for (const k of rs.ch || []) {
+        if (!row.opts[CH_OPT[k]]) continue;
+        if (k === "stop") upd.status = "stopped"; if (k === "due" || k === "due-change") upd.expected_delivery = row.due;
+        if (k.startsWith("min")) upd.min_level = leadNum(row.min); if (k.startsWith("monthly")) upd.monthly_use = leadNum(row.monthly);
+        if (k === "flag") flags[pid] = true;
+      }
+      if (Object.keys(upd).length && p && canInvManage()) { await invWrite("update", `${INV_PRODUCTS}/${pid}`, { ...upd, updated_at: now }); prodN++; }
+    }
+    if (Object.keys(counts).length || Object.keys(flags).length) {
+      const snap = navigator.onLine ? await S.caps.db.doc(`${INV_MONTHS}/${mk}`).get().catch(() => null) : null;   // never replace a month that already exists
+      if (INV.months.has(mk) || snap?.exists) await invWrite("update", `${INV_MONTHS}/${mk}`, { counts, src, flags });
+      else await invWrite("set", `${INV_MONTHS}/${mk}`, { counts, src, flags, started_at: now, started_by: S.uid });
+    }
+    await invWrite("update", `${INV_SCANS}/${R.id}`, { status: "saved", saved_at: now, saved_month: mk, saved_counts: { added, same, kept, products: prodN } });
+    writeAudit("inventory.scan_save", null, R.id, null, { month: mk, added, same, kept });
+  } catch (e) { flash(dbErrorText(e).replace("save this bill", "save the register scan")); return; }
+  (R.urls || []).forEach((u) => URL.revokeObjectURL(u));
+  INV.review = null; INV.view = "register"; INV.regMonth = mk;
+  flash(`Saved the register scan to ${monthLabel(mk)}: ${added} count${added === 1 ? "" : "s"} added, ${same} already there${kept ? `, ${kept} kept as entered` : ""}${prodN ? `, ${prodN} product${prodN === 1 ? "" : "s"} updated` : ""}.`);
+  render(); window.scrollTo(0, 0);
+}
+function invScansView() {
+  const list = [...INV.scans.entries()].map(([id, s]) => ({ id, ...s })).sort((a, b) => (b.created_at || "").localeCompare(a.created_at || "")).slice(0, 12);
+  if (!list.length) return ""; const ro = !canInvCount();
+  return `<section class="card"><h2>Register scans</h2>${list.map((s) => `<div class="scan-row">
+    <div><b>📷 ${s.created_at ? new Date(s.created_at).toLocaleString("en-IN", { day: "2-digit", month: "2-digit", hour: "numeric", minute: "2-digit" }) : ""}</b> <span class="small muted">${esc(monthLabel(s.saved_month || s.month || monthKey(invTodayISO())))} · ${s.page_count || 0} page${s.page_count === 1 ? "" : "s"}${s.saved_counts ? ` · ${s.saved_counts.added} counts added` : ""}</span>
+      <span class="pill ${s.status === "review" ? "warn" : s.status === "failed" ? "bad" : s.status === "saved" ? "ok" : ""}">${SCAN_STATUS[s.status] || s.status}</span>${s.error ? `<div class="small bad-ink">${esc(s.error)}</div>` : ""}</div>
+    ${!ro ? `<div class="dr-mact">${s.result ? `<button class="btn-link" data-act="iscan-open" data-id="${esc(s.id)}">${s.status === "review" ? "Review" : "Open"}</button>` : ""}${s.status !== "reading" ? `<button class="btn-link" data-act="scan-reread" data-id="${esc(s.id)}">${s.status === "pending" ? "Read now" : "Re-read"}</button>` : ""}<button class="btn-link danger-text" data-act="iscan-del" data-id="${esc(s.id)}">Delete</button></div>` : ""}
+    ${INV.scanConfirm === s.id ? `<div class="note bad confirm"><span>Delete this scan?${s.status === "saved" ? " Counts already saved stay unless you remove them too." : ""}</span><button class="btn btn-danger" data-act="iscan-del-yes" data-id="${esc(s.id)}" data-remove="0">Delete scan</button>${s.status === "saved" ? `<button class="btn btn-danger" data-act="iscan-del-yes" data-id="${esc(s.id)}" data-remove="1">Delete and remove its counts</button>` : ""}<button class="btn btn-ghost" data-act="iscan-del-no">Keep</button></div>` : ""}
+  </div>`).join("")}</section>`;
+}
+async function invDeleteScan(id, removeValues) {
+  const s = INV.scans.get(id); INV.scanConfirm = null;
+  try {
+    if (removeValues) for (const [mk, m] of INV.months) {
+      const counts = {}, src = {}; for (const [pid, days] of Object.entries(m.src || {})) for (const [d, sid] of Object.entries(days || {})) if (sid === id) { (counts[pid] ||= {})[d] = null; (src[pid] ||= {})[d] = null; }
+      if (Object.keys(counts).length) await invWrite("update", `${INV_MONTHS}/${mk}`, { counts, src });
+    }
+    await invWrite("delete", `${INV_SCANS}/${id}`); await idbScan.del(id); scanBlobs.delete(id);
+    if (S.caps.assets) for (const a of [...(s?.pages || []), ...(s?.pdfs || [])]) S.caps.assets.delete(a).catch(() => {});
+    writeAudit("inventory.scan_delete", null, id, null, { removed_values: !!removeValues });
+    flash(removeValues ? "Scan and its counts removed." : "Scan deleted. Saved counts stay.");
+  } catch (e) { flash(dbErrorText(e)); }
+  render();
+}
+document.addEventListener("click", async (e) => {
+  const t = e.target.closest("[data-act]"); if (!t || !t.dataset.act.startsWith("iscan-")) return;
+  const a = t.dataset.act; const R = INV.review; const id = t.dataset.id;
+  switch (a) {
+    case "iscan-open": openInvReview(id); break;
+    case "iscan-back": (R?.urls || []).forEach((u) => URL.revokeObjectURL(u)); INV.review = null; render(); break;
+    case "iscan-choice": R.rows.find((x) => x.id === id).choice = t.dataset.v; render(); break;
+    case "iscan-save": t.disabled = true; saveInvReview(); break;
+    case "iscan-discard": R.confirmDiscard = true; render(); break;
+    case "iscan-discard-no": R.confirmDiscard = false; render(); break;
+    case "iscan-discard-yes": { const sid = R.id; (R.urls || []).forEach((u) => URL.revokeObjectURL(u)); INV.review = null; await invDeleteScan(sid, false); break; }
+    case "iscan-del": INV.scanConfirm = id; render(); break;
+    case "iscan-del-no": INV.scanConfirm = null; render(); break;
+    case "iscan-del-yes": invDeleteScan(id, t.dataset.remove === "1"); break;
+  }
+});
+document.addEventListener("input", (e) => { const t = e.target; if (INV.review && t.dataset.iv) { const row = INV.review.rows.find((x) => x.id === t.dataset.iv); if (row) row.vals[t.dataset.d] = t.value; } });
+document.addEventListener("change", (e) => {
+  const t = e.target; const R = INV.review; if (!R) return;
+  if (t.dataset.iv) { const row = R.rows.find((x) => x.id === t.dataset.iv); row.vals[t.dataset.d] = t.value; render(); return; }
+  if (t.dataset.imatch) { const row = R.rows.find((x) => x.id === t.dataset.imatch); row.pid = t.value || null; render(); return; }
+  if (t.dataset.iopt) { R.rows.find((x) => x.id === t.dataset.iopt).opts[t.dataset.k] = t.checked; return; }
+  if (t.id === "iscan-all") { R.showAll = t.checked; render(); return; }
+  if (t.id === "iscan-month" && /^\d{4}-\d{2}$/.test(t.value)) { R.month = t.value; watchMonth(t.value); render(); }
 });
 
 boot();
