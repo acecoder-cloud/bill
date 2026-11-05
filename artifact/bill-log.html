@@ -493,6 +493,35 @@ pre.wa { margin: 0; padding: 12px; border-radius: 12px; background: var(--surfac
 .dr-list { margin: 2px 0 6px; padding-left: 20px; }
 .bad-ink { color: var(--bad-ink); }
 .pill.bad { background: var(--bad-bg); color: var(--bad-ink); }
+.scan-opts { display: flex; flex-direction: column; gap: 8px; }
+.scan-thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.scan-thumb { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.scan-thumb .thumb { width: 120px; height: 160px; }
+.scan-thumb figcaption { font-weight: 700; font-size: .86rem; }
+.scan-tact { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 2px; }
+.scan-tact .btn-link { min-height: 36px; padding: 0 6px; font-size: .84rem; }
+.scan-review { display: flex; flex-direction: column; gap: 12px; }
+.scan-pane { position: sticky; top: 0; z-index: 3; background: var(--bg, var(--surface)); padding: 4px 0; }
+.scan-carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 8px; border-radius: 12px; }
+.scan-page { position: relative; flex: 0 0 100%; scroll-snap-align: start; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); padding: 0; cursor: zoom-in; height: 36vh; overflow: hidden; }
+.scan-page img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.scan-page .pill { position: absolute; left: 8px; top: 8px; }
+.scan-fields { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+@media (min-width: 900px) { .scan-review { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; } .scan-pane { top: 8px; } .scan-page { height: calc(100vh - 140px); } }
+.scan-item { border-top: 1px solid var(--line); padding: 10px 0 10px 10px; display: flex; flex-direction: column; gap: 6px; border-left: 4px solid transparent; }
+.scan-item.conf-medium { border-left-color: var(--warn-line, #d9a400); }
+.scan-item.conf-low { border-left-color: var(--bad-line); background: color-mix(in srgb, var(--bad-bg) 45%, transparent); }
+.scan-item.st-same { opacity: .75; }
+.scan-pills { display: inline-flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+.pill.ok { background: var(--ok-bg); color: var(--ok-ink); }
+.field.is-conflict .inp { border-color: var(--bad-line); }
+.scan-saved { background: var(--surface-2); border-radius: 8px; padding: 6px 8px; overflow-wrap: anywhere; }
+.scan-flag { color: var(--bad-ink); }
+.scan-miss { color: var(--muted); }
+.scan-newname { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+.scan-newname select { min-height: 36px; }
+.scan-actions { position: sticky; bottom: calc(72px + env(safe-area-inset-bottom)); display: grid; grid-template-columns: 2fr 1fr; gap: 8px; background: var(--bg, var(--surface)); padding: 8px 0; z-index: 2; }
+.scan-row { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--line); padding-top: 8px; }
 .audit { display: flex; flex-direction: column; gap: 8px; }
 .audit details { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
 .audit summary { padding: 10px 12px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
@@ -543,6 +572,9 @@ pre.wa { margin: 0; padding: 12px; border-radius: 12px; background: var(--surfac
 </main>
 <nav class="tabs" aria-label="Sections"><div class="tabs-in" id="tabs"></div></nav>
 <input id="camera" type="file" accept="image/*" capture="environment" hidden>
+<input id="scan-cam" type="file" accept="image/*" capture="environment" hidden>
+<input id="scan-photos" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/*" multiple hidden>
+<input id="scan-pdf" type="file" accept="application/pdf,.pdf" multiple hidden>
 <input id="dr-photo-file" type="file" accept="image/*" multiple hidden>
 <input id="rou-import-file" type="file" accept=".csv,text/csv" hidden>
 <input id="acc-import-file" type="file" accept=".csv,text/csv" hidden>
@@ -1282,7 +1314,7 @@ function paintAdmin() {
   const team = $("#team"); if (team) paintNames(team).then(() => showLabelBoxes(team));
   const a = S.audit; const box = $("#audit-list"); if (!box || !a?.rows) return;
   if (!a.rows.length) { box.innerHTML = `<p class="muted">No activity yet.</p>`; return; }
-  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed", "roles.update": "Role permissions changed", "inventory.seed": "Stock register loaded", "inventory.add": "Product added", "inventory.edit": "Product edited", "inventory.archive": "Product archived", "inventory.restore": "Product restored", "inventory.delete": "Product deleted", "inventory.month": "Stock month started", "inventory.import": "Stock CSV imported", "inventory.delivered": "Order delivered", "accounts.add": "Account entry added", "accounts.edit": "Account entry edited", "accounts.delete": "Account entry deleted", "accounts.seed": "WhatsApp ledger imported", "accounts.import": "Account entries imported", "routine.add": "Visit logged", "routine.edit": "Visit edited", "routine.delete": "Visit deleted", "routine.merge": "People merged", "routine.seed": "Visitor log imported", "routine.import": "Visits imported", "routine.daily_seed": "Daily routine loaded", "routine.task_add": "Routine task added", "routine.task_delete": "Routine task deleted", "routine.plan": "Medicine/feed plan changed" };
+  const label = { "bill.create": "Bill created", "bill.update": "Bill edited", "bill.delete": "Bill deleted", "bill.paid": "Marked paid", "bill.unpaid": "Marked unpaid", "team.add": "User added", "team.role": "Role changed", "team.remove": "User removed", "roles.update": "Role permissions changed", "inventory.seed": "Stock register loaded", "inventory.add": "Product added", "inventory.edit": "Product edited", "inventory.archive": "Product archived", "inventory.restore": "Product restored", "inventory.delete": "Product deleted", "inventory.month": "Stock month started", "inventory.import": "Stock CSV imported", "inventory.delivered": "Order delivered", "accounts.add": "Account entry added", "accounts.edit": "Account entry edited", "accounts.delete": "Account entry deleted", "accounts.seed": "WhatsApp ledger imported", "accounts.import": "Account entries imported", "routine.add": "Visit logged", "routine.edit": "Visit edited", "routine.delete": "Visit deleted", "routine.merge": "People merged", "routine.seed": "Visitor log imported", "routine.import": "Visits imported", "routine.daily_seed": "Daily routine loaded", "routine.task_add": "Routine task added", "routine.task_delete": "Routine task deleted", "routine.plan": "Medicine/feed plan changed", "routine.scan_save": "Notebook scan saved", "routine.scan_delete": "Notebook scan deleted" };
   box.innerHTML = a.rows.map((r, i) => `<details><summary><b>${esc(label[r.action] || r.action)}</b>
     <span class="small muted">by <span data-uid="${esc(r.actor)}"></span> · ${esc(fmtDT(r.at))} · ${r.action === "roles.update" ? "Admin / Staff / Viewer permissions" : r.action.startsWith("inventory.") ? esc((r.after || r.before || {}).name || (r.after || {}).month || "Inventory") : r.action.startsWith("accounts.") ? (() => { const x = r.after || r.before || {}; return x.amount != null ? esc(`${x.type === "received" ? "received" : (x.lines || []).map((l) => l.name).join(" & ")} ${inr(x.amount)} on ${dmy(x.date)}`) : "Accounts"; })() : r.action.startsWith("team.") ? `<span data-uid="${esc((r.after || r.before || {}).member || "")}"></span>${r.after?.role ? " → " + esc(ROLES[r.after.role]?.label || r.after.role) : ""}` : `bill ${(r.after || r.before || {}).bill_no ? "No. " + esc((r.after || r.before).bill_no) + " of " : "of "}${esc(fmtDate((r.after || r.before || {}).bill_date))}`}</span></summary>
     <div class="pair"><div><div class="small muted">Before</div><pre data-json="b${i}"></pre></div><div><div class="small muted">After</div><pre data-json="a${i}"></pre></div></div></details>`).join("");
@@ -1337,7 +1369,7 @@ async function compressImage(file) {
 const PDFJS = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
 function isPdf(file) { return file.type === "application/pdf" || /\.pdf$/i.test(file.name || ""); }
 /** Turns the first pages of a PDF bill into JPEG images Claude can read. */
-async function pdfToImages(file, maxPages) {
+async function pdfToImages(file, maxPages, width = 1600) {
   await loadScript(PDFJS + "pdf.min.js");
   const lib = window.pdfjsLib; lib.GlobalWorkerOptions.workerSrc = PDFJS + "pdf.worker.min.js";
   let pdf;
@@ -1347,7 +1379,7 @@ async function pdfToImages(file, maxPages) {
   for (let i = 1; i <= Math.min(pdf.numPages, maxPages); i++) {
     const page = await pdf.getPage(i);
     const base = page.getViewport({ scale: 1 });
-    const vp = page.getViewport({ scale: Math.min(2.5, 1600 / base.width) });
+    const vp = page.getViewport({ scale: Math.min(2.5, width / Math.max(base.width, base.height) * (width === 1600 ? Math.max(base.width, base.height) / base.width : 1)) });
     const c = document.createElement("canvas"); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
     const ctx = c.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
     await page.render({ canvasContext: ctx, viewport: vp }).promise;
@@ -1956,7 +1988,7 @@ function applyLocal(op, path, data) {
   const map = col === INV_PRODUCTS ? INV.products : col === INV_MONTHS ? INV.months
     : col === "accounts/items/list" ? ACC.items : col === "accounts/tx/list" ? ACC.tx : col === "accounts/checks/list" ? ACC.checks
     : col === "routine/people/list" ? ROU.people : col === "routine/visits/list" ? ROU.visits
-    : col === "routine/tasks/list" ? DR.tasks : col === "routine/days/list" ? DR.days : col === "routine/plans/list" ? DR.plans : col === "routine/staff/list" ? DR.staff : col === "routine/updates/list" ? DR.updates : null;
+    : col === "routine/tasks/list" ? DR.tasks : col === "routine/days/list" ? DR.days : col === "routine/plans/list" ? DR.plans : col === "routine/staff/list" ? DR.staff : col === "routine/updates/list" ? DR.updates : col === "routine/scans/list" ? DR.scans : null;
   if (path === "inventory/settings") { INV.settings = op === "set" ? clone(data) : deepMerge(clone(INV.settings) || {}, data); return; }
   if (path === "routine/settings") { ROU.settings = op === "set" ? clone(data) : deepMerge(clone(ROU.settings) || {}, data); return; }
   if (path === "accounts/settings") { ACC.settings = op === "set" ? clone(data) : deepMerge(clone(ACC.settings) || {}, data); return; }
@@ -3690,7 +3722,7 @@ function rouChanged() {
   requestAnimationFrame(() => { rouQueued = false; if (S.tab !== "routine" || S.editor) return; if (rouBusy()) { ROU.stale = true; return; } ROU.stale = false; render(); });
 }
 function rouBusy() { return !!(ROU.form || ROU.personForm || ROU.importPreview || ROU.confirm || ROU.merge || document.activeElement?.closest?.(".rou-filters")
-  || DR.edit || DR.taskForm || DR.planForm || DR.onceForm || DR.updForm || DR.medEdit || DR.vitEdit || DR.drag || DR.confirm
+  || DR.edit || DR.taskForm || DR.planForm || DR.scan || DR.review || DR.onceForm || DR.updForm || DR.medEdit || DR.vitEdit || DR.drag || DR.confirm
   || document.activeElement?.matches?.("#main input:not([type=checkbox]), #main textarea, #main select")); }
 /* a change from another phone arrived while someone was typing: show it once they leave the field */
 document.addEventListener("focusout", () => { if (S.tab === "routine" && ROU.stale) setTimeout(() => { if (ROU.stale && S.tab === "routine" && !S.editor && !rouBusy()) { ROU.stale = false; render(); } }, 400); });
@@ -3796,14 +3828,15 @@ function importRows(rows, source) {
 /* ---------- views ---------- */
 function routineHead() {
   const pending = outbox().filter((w) => w.path.startsWith("routine/")).length;
-  return `<h1>Routine</h1>
+  const sp = scanPendingCount() + scanReviewCount();
+  return `<div class="row-between"><h1>Routine</h1>${canRouEdit() && scanOn() ? `<button class="btn btn-ghost" data-act="scan-open-capture">📷 Scan notebook${sp ? ` <span class="pill warn">${sp}</span>` : ""}</button>` : ""}</div>
   <div class="seg rou-menu" role="tablist" aria-label="Routine menu">${ROUTINE_SECTIONS.map(([k, l]) => `<button role="tab" data-act="rou-section" data-v="${k}" aria-selected="${ROU.section === k}" aria-pressed="${ROU.section === k}">${l}</button>`).join("")}</div>
   ${pending ? `<div class="note warn">${pending} change${pending === 1 ? "" : "s"} saved on this phone, waiting for a connection to sync.</div>` : ""}`;
 }
 function routineView() {
   if (ROU.form) return visitFormView();
   if (ROU.personForm) return personFormView();
-  if (ROU.section === "daily") return DR.taskForm || DR.planForm ? dailyView() : routineHead() + dailyView();
+  if (ROU.section === "daily") return DR.taskForm || DR.planForm || DR.scan || DR.review ? dailyView() : routineHead() + dailyView();
   if (!ROU.loaded.visits && !ROU.visits.size) return `${routineHead()}<div class="card"><div class="row-between"><span class="spin"></span><span class="muted">Loading…</span></div></div>`;
   return `${routineHead()}
   ${ROU.seeding ? `<div class="note">Importing the visitor log… ${ROU.seeding.done} of ${ROU.seeding.total}</div>` : ""}
@@ -4308,8 +4341,8 @@ const DR_SEED_STAFF = [["Mangai", "nurse"], ["Gayathri", "nurse"], ["Yokeshwari"
   ["Nandhini", "family"], ["Dharani", "family"], ["Dr Jothi", "doctor"], ["Dr Sushmitha", "doctor"], ["Dr Santhosham", "doctor", "Critical care"], ["Dr Hariharan", "therapist", "Physiotherapist"], ["Dr Vinothini", "therapist", "Special educator"]];
 const DR_SEED_UPDATES = [["Daily Routine", [["09:00", "10:00"]], ""], ["Inventory", [["11:00"]], ""], ["Ledger", [["09:00"], ["14:00"], ["21:00"]], ""], ["Pharmacy Bill", [["21:00"]], "Payment every 5 days"], ["Visitors log", [["21:00"]], ""], ["Towards", [["14:00"]], ""]];
 
-const DR = { tasks: new Map(), days: new Map(), plans: new Map(), staff: new Map(), updates: new Map(),
-  loaded: { tasks: false, days: false, plans: false, staff: false, updates: false },
+const DR = { tasks: new Map(), days: new Map(), plans: new Map(), staff: new Map(), updates: new Map(), scans: new Map(), scan: null, review: null, scanLimits: null,
+  loaded: { tasks: false, days: false, plans: false, staff: false, updates: false, scans: false },
   date: null, badge: 0, view: "day", mgr: "tasks", edit: null, taskForm: null, onceForm: null, planForm: null, updForm: null, medEdit: null, vitEdit: null,
   confirm: null, seeding: null, copied: null, trend: 7, trendTask: "", cal: "", tables: false, showArchived: false, drag: null, alerted: false, sig: "", qty: {} };
 
@@ -4433,7 +4466,8 @@ function drNotifyTick() {
 function drStart() {
   const db = S.caps.db;
   const sub = (col, key) => db.collection(col).onSnapshot((snap) => { DR[key] = new Map(snap.docs.map((d) => [d.id, clone(d.data())])); reapplyOutbox(col); if (!snap.metadata.fromCache) DR.loaded[key] = true; drChanged(); }, () => { DR.loaded[key] = true; drChanged(); });
-  sub(DR_TASKS, "tasks"); sub(DR_DAYS, "days"); sub(DR_PLANS, "plans"); sub(DR_STAFF, "staff"); sub(DR_UPD, "updates");
+  sub(DR_TASKS, "tasks"); sub(DR_DAYS, "days"); sub(DR_PLANS, "plans"); sub(DR_STAFF, "staff"); sub(DR_UPD, "updates"); sub(DR_SCANS, "scans");
+  S.caps.sample?.limits().then((l) => { DR.scanLimits = !!l?.images; }).catch(() => { DR.scanLimits = false; });
   setInterval(drTick, 30000);
 }
 let drTabsQueued = false;
@@ -4442,7 +4476,7 @@ function drBadgeSoon() {
   if (drTabsQueued) return; drTabsQueued = true;
   requestAnimationFrame(() => { drTabsQueued = false; const n = drAlertCount(); if (n !== DR.badge && !S.editor) { DR.badge = n; renderTabs(); } });
 }
-function drChanged() { drBadgeSoon(); drAlertOnOpen(); rouChanged(); }
+function drChanged() { drBadgeSoon(); drAlertOnOpen(); rouChanged(); if (DR.loaded.scans && !DR.pendingChecked) { DR.pendingChecked = true; setTimeout(processPendingScans, 1500); } }
 function drSig() { const d = todayISO(); return `${d}|${dayStatus(d).overdue}|${updSlots(d).map((s) => s.state[0]).join("")}`; }
 function drTick() {
   if (!S.caps?.db || !DR.loaded.tasks) return;
@@ -4529,6 +4563,8 @@ async function drSeed(auto) {
 /* ---------- views ---------- */
 function dailyView() {
   if (!DR.loaded.tasks || !DR.loaded.days) return `<div class="card"><div class="row-between"><span class="spin"></span><span class="muted">Loading the daily routine…</span></div></div>`;
+  if (DR.review && DR.scans.get(DR.review.id)) return reviewView();
+  if (DR.scan) return scanCaptureView();
   if (DR.taskForm) return taskFormView();
   if (DR.planForm) return planFormView();
   const n = drAlertCount();
@@ -4557,8 +4593,10 @@ function dayView() {
     ${ups.length ? `<button class="note warn dr-upnote" data-act="dr-view" data-v="updates"><b>${ups.length} family update${ups.length === 1 ? "" : "s"} to send:</b> ${esc(ups.map((s) => `${s.name} ${fmtTime(s.at)}${s.state === "overdue" ? " (overdue)" : ""}`).join(", "))}</button>` : ""}
     ${ro ? `<p class="small muted">Your role can view the routine only.</p>` : `<label class="field"><span>Recording as (fills “done by”)</span><input class="inp" list="dr-staff-list" id="dr-me" value="${esc(drMe())}" placeholder="Your name" autocomplete="off"></label>
       <div class="duo"><button class="btn btn-primary" data-act="dr-task-new">+ Add task</button><button class="btn btn-ghost" data-act="dr-once">+ Note/task for this day only</button></div>
+      ${scanOn() ? `<button class="btn btn-ghost btn-block" data-act="scan-open-capture">📷 Scan notebook${scanPendingCount() ? ` <span class="pill warn">${scanPendingCount()} pending</span>` : ""}${scanReviewCount() ? ` <span class="pill warn">${scanReviewCount()} to review</span>` : ""}</button>` : ""}
       ${DR.onceForm ? onceFormView() : ""}`}
   </section>
+  ${scansStrip(d, ro)}
   ${drSections(tasks).map((sec) => sectionView(sec, d, day, tasks, st, ro)).join("")}
   ${photosView(d, day, ro)}
   ${shareView(d)}`;
@@ -4580,7 +4618,7 @@ function sectionView(sec, d, day, tasks, st, ro) {
 function chipText(t, o) {
   const when = o.time ? fmtTime(o.time) + (o.end ? `–${fmtTime(o.end)}` : "") : o.slot ? slotName(o.slot) : "";
   const what = t.type === "value" ? withUnit(o.value, t.unit) : t.type === "item" ? o.item : "";
-  return [what, when, o.by].filter(Boolean).join(" · ") || "Done";
+  return (o.src ? "📷 " : "") + ([what, when, o.by].filter(Boolean).join(" · ") || "Done");
 }
 function taskRow(t, d, day, ro) {
   const { units, extra, occs } = taskUnits(t, d, day); const overdue = units.some((u) => u.state === "overdue");
@@ -4608,7 +4646,7 @@ function feedView(d, day, ro) {
   if (!us.length) return `<p class="small muted">No feed plan for this day. Set one in Manage → Medicines & feed.</p>`;
   return `<div class="dr-feed">${us.map((u) => { const open = DR.edit?.kind === "feed" && DR.edit.time === u.time;
     return `<div class="dr-frow ${u.state}"><span class="num dr-ftime">${fmtTime(u.time)}</span>
-      <span class="dr-fmain">${u.rec ? `<b>${esc(u.rec.item || "—")}</b> <span class="small muted">${esc([u.rec.by, u.rec.given_at && u.rec.given_at !== u.time ? "at " + fmtTime(u.rec.given_at) : ""].filter(Boolean).join(" · "))}</span>` : `<span>${esc(u.planned || "—")}</span>`}</span>
+      <span class="dr-fmain">${u.rec ? `${u.rec.src ? '<span title="From a notebook scan">📷</span> ' : ""}<b>${esc(u.rec.item || "—")}</b> <span class="small muted">${esc([u.rec.by, u.rec.given_at && u.rec.given_at !== u.time ? "at " + fmtTime(u.rec.given_at) : ""].filter(Boolean).join(" · "))}</span>` : `<span>${esc(u.planned || "—")}</span>`}</span>
       ${u.rec ? `<button class="dr-chip ${u.state}" data-act="dr-feed-edit" data-time="${u.time}" ${ro ? "disabled" : ""} aria-label="${fmtTime(u.time)} feed ${u.state === "done" ? "given" : "not given"}. Edit">${u.state === "done" ? "✅" : "❌"}</button>`
         : ro ? `<span class="small">${stateWord[u.state]}</span>` : `<button class="dr-chip ${u.state}" data-act="dr-feed-tap" data-time="${u.time}" aria-label="${fmtTime(u.time)} feed given">${u.state === "overdue" ? "⚠ Overdue · " : ""}Given</button>`}
     </div>${open ? editorView() : ""}`; }).join("")}</div>`;
@@ -4623,7 +4661,7 @@ function medsView(d, day, ro) {
       <div class="duo"><button class="btn btn-primary" type="submit">${u.rec ? "Save" : `${u.label} given`}</button>${DR.medEdit === u.slot ? `<button type="button" class="btn btn-ghost" data-act="dr-med-cancel">Cancel</button>` : ""}</div></form>`;
     return `<div class="dr-slot ${u.state}"><div class="row-between"><b>${u.label}</b>${u.rec && !ro ? `<button class="btn-link" data-act="dr-med-edit" data-slot="${u.slot}">Edit</button>` : ""}</div>
       ${u.list.map((m, i) => `<div class="small">${u.rec ? (u.rec.given?.[i] !== false ? "✅" : "❌") : "·"} ${esc(m)}</div>`).join("")}
-      <div class="small muted">${u.rec ? esc([byLabel(u.rec.by), u.rec.time ? fmtTime(u.rec.time) : ""].filter(Boolean).join(" · ")) : stateWord[u.state]}</div></div>`;
+      <div class="small muted">${u.rec ? (u.rec.src ? "📷 " : "") + esc([byLabel(u.rec.by), u.rec.time ? fmtTime(u.rec.time) : ""].filter(Boolean).join(" · ")) : stateWord[u.state]}</div></div>`;
   }).join("")}</div>`;
 }
 const VITAL_SHORT = { Temperature: "T", Pulse: "PR", SpO2: "SpO2", BP: "BP" };
@@ -4638,13 +4676,13 @@ function vitalsView(d, day, tasks, ro) {
       <div class="dr-verr"></div>
       <div class="duo"><button class="btn btn-primary" type="submit">Save ${label.toLowerCase()} vitals</button>${DR.vitEdit === s ? `<button type="button" class="btn btn-ghost" data-act="dr-vit-cancel">Cancel</button>` : ""}</div></form>`;
     return `<div class="dr-slot ${state}"><div class="row-between"><b>${label}</b>${!ro ? `<button class="btn-link" data-act="dr-vit-edit" data-slot="${s}">Edit</button>` : ""}</div>
-      ${n ? `<div class="dr-vals">${recs.map(({ t, o }) => `<span><span class="small muted">${esc(VITAL_SHORT[t.name] || t.name)}</span> <b class="num">${o ? esc(o.value) : "—"}</b> <span class="small muted">${esc(t.unit || "")}</span></span>`).join("")}</div><div class="small muted">${esc(byLabel(by))}</div>` : `<p class="small muted">${stateWord[state]}</p>`}</div>`;
+      ${n ? `<div class="dr-vals">${recs.map(({ t, o }) => `<span><span class="small muted">${esc(VITAL_SHORT[t.name] || t.name)}</span> <b class="num">${o ? esc(o.value) : "—"}</b> <span class="small muted">${esc(t.unit || "")}</span></span>`).join("")}</div><div class="small muted">${recs.some((r) => r.o?.src) ? "📷 " : ""}${esc(byLabel(by))}</div>` : `<p class="small muted">${stateWord[state]}</p>`}</div>`;
   }).join("")}</div>`;
 }
 function doctorsView(d, day, ro) {
   const list = Object.entries(day.doctors || {}).filter(([, c]) => !c.deleted).sort((a, b) => (a[1].time || "99").localeCompare(b[1].time || "99"));
   const open = DR.edit?.kind === "doc";
-  return `${list.map(([id, c]) => `<div class="dr-doc"><button class="dr-text" data-act="dr-doc-edit" data-id="${esc(id)}" ${ro ? "disabled" : ""}><b>${esc(c.name || "Note")}</b>${c.time ? ` <span class="small muted">${fmtTime(c.time)}</span>` : ""}<br><span>${esc(c.comment)}</span></button>${open && DR.edit.id === id ? editorView() : ""}</div>`).join("") || `<p class="small muted">No comments yet.</p>`}
+  return `${list.map(([id, c]) => `<div class="dr-doc"><button class="dr-text" data-act="dr-doc-edit" data-id="${esc(id)}" ${ro ? "disabled" : ""}>${c.src ? "📷 " : ""}<b>${esc(c.name || "Note")}</b>${c.time ? ` <span class="small muted">${fmtTime(c.time)}</span>` : ""}<br><span>${esc(c.comment)}</span></button>${open && DR.edit.id === id ? editorView() : ""}</div>`).join("") || `<p class="small muted">No comments yet.</p>`}
     ${!ro ? (open && !DR.edit.id ? editorView() : `<button class="btn btn-ghost" data-act="dr-doc-new">+ Add comment</button>`) : ""}`;
 }
 function dayVisitors(d, ro) {
@@ -4719,14 +4757,14 @@ async function saveEdit() {
       if (e.fields.includes("text") && !String(v.text || "").trim()) return err("Write something first.");
       if (e.fields.includes("slot") && !v.slot && t.type === "value") return err("Pick the slot.");
       const occ = { task: e.tid, sched: v.sched || null, slot: v.slot || null, time: v.time || "", end: v.end || "", value, item: String(v.item || "").trim(), text: String(v.text || "").trim(),
-        by: String(v.by || "").trim(), note: String(v.note || "").trim(), done: v.done !== false, deleted: false, at: nowISO(), who: S.uid };
+        by: String(v.by || "").trim(), note: String(v.note || "").trim(), done: v.done !== false, deleted: false, at: nowISO(), who: S.uid, src: null };
       await dayWrite(d, { occ: { [e.id || drId("o")]: occ } }); await ensureStaff(occ.by);
     } else if (e.kind === "feed") {
-      await dayWrite(d, { feed: { [feedKey(e.time)]: { time: e.time, item: String(v.item || "").trim(), given_at: v.time || "", by: String(v.by || "").trim(), note: String(v.note || "").trim(), done: v.done !== false, deleted: false, at: nowISO() } } });
+      await dayWrite(d, { feed: { [feedKey(e.time)]: { time: e.time, item: String(v.item || "").trim(), given_at: v.time || "", by: String(v.by || "").trim(), note: String(v.note || "").trim(), done: v.done !== false, deleted: false, at: nowISO(), src: null } } });
       await ensureStaff(v.by);
     } else if (e.kind === "doc") {
       if (!String(v.comment || "").trim()) return err("Write the comment.");
-      await dayWrite(d, { doctors: { [e.id || drId("c")]: { name: String(v.name || "").trim(), time: v.time || "", comment: v.comment.trim(), by: drMe(), deleted: false, at: nowISO() } } });
+      await dayWrite(d, { doctors: { [e.id || drId("c")]: { name: String(v.name || "").trim(), time: v.time || "", comment: v.comment.trim(), by: drMe(), deleted: false, at: nowISO(), src: null } } });
       await ensureStaff(v.name, "doctor");
     }
   } catch (x) { return err(dbErrorText(x).replace("save this bill", "save this")); }
@@ -4812,6 +4850,7 @@ async function drPdf(d) {
       body: s.rows.map((r) => [r.name, r.when || "", r.detail || "", word(r) + (r.count ? ` (${r.count})` : ""), r.by || ""]) });
     y = doc.lastAutoTable.finalY + 10;
   }
+  await scanPdfAppendix(doc, d);   // the notebook pages, as scanned
   return doc.output("blob");
 }
 function drCsv() {
@@ -4914,8 +4953,8 @@ function calendarView() {
 
 /* --- manage: tasks, medicines & feed, staff --- */
 function manageView() {
-  return `<div class="seg" role="group" aria-label="Manage">${[["tasks", "Tasks"], ["plans", "Medicines & feed"], ["staff", "Staff"]].map(([v, l]) => `<button data-act="dr-mgr" data-v="${v}" aria-pressed="${DR.mgr === v}">${l}</button>`).join("")}</div>
-  ${DR.mgr === "plans" ? plansView() : DR.mgr === "staff" ? staffView() : manageTasksView()}`;
+  return `<div class="seg" role="group" aria-label="Manage">${[["tasks", "Tasks"], ["plans", "Medicines & feed"], ["staff", "Staff"], ["scan", "Scanning"]].map(([v, l]) => `<button data-act="dr-mgr" data-v="${v}" aria-pressed="${DR.mgr === v}">${l}</button>`).join("")}</div>
+  ${DR.mgr === "plans" ? plansView() : DR.mgr === "staff" ? staffView() : DR.mgr === "scan" ? scanSettingsView() : manageTasksView()}`;
 }
 function taskStatus(t) { const d = todayISO(); return t.archived_from && d >= t.archived_from ? "archived" : t.paused_from && d >= t.paused_from ? "paused" : t.kind === "once" && t.date < d ? "past" : "active"; }
 function manageTasksView() {
@@ -5162,7 +5201,7 @@ document.addEventListener("change", async (e) => {
   if (t.id === "dr-date" && isISODate(t.value)) { DR.date = t.value; DR.edit = null; DR.copied = null; t.blur(); render(); return; }
   if (t.id === "dr-me") { try { localStorage.setItem("pbl-dr-me", t.value.trim()); } catch {} ensureStaff(t.value).catch(() => {}); return; }
   if (t.id === "dr-trend-task") { DR.trendTask = t.value; render(); return; }
-  if (t.dataset.note) { try { await dayWrite(d, { notes: { [t.dataset.note]: t.value.trim() } }); } catch (x) { flash(dbErrorText(x)); } return; }
+  if (t.dataset.note) { try { await dayWrite(d, { notes: { [t.dataset.note]: t.value.trim() }, notes_src: { [t.dataset.note]: null } }); } catch (x) { flash(dbErrorText(x)); } return; }
   if (t.dataset.staffRole) { try { await rouWrite("update", `${DR_STAFF}/${t.dataset.staffRole}`, { role: t.value }); } catch (x) { flash(dbErrorText(x)); } return; }
   if (t.id === "dr-photo-file") {
     const files = [...(t.files || [])]; t.value = ""; if (!files.length || !S.caps.assets) return;
@@ -5185,7 +5224,7 @@ document.addEventListener("submit", async (e) => {
   if (f.dataset.mslot) {
     e.preventDefault(); const slot = f.dataset.mslot; const u = medUnits(d).find((x) => x.slot === slot); const by = f.querySelector("[data-mby]").value.trim();
     const given = u.list.map((m, i) => !!f.querySelector(`[data-med="${i}"]`)?.checked);
-    try { await dayWrite(d, { meds: { [slot]: { list: u.list, given, by, time: u.rec?.time || (d === todayISO() ? nowHM() : ""), done: true, deleted: false, at: nowISO() } } }); await ensureStaff(by, "nurse"); } catch (x) { flash(dbErrorText(x)); return; }
+    try { await dayWrite(d, { meds: { [slot]: { list: u.list, given, by, time: u.rec?.time || (d === todayISO() ? nowHM() : ""), done: true, deleted: false, at: nowISO(), src: null } } }); await ensureStaff(by, "nurse"); } catch (x) { flash(dbErrorText(x)); return; }
     DR.medEdit = null; render();
   }
   if (f.dataset.vslot) {
@@ -5194,10 +5233,11 @@ document.addEventListener("submit", async (e) => {
       const t = drTask(inp.dataset.vt); const value = inp.value.trim().replace(/\s+/g, ""); const old = occsFor(day, t.id).find((o) => o.slot === slot);
       if (value && t.unit === "mmHg" && !/^\d{2,3}\/\d{2,3}$/.test(value)) { f.querySelector(".dr-verr").innerHTML = `<div class="note bad">Write BP like 110/70.</div>`; return; }
       if (value && t.unit !== "mmHg" && !Number.isFinite(parseFloat(value))) { f.querySelector(".dr-verr").innerHTML = `<div class="note bad">${esc(t.name)} should be a number.</div>`; return; }
-      if (value) occ[old?.id || drId("o")] = { task: t.id, sched: null, slot, time: old?.time || (d === todayISO() ? nowHM() : ""), end: "", value, item: "", text: "", by, note: old?.note || "", done: true, deleted: false, at: nowISO(), who: S.uid };
+      if (value && old && old.value === value && (old.by || "") === by) continue;   // unchanged: keep its source
+      if (value) occ[old?.id || drId("o")] = { task: t.id, sched: null, slot, time: old?.time || (d === todayISO() ? nowHM() : ""), end: "", value, item: "", text: "", by, note: old?.note || "", done: true, deleted: false, at: nowISO(), who: S.uid, src: null };
       else if (old) occ[old.id] = { deleted: true };
     }
-    if (!Object.keys(occ).length) { f.querySelector(".dr-verr").innerHTML = `<div class="note bad">Enter at least one reading.</div>`; return; }
+    if (!Object.keys(occ).length) { if (f.querySelector("[data-vt]") && [...f.querySelectorAll("[data-vt]")].some((i) => i.value.trim())) { DR.vitEdit = null; render(); return; } f.querySelector(".dr-verr").innerHTML = `<div class="note bad">Enter at least one reading.</div>`; return; }
     try { await dayWrite(d, { occ }); await ensureStaff(by, "nurse"); } catch (x) { flash(dbErrorText(x)); return; }
     DR.vitEdit = null; render();
   }
@@ -5215,6 +5255,563 @@ document.addEventListener("submit", async (e) => {
     if (staffByName(name)) { flash(`${name} is already in the list.`); return; }
     try { await rouWrite("set", `${DR_STAFF}/${drId("s")}`, { name, role: $("#dr-staff-role").value, detail: "", archived: false, created_at: nowISO() }); flash(`${name} added.`); } catch (x) { flash(dbErrorText(x)); }
     render();
+  }
+});
+
+/* ================= Scan notebook → Daily Routine (photo or PDF → reviewed, merged day) ================= */
+/* routine/scans/list/<id>  {date, status: pending|reading|review|saved|failed, pages: [assetId], pdfs: [assetId], page_count, source,
+                             result (normalised reading), error, tier, created_at, created_by, by, saved_at, saved_date, saved_counts}
+   Values written from a scan carry src: <scan id> (occurrences, feeds, medicines, doctor's comments, notes_src) so they show 📷
+   and can be removed with the scan. Hand edits set src back to null. Pages waiting to be read offline live in IndexedDB. */
+const DR_SCANS = "routine/scans/list";
+const SCAN_STATUS = { pending: "Pending reading", reading: "Reading…", review: "Needs review", saved: "Saved", failed: "Couldn't read" };
+const scanBlobs = new Map();   // scan id -> page blobs kept for this session (re-read, print appendix)
+const idbScan = {
+  db: null,
+  async open() { if (this.db) return this.db; this.db = await new Promise((res, rej) => { const r = indexedDB.open("pbl-scans", 1); r.onupgradeneeded = () => r.result.createObjectStore("pages"); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); return this.db; },
+  async run(mode, fn) { const db = await this.open(); return new Promise((res, rej) => { const tx = db.transaction("pages", mode); const q = fn(tx.objectStore("pages")); tx.oncomplete = () => res(q?.result); tx.onerror = () => rej(tx.error); }); },
+  put(k, v) { return this.run("readwrite", (s) => s.put(v, k)).catch(() => null); },
+  get(k) { return this.run("readonly", (s) => s.get(k)).catch(() => null); },
+  del(k) { return this.run("readwrite", (s) => s.delete(k)).catch(() => null); },
+};
+function scanOn() { return ROU.settings.scan_enabled !== false; }
+function scansFor(d) { return [...DR.scans.entries()].map(([id, s]) => ({ id, ...s })).filter((s) => (s.saved_date || s.date) === d).sort((a, b) => (a.created_at || "").localeCompare(b.created_at || "")); }
+function scanPendingCount() { return [...DR.scans.values()].filter((s) => s.status === "pending" || s.status === "reading" || s.status === "failed").length; }
+function scanReviewCount() { return [...DR.scans.values()].filter((s) => s.status === "review").length; }
+
+/* ---------- capture ---------- */
+function openScan() {
+  if (!scanOn()) { flash("Scanning the notebook is turned off in Manage → Scanning."); return; }
+  ROU.section = "daily"; DR.view = "day"; DR.scan = { date: drDate(), pages: [], busy: false, err: "", camera: false, notice: false };
+  render(); window.scrollTo(0, 0);
+}
+/** Straighten (EXIF), shrink to ~2000 px on the long side, lift contrast a little, JPEG 0.85. */
+async function prepPage(file) {
+  let src;
+  try { src = await createImageBitmap(file, { imageOrientation: "from-image" }); }
+  catch { src = await new Promise((res, rej) => { const u = URL.createObjectURL(file); const i = new Image(); i.onload = () => { URL.revokeObjectURL(u); res(i); }; i.onerror = () => { URL.revokeObjectURL(u); rej(new Error(`“${file.name || "That photo"}” can't be opened here. Use a JPG or PNG photo.`)); }; i.src = u; }); }
+  const w0 = src.naturalWidth || src.width, h0 = src.naturalHeight || src.height; const k = Math.min(1, 2000 / Math.max(w0, h0));
+  const c = document.createElement("canvas"); c.width = Math.round(w0 * k); c.height = Math.round(h0 * k);
+  const ctx = c.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height); ctx.filter = "contrast(1.15) brightness(1.03)"; ctx.imageSmoothingQuality = "high"; ctx.drawImage(src, 0, 0, c.width, c.height); src.close?.();
+  const blob = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.85)); if (!blob) throw new Error("The page couldn't be prepared."); return blob;
+}
+async function addScanFiles(files, source) {
+  const sc = DR.scan; if (!sc) return; sc.busy = true; sc.err = ""; render();
+  try {
+    for (const f of files) {
+      if (isPdf(f)) { const r = await pdfToImages(f, 12, 2000); for (const b of r.images) sc.pages.push({ blob: await prepPage(b), url: "", from: f.name || "PDF" }); sc.pdfs = [...(sc.pdfs || []), f]; if (r.pages > 12) sc.err = `Only the first 12 of ${r.pages} pages of ${f.name || "the PDF"} were added.`; }
+      else sc.pages.push({ blob: await prepPage(f), url: "", from: "photo" });
+    }
+    sc.source = [...new Set([...(sc.source ? sc.source.split("+") : []), source])].join("+");
+  } catch (e) { sc.err = e.message || "That file couldn't be added."; }
+  for (const p of sc.pages) if (!p.url) p.url = URL.createObjectURL(p.blob);
+  sc.busy = false; render();
+}
+function scanCaptureView() {
+  const sc = DR.scan; const n = sc.pages.length;
+  return `<div class="row-between"><button class="btn-link" data-act="scan-cancel">‹ Cancel</button><h1 style="flex:1">Scan notebook</h1></div>
+  <section class="card">
+    <p class="small muted">Photograph each notebook page, or upload the CamScanner PDF. Claude reads the handwriting; you check everything before it is saved.</p>
+    <div class="scan-opts">
+      <button class="sheet-opt" data-act="scan-cam">${ICON.cam}<span><b>${n && sc.camera ? "Add another page" : "Take photo"}</b><small>Rear camera, one page at a time</small></span></button>
+      <button class="sheet-opt" data-act="scan-photos">${ICON.upload}<span><b>Upload photos</b><small>Several pages from the gallery</small></span></button>
+      <button class="sheet-opt" data-act="scan-pdf">${ICON.upload}<span><b>Upload PDF</b><small>For example a CamScanner export</small></span></button>
+    </div>
+    ${sc.busy ? `<div class="row-between"><span class="spin"></span><span class="muted">Preparing pages…</span></div>` : ""}
+    ${sc.err ? `<div class="note warn">${esc(sc.err)}</div>` : ""}
+  </section>
+  ${n ? `<section class="card"><div class="row-between"><h2>${n} page${n === 1 ? "" : "s"}</h2>${sc.camera ? `<button class="btn btn-ghost" data-act="scan-cam-done">Done</button>` : ""}</div>
+    <div class="scan-thumbs">${sc.pages.map((p, i) => `<figure class="scan-thumb"><button class="thumb" data-act="scan-view" data-i="${i}" aria-label="View page ${i + 1}"><img src="${p.url}" alt=""></button>
+      <figcaption>Page ${i + 1}</figcaption>
+      <div class="scan-tact"><button class="btn-link" data-act="scan-move" data-i="${i}" data-n="-1" ${i === 0 ? "disabled" : ""} aria-label="Move page ${i + 1} earlier">◀</button><button class="btn-link" data-act="scan-move" data-i="${i}" data-n="1" ${i === n - 1 ? "disabled" : ""} aria-label="Move page ${i + 1} later">▶</button>
+        <button class="btn-link" data-act="scan-retake" data-i="${i}" aria-label="Retake page ${i + 1}">Retake</button><button class="btn-link danger-text" data-act="scan-del-page" data-i="${i}" aria-label="Delete page ${i + 1}">Delete</button></div></figure>`).join("")}</div>
+    ${!localNoticeSeen() || sc.notice ? `<div class="note warn"><b>Before the first scan:</b> the page images contain health information. They are sent to Claude (Anthropic) through claude.ai to read the handwriting, together with the staff, medicine, feed, task and visitor name lists. Nothing else is sent.</div>` : ""}
+    <button class="btn btn-primary btn-block" data-act="scan-read" ${sc.busy ? "disabled" : ""}>${navigator.onLine ? `Read ${n} page${n === 1 ? "" : "s"} with Claude` : `Save ${n} page${n === 1 ? "" : "s"} to read later (offline)`}</button>
+  </section>` : ""}`;
+}
+function localNoticeSeen() { try { return localStorage.getItem("pbl-scan-notice") === "1"; } catch { return false; } }
+
+/* ---------- reading ---------- */
+function scanRefs(date) {
+  const meds = planFor("meds", date)?.data?.slots || {}; const feed = planFor("feed", date)?.data?.items || [];
+  return { staff: staffList().map((s) => `${s.name} (${(STAFF_ROLES.find(([k]) => k === s.role) || [, s.role])[1]})`), medicines: Object.fromEntries(DR_SLOTS.map(([s, l]) => [l, meds[s] || []])),
+    rt_feed_plan: feed.map((x) => ({ time: fmtTime(x.time), feed: x.item })), tasks: allTasks().filter((t) => taskStatus(t) !== "archived").map((t) => `${t.name} (${t.section})`), visitor_names: activePeople().map((p) => p.name) };
+}
+function scanPrompt(date, n) {
+  return `These ${n} images are handwritten pages from a hospital patient's daily routine notebook (India). The pages may be in any order and may be partial: the notebook is scanned 3–4 times a day while it is being filled in.
+Read the date from the page header (written like "04/11/26"). If pages show different dates, list each page's date in "pages" and fill the rest for the main date only.
+Notebook sections: Daily routines (care done, cleaning, sleep), Nebulizer, RT feed timetable, Medication, Vitals, Oral feed, then (ii) Doctor's comment, (iii) Physio therapy, (iv) Visitors, (v) Room issues, (vi) Any improvement, (vii) Other discussion.
+"S/N Name" is the staff nurse who signed that slot. "T" is temperature (°F), "PR" is pulse rate.
+Match names to the reference lists below when the handwriting is close, and return the matched spelling; put what was actually written in "raw".
+Times: 12-hour "h:mm AM/PM". Keep ranges as from/to. Empty cells mean not recorded: return null, never guess.
+For every entry give "confidence": "high", "medium" or "low" (low = hard to read), and "page_index" (1-based image number) where it was written.
+Lines that fit no section go in "unmatched_text".
+Reply with only this JSON:
+{"pages":[{"page_index":1,"date":"04/11/2026","date_confidence":"high"}],"date":"04/11/2026",
+"care":[{"task":"Ward boy care","done_by":"Francis","from":"4:30 AM","to":"5:00 AM","details":"Bed sheet change","raw":"...","confidence":"high","page_index":1}],
+"nebulizer":{"morning":{"items":"Duolin + Mesna","staff_nurse":"Yokeshwari","confidence":"high","page_index":1},"afternoon":null,"night":null},
+"rt_feed":[{"time":"6:00 AM","feed":"Rice kanji","given_by":"Yokeshwari","confidence":"high","page_index":1}],
+"medication":{"morning":{"items":["Tab. B-Complex"],"staff_nurse":"Mangai","confidence":"medium","page_index":1},"afternoon":null,"night":null},
+"vitals":{"morning":{"temp_f":97.0,"pulse":82,"spo2":99,"bp":"110/70","sugar":null,"staff_nurse":"Mangai","confidence":"high","page_index":2},"afternoon":null,"night":null},
+"oral_feed":[{"meal":"Breakfast","item":"Pongal","time":"9:40 AM","confidence":"high","page_index":2}],
+"output":[{"type":"Urine","ml":600,"from":"8:00 AM","to":"10:40 AM","confidence":"medium","page_index":2}],
+"doctor_comments":[{"doctor":"Dr Santhosham","time":"5:25 PM","comment":"Advised to plan Friday decannulation","confidence":"medium","page_index":2}],
+"physio":[{"task":"Physiotherapy","by":"Dr Hariharan","from":"11:15 AM","to":"11:25 AM","details":null,"confidence":"high","page_index":2}],
+"visitors":[{"time":null,"name":null,"place":null,"type":null,"raw":"No visitors","confidence":"high","page_index":2}],
+"room_issues":"Restroom issue","improvements":"Writing practice","other_discussion":null,"unmatched_text":["any line that didn't fit a section"]}
+Reference lists from the app (JSON):
+${JSON.stringify(scanRefs(date))}`;
+}
+const scanStr = (x) => (x == null ? "" : String(x).trim());
+const scanConf = (x) => (["high", "medium", "low"].includes(x) ? x : "medium");
+function scanTime(x) { x = scanStr(x); if (!x) return ""; const t = to24(x); if (t) return t; const m = /^(\d{1,2})[:.](\d{2})$/.exec(x); return m ? `${m[1].padStart(2, "0")}:${m[2]}` : ""; }
+function scanDate(x) { const m = /^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2}|\d{4})$/.exec(scanStr(x)); if (!m) return isISODate(x) ? x : ""; const y = m[3].length === 2 ? "20" + m[3] : m[3]; const iso = `${y}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`; return isISODate(iso) ? iso : ""; }
+function scanNum(x) { if (x == null || x === "") return ""; const n = parseFloat(String(x).replace(/[^\d.]/g, "")); return Number.isFinite(n) ? String(n) : ""; }
+/** Turn whatever came back into a tidy, predictable shape (never trust the reply blindly). */
+function normScan(raw) {
+  const o = raw && typeof raw === "object" ? raw : {}; const arr = (x) => (Array.isArray(x) ? x.filter((r) => r && typeof r === "object") : []); const pg = (r) => (Number.isInteger(r?.page_index) ? r.page_index : null);
+  const slotObj = (x, f) => Object.fromEntries(DR_SLOTS.map(([s]) => [s, x && typeof x === "object" && x[s] && typeof x[s] === "object" ? f(x[s]) : null]));
+  return {
+    date: scanDate(o.date), pages: arr(o.pages).map((p) => ({ page: pg(p), date: scanDate(p.date), conf: scanConf(p.date_confidence) })),
+    care: arr(o.care).map((r) => ({ task: scanStr(r.task), by: scanStr(r.done_by), time: scanTime(r.from), end: scanTime(r.to), details: scanStr(r.details), raw: scanStr(r.raw), conf: scanConf(r.confidence), page: pg(r) })),
+    nebulizer: slotObj(o.nebulizer, (r) => ({ items: scanStr(Array.isArray(r.items) ? r.items.join(" + ") : r.items), by: scanStr(r.staff_nurse), conf: scanConf(r.confidence), page: pg(r) })),
+    rt_feed: arr(o.rt_feed).map((r) => ({ time: scanTime(r.time), item: scanStr(r.feed), by: scanStr(r.given_by), conf: scanConf(r.confidence), page: pg(r) })).filter((r) => r.time && (r.item || r.by)),
+    medication: slotObj(o.medication, (r) => ({ items: (Array.isArray(r.items) ? r.items : []).map(scanStr).filter(Boolean), by: scanStr(r.staff_nurse), conf: scanConf(r.confidence), page: pg(r) })),
+    vitals: slotObj(o.vitals, (r) => ({ temp: scanNum(r.temp_f), pulse: scanNum(r.pulse), spo2: scanNum(r.spo2), bp: /^\d{2,3}\s*\/\s*\d{2,3}$/.test(scanStr(r.bp)) ? scanStr(r.bp).replace(/\s+/g, "") : "", sugar: scanNum(r.sugar), by: scanStr(r.staff_nurse), conf: scanConf(r.confidence), page: pg(r) })),
+    oral_feed: arr(o.oral_feed).map((r) => ({ meal: scanStr(r.meal), item: scanStr(r.item), time: scanTime(r.time), conf: scanConf(r.confidence), page: pg(r) })).filter((r) => r.meal && (r.item || r.time)),
+    output: arr(o.output).map((r) => ({ type: scanStr(r.type) || "Urine", ml: scanNum(r.ml), time: scanTime(r.from), end: scanTime(r.to), conf: scanConf(r.confidence), page: pg(r) })),
+    doctor_comments: arr(o.doctor_comments).map((r) => ({ name: scanStr(r.doctor), time: scanTime(r.time), comment: scanStr(r.comment), conf: scanConf(r.confidence), page: pg(r) })).filter((r) => r.comment || r.name),
+    physio: arr(o.physio).map((r) => ({ task: scanStr(r.task), by: scanStr(r.by), time: scanTime(r.from), end: scanTime(r.to), details: scanStr(r.details), raw: scanStr(r.raw), conf: scanConf(r.confidence), page: pg(r) })).filter((r) => r.task),
+    visitors: arr(o.visitors).map((r) => ({ time: scanTime(r.time), name: scanStr(r.name), place: scanStr(r.place), type: /video/i.test(r.type || "") ? "video" : /voice|call/i.test(r.type || "") ? "voice" : "in_person", raw: scanStr(r.raw), conf: scanConf(r.confidence), page: pg(r) })),
+    notes: { room: scanStr(o.room_issues), improvement: scanStr(o.improvements), other: scanStr(o.other_discussion) },
+    unmatched: (Array.isArray(o.unmatched_text) ? o.unmatched_text : []).map(scanStr).filter(Boolean),
+  };
+}
+/** Several calls when there are more pages than one call takes; later readings fill gaps, lists are joined. */
+function mergeScanResults(rs) {
+  if (rs.length === 1) return rs[0]; const out = normScan({});
+  for (const r of rs) {
+    out.date = out.date || r.date; out.pages.push(...r.pages);
+    for (const k of ["care", "rt_feed", "oral_feed", "output", "doctor_comments", "physio", "visitors", "unmatched"]) out[k].push(...r[k]);
+    for (const k of ["nebulizer", "medication", "vitals"]) for (const [s] of DR_SLOTS) out[k][s] = out[k][s] || r[k][s];
+    for (const k of Object.keys(out.notes)) out.notes[k] = [out.notes[k], r.notes[k]].filter(Boolean).join("; ");
+  }
+  return out;
+}
+async function scanRead(blobs, date) {
+  const sample = S.caps.sample; if (!sample) throw { message: "Reading photos with Claude isn't available in this view." };
+  const lim = await sample.limits().catch(() => null); if (!lim?.images) throw { code: "images_unavailable" };
+  const per = Math.max(1, lim.images.maxCount || 5); const tier = ROU.settings.scan_model === "complex" ? "complex" : undefined; const results = [];
+  for (let i = 0; i < blobs.length; i += per) {
+    const chunk = blobs.slice(i, i + per);
+    results.push(normScan(await sample.json(scanPrompt(date, chunk.length) + (i ? `\nThese are pages ${i + 1}–${i + chunk.length}; number page_index from 1 within this set.` : ""), { images: chunk, ...(tier ? { modelTier: tier } : {}) })));
+    if (i) for (const k of ["care", "rt_feed", "oral_feed", "output", "doctor_comments", "physio", "visitors"]) for (const r of results.at(-1)[k]) if (r.page) r.page += i;
+  }
+  return mergeScanResults(results);
+}
+async function startScanRead() {
+  const sc = DR.scan; if (!sc?.pages.length) return;
+  if (!localNoticeSeen()) { if (!sc.notice) { sc.notice = true; render(); return; } try { localStorage.setItem("pbl-scan-notice", "1"); } catch {} }
+  const id = drId("sc"); const blobs = sc.pages.map((p) => p.blob); scanBlobs.set(id, blobs);
+  await idbScan.put(id, { pages: blobs, pdfs: sc.pdfs || [] });
+  try { await rouWrite("set", `${DR_SCANS}/${id}`, { date: sc.date, status: "pending", pages: [], pdfs: [], page_count: blobs.length, source: sc.source || "photo", result: null, error: "", created_at: nowISO(), created_by: S.uid, by: drMe() }); }
+  catch (e) { sc.err = dbErrorText(e); render(); return; }
+  for (const p of sc.pages) URL.revokeObjectURL(p.url);
+  DR.scan = null;
+  if (!navigator.onLine) { flash(`Saved ${blobs.length} page${blobs.length === 1 ? "" : "s"} as Pending reading. They will be read when you're back online.`); render(); return; }
+  render(); await readScan(id, true);
+}
+async function scanPageBlobs(id) {
+  if (scanBlobs.has(id)) return scanBlobs.get(id);
+  const local = await idbScan.get(id); if (local?.pages?.length) { scanBlobs.set(id, local.pages); return local.pages; }
+  const s = DR.scans.get(id); if (!s?.pages?.length) return [];
+  const blobs = await Promise.all(s.pages.map((a) => fetch("/_blob/" + a).then((r) => { if (!r.ok) throw new Error("page"); return r.blob(); })));
+  scanBlobs.set(id, blobs); return blobs;
+}
+const scanReading = new Set();
+/** Upload the pages (if not yet), read them with Claude, then wait for review. Safe to call again for pending scans. */
+async function readScan(id, openAfter) {
+  if (scanReading.has(id)) return; const path = `${DR_SCANS}/${id}`; let s = DR.scans.get(id); if (!s) return;
+  if (!navigator.onLine) return;
+  scanReading.add(id);
+  try {
+    const blobs = await scanPageBlobs(id).catch(() => []);
+    if (!blobs.length) { if (s.status === "pending") return; throw { message: "The page images aren't available on this phone." }; }
+    await rouWrite("update", path, { status: "reading", error: "" }); rouRefresh();
+    if (!s.pages?.length && S.caps.assets) {
+      const pages = []; for (const b of blobs) pages.push((await S.caps.assets.upload(b, { type: "image/jpeg" })).id);
+      const pdfs = []; for (const f of (await idbScan.get(id))?.pdfs || []) { try { pdfs.push((await S.caps.assets.upload(f, { type: "application/pdf" })).id); } catch {} }
+      await rouWrite("update", path, { pages, pdfs });
+    }
+    s = DR.scans.get(id);
+    const result = await scanRead(blobs, s.date);
+    await rouWrite("update", path, { status: "review", result, error: "", read_at: nowISO(), tier: ROU.settings.scan_model || "default" });
+    if (DR.scans.get(id)?.pages?.length) await idbScan.del(id);
+    if (openAfter && S.tab === "routine") openReview(id);
+    else flash("A notebook scan is ready to check. Open it from Notebook scans.");
+  } catch (e) {
+    const offline = !navigator.onLine || e?.code === "unavailable" || e?.code === "network";
+    await rouWrite("update", path, offline ? { status: "pending" } : { status: "failed", error: e?.code ? sampleErrorText(e) : e?.message || "The pages couldn't be read." }).catch(() => {});
+    if (!offline) flash("The notebook pages couldn't be read. Try Re-read, or retake clearer photos.");
+  } finally { scanReading.delete(id); rouRefresh(); }
+}
+async function processPendingScans() {
+  if (!navigator.onLine || !DR.loaded.scans) return;
+  for (const [id, s] of DR.scans) if (s.status === "pending" || (s.status === "reading" && !scanReading.has(id))) { const local = scanBlobs.has(id) || (await idbScan.get(id)); if (local || s.pages?.length) await readScan(id, false); }
+}
+window.addEventListener("online", () => setTimeout(processPendingScans, 2500));
+
+/* ---------- review: compare every scanned value with what the day already has ---------- */
+function matchTask(name) {
+  const k = fuzzyKey(name); if (!k) return null; const ts = allTasks().filter((t) => taskStatus(t) !== "archived");
+  return (ts.find((t) => fuzzyKey(t.name) === k) || ts.find((t) => fuzzyKey(t.name).startsWith(k) || k.startsWith(fuzzyKey(t.name))) || ts.find((t) => lev(fuzzyKey(t.name), k) <= 2))?.id || null;
+}
+function matchStaff(name) { if (!name) return ""; const s = staffByName(name); if (s) return s.name; const k = personKey(name); const al = staffList().find((x) => (x.aliases || []).some((a) => personKey(a) === k)); if (al) return al.name; const near = staffList().find((x) => lev(personKey(x.name), k) <= 1); return near ? near.name : name; }
+function buildReview(id) {
+  const s = DR.scans.get(id); const r = s.result || normScan({}); const items = []; let n = 0;
+  const push = (sec, kind, v, conf, page, raw = "") => items.push({ id: "i" + ++n, sec, kind, v, conf, page, raw, include: true, choice: "keep" });
+  const occ = (sec, r2, extra = {}) => { const tid = matchTask(r2.task); push(sec, "occ", { task: r2.task, tid, time: r2.time || "", end: r2.end || "", by: matchStaff(r2.by), note: r2.details || "", item: "", value: "", text: "", ...extra }, r2.conf, r2.page, r2.raw); };
+  for (const x of r.care) occ("Care & hygiene", x);
+  for (const [sl, label] of DR_SLOTS) { const x = r.nebulizer[sl]; if (x && (x.items || x.by)) { const tid = matchTask(`Nebulizer – ${label}`); const t = tid && drTask(tid); push("Nebulizer", "occ", { task: `Nebulizer – ${label}`, tid, time: t?.times?.[0] || "", end: "", by: matchStaff(x.by), item: x.items, note: "", value: "", text: "" }, x.conf, x.page); } }
+  for (const x of r.rt_feed) push("RT feed", "feed", { time: x.time, item: x.item, by: matchStaff(x.by) }, x.conf, x.page);
+  for (const [sl] of DR_SLOTS) { const x = r.medication[sl]; if (x && (x.items.length || x.by)) push("Medication", "meds", { slot: sl, items: x.items, by: matchStaff(x.by), ticked: null }, x.conf, x.page); }
+  for (const [sl] of DR_SLOTS) { const x = r.vitals[sl]; if (x && ["temp", "pulse", "spo2", "bp", "sugar"].some((k) => x[k])) push("Vitals", "vitals", { slot: sl, temp: x.temp, pulse: x.pulse, spo2: x.spo2, bp: x.bp, sugar: x.sugar, by: matchStaff(x.by) }, x.conf, x.page); }
+  for (const x of r.oral_feed) { const tid = matchTask(x.meal); const t = tid && drTask(tid); push("Oral feed", "occ", { task: x.meal, tid, time: x.time, end: "", by: "", item: t?.type === "text" ? "" : x.item, text: t?.type === "text" ? x.item : "", note: "", value: "" }, x.conf, x.page); }
+  for (const x of r.output) { const urine = /urine/i.test(x.type); const tid = matchTask(urine ? "Urine output" : "Stools / motion"); push("Output", "occ", { task: urine ? "Urine output" : x.type, tid, time: x.time, end: x.end, by: "", value: urine ? x.ml : "", item: "", text: "", note: "" }, x.conf, x.page); }
+  for (const x of r.doctor_comments) push("Doctor's comment", "doc", { name: x.name, time: x.time, comment: x.comment }, x.conf, x.page);
+  for (const x of r.physio) { const tid = matchTask(x.task); const t = tid && drTask(tid); occ("Physiotherapy & therapy", x, t?.type === "text" ? { text: x.details || x.raw, note: "" } : {}); }
+  for (const x of r.visitors) if (x.name) push("Visitors", "visit", { time: x.time, name: x.name, place: x.place, type: x.type }, x.conf, x.page, x.raw);
+  for (const [k] of NOTE_KEYS) if (r.notes[k]) push("Notes", "note", { key: k, text: r.notes[k] }, "high", null);
+  for (const t of r.unmatched) push("Unmatched", "text", { text: t, assign: "" }, "medium", null);
+  const noVisitors = r.visitors.length && !r.visitors.some((x) => x.name) ? r.visitors[0].raw || "No visitors" : "";
+  return { id, date: isISODate(s.result?.date) ? s.result.date : s.date, readDate: s.result?.date || "", items, noVisitors, page: 0, confirmDiscard: false };
+}
+function openReview(id) { const s = DR.scans.get(id); if (!s?.result) return; DR.review = buildReview(id); DR.scan = null; ROU.section = "daily"; render(); window.scrollTo(0, 0); }
+const same = (a, b) => normName(a) === normName(b);
+/** Field-by-field: "fill" = empty on the day, "conflict" = both have a value and they differ. */
+function cmpFields(scan, ex, keys) { const f = {}; for (const k of keys) { const a = scanStr(scan[k]), b = scanStr(ex?.[k]); f[k] = !a ? "ok" : !b ? "fill" : (k === "by" ? personKey(a) === personKey(b) : same(a, b)) ? "ok" : "conflict"; } return f; }
+function fieldsStatus(f) { const v = Object.values(f); return v.includes("conflict") ? "conflict" : v.includes("fill") ? "fill" : "same"; }
+function schedFor(t, time, occs) {
+  if (!t.times?.length || !time) return null; const m = minutesOf(time); let best = null, bd = 121;
+  for (const x of t.times) { const d = Math.abs(minutesOf(x) - m); const taken = occs.some((o) => o.sched === x && o.time !== time); if (d < bd && !taken) { bd = d; best = x; } }
+  return best;
+}
+const OCC_KEYS = ["time", "end", "by", "item", "value", "text", "note"];
+const VITAL_TASKS = [["temp", "Temperature"], ["pulse", "Pulse"], ["spo2", "SpO2"], ["bp", "BP"], ["sugar", "Sugar"]];
+function reviewStatus(it, date) {
+  const day = dayDoc(date); const v = it.v;
+  if (it.kind === "occ") {
+    if (!v.tid) return { st: "needs" }; if (v.tid === "__once") return { st: "new" };
+    const t = drTask(v.tid); if (!t) return { st: "needs" }; const occs = occsFor(day, t.id); const sched = schedFor(t, v.time, occs);
+    let ex = (sched && occs.find((o) => o.sched === sched)) || (v.time && occs.find((o) => o.time === v.time)) || null;
+    if (!ex && !t.times?.length && !t.target && t.type !== "multi" && !t.asNeeded) ex = occs[0] || null;   // once-a-day task: one record
+    if (!ex) return { st: "new", sched }; const f = cmpFields(v, ex, OCC_KEYS); return { st: fieldsStatus(f), f, ex, sched };
+  }
+  if (it.kind === "feed") { const ex = day.feed?.[feedKey(v.time)]; if (!ex || ex.deleted) return { st: "new" }; const f = cmpFields(v, ex, ["item", "by"]); return { st: fieldsStatus(f), f, ex }; }
+  if (it.kind === "meds") {
+    const ex = day.meds?.[v.slot]; if (!ex || ex.deleted) return { st: "new" };
+    const given = (ex.list || []).filter((m, i) => ex.given?.[i] !== false); const mine = medChoice(it, date).filter((m) => m.on).map((m) => m.name);
+    const f = { by: cmpFields(v, ex, ["by"]).by, items: mine.length && (mine.length !== given.length || mine.some((m) => !given.some((g) => same(g, m)))) ? "conflict" : "ok" };
+    return { st: fieldsStatus(f), f, ex };
+  }
+  if (it.kind === "vitals") {
+    const f = {}, ex = {}; let any = false;
+    for (const [k, name] of VITAL_TASKS) { if (!v[k]) continue; const tid = matchTask(name); const t = tid && drTask(tid); if (!t) continue; const os = occsFor(day, t.id);
+      const o = k === "sugar" ? os.find((x) => x.sched === (t.times?.[0] || null)) || os[0] : os.find((x) => x.slot === v.slot); ex[k] = o || null; if (o) any = true;
+      f[k] = !o ? "fill" : String(parseFloat(o.value)) === String(parseFloat(v[k])) || same(o.value, v[k]) ? "ok" : "conflict"; }
+    const exBy = Object.values(ex).find((o) => o?.by)?.by; f.by = !v.by ? "ok" : !exBy ? "fill" : personKey(exBy) === personKey(v.by) ? "ok" : "conflict";
+    if (!any) return { st: "new", ex }; return { st: fieldsStatus(f), f, ex };
+  }
+  if (it.kind === "doc") {
+    const list = Object.values(day.doctors || {}).filter((c) => !c.deleted);
+    const ex = list.find((c) => (c.comment && fuzzyKey(c.comment) === fuzzyKey(v.comment)) || (v.time && c.time === v.time && personKey(c.name) === personKey(v.name)));
+    if (!ex) return { st: "new" }; const f = cmpFields(v, ex, ["name", "time", "comment"]); return { st: fieldsStatus(f), f, ex };
+  }
+  if (it.kind === "note") { const ex = scanStr(day.notes?.[v.key]); if (!ex) return { st: "new" }; if (same(ex, v.text) || normName(ex).includes(normName(v.text))) return { st: "same", ex }; return { st: "conflict", ex, f: { text: "conflict" } }; }
+  if (it.kind === "visit") { const k = personKey(v.name); const ex = visitList().find((x) => x.date === date && (!v.time || !x.time || x.time === v.time) && (x.visitors || []).some((y) => personKey(y.name) === k)); return ex ? { st: "same", ex } : { st: "new" }; }
+  return { st: "text" };
+}
+function medChoice(it, date) {
+  const plan = planFor("meds", date)?.data?.slots?.[it.v.slot] || []; const scanned = it.v.items || [];
+  const match = (m) => plan.find((p) => fuzzyKey(p) === fuzzyKey(m) || lev(fuzzyKey(p), fuzzyKey(m)) <= 2) || null;
+  const out = plan.map((p) => ({ name: p, inPlan: true, written: scanned.some((m) => match(m) === p) }));
+  for (const m of scanned) if (!match(m) && !out.some((x) => same(x.name, m))) out.push({ name: m, inPlan: false, written: true });
+  const t = it.v.ticked || {}; return out.map((x) => ({ ...x, on: t[x.name] ?? x.written }));
+}
+function reviewNames(it) { const v = it.v; const names = []; if (v.by) names.push(["by", v.by]); if (it.kind === "doc" && v.name) names.push(["name", v.name]); return names.filter(([, n]) => !staffByName(n)); }
+
+/* --- review screen --- */
+function reviewView() {
+  const R = DR.review; const s = DR.scans.get(R.id); const pages = s?.pages || []; const local = scanBlobs.get(R.id) || [];
+  const urls = local.length ? (R.urls = R.urls || local.map((b) => URL.createObjectURL(b))) : pages.map((a) => "/_blob/" + a);   // this phone's copy first, else the stored pages
+  const st = R.items.map((it) => ({ it, s: reviewStatus(it, R.date) })); const count = (k) => st.filter((x) => x.s.st === k).length;
+  const pagesDates = [...new Set((s.result?.pages || []).map((p) => p.date).filter(Boolean))];
+  const order = [...drSections(allTasks()), "Unmatched"];
+  return `<div class="row-between"><button class="btn-link" data-act="scan-review-close">‹ Back</button><h1 style="flex:1">Check before saving</h1></div>
+  <div class="scan-review">
+    <div class="scan-pane" id="scan-pane">${urls.length ? `<div class="scan-carousel" id="scan-carousel">${urls.map((u, i) => `<button class="scan-page" data-act="scan-zoom" data-src="${esc(u)}" aria-label="Page ${i + 1}, open full screen"><img src="${esc(u)}" alt="Notebook page ${i + 1}"><span class="pill">Page ${i + 1} of ${urls.length}</span></button>`).join("")}</div>` : `<p class="small muted">The page images are not on this device.</p>`}</div>
+    <div class="scan-fields">
+      <section class="card"><div class="dates"><label class="field"><span>Save to date</span><input class="inp" type="date" id="scan-date" value="${esc(R.date)}"></label>
+        <div class="small muted" style="align-self:end">${R.readDate ? `Read as ${dmy(R.readDate)}` : "No date found on the pages"}${pagesDates.length > 1 ? `<br><b class="bad-ink">Pages show different dates: ${pagesDates.map(dmy).join(", ")}</b>` : ""}</div></div>
+        <p class="small"><b>${count("new") + count("fill")}</b> to add · <b>${count("same")}</b> already saved · <b class="${count("conflict") ? "bad-ink" : ""}">${count("conflict")}</b> differ${count("needs") ? ` · <b class="bad-ink">${count("needs")} need a match</b>` : ""}</p>
+        <p class="small muted">Values that differ keep what is saved unless you pick the scan. Nothing is saved until you press Save.</p></section>
+      ${order.map((sec) => { const xs = st.filter((x) => x.it.sec === sec); if (!xs.length && !(sec === "Visitors" && R.noVisitors)) return "";
+        return `<section class="card"><h2>${esc(sec === "Unmatched" ? "Unmatched text" : DR_LABEL[sec] || sec)}</h2>${sec === "Visitors" && R.noVisitors ? `<p class="small muted">Notebook says: “${esc(R.noVisitors)}”. No visitors will be added.</p>` : ""}${xs.map(({ it, s: rs }) => reviewItem(it, rs, R.date)).join("")}</section>`; }).join("")}
+      <div class="scan-actions"><button class="btn btn-primary" data-act="scan-save">Save to ${esc(dmy(R.date))}</button><button class="btn btn-danger" data-act="scan-discard">Discard</button></div>
+      ${R.confirmDiscard ? `<div class="note bad confirm"><span>Discard this scan? Its pages are deleted and nothing is saved.</span><button class="btn btn-danger" data-act="scan-discard-yes">Discard</button><button class="btn btn-ghost" data-act="scan-discard-no">Keep</button></div>` : ""}
+    </div>
+  </div>`;
+}
+const ST_LABEL = { new: ["New", "ok"], fill: ["Adds details", "ok"], same: ["Already saved", ""], conflict: ["Differs: choose", "bad"], needs: ["Needs a match", "bad"], text: ["Not placed", "warn"] };
+function reviewItem(it, rs, date) {
+  const v = it.v; const [lab, tone] = ST_LABEL[rs.st]; const f = rs.f || {};
+  const inp = (k, label, type = "text", extra = "") => `<label class="field ${f[k] === "conflict" ? "is-conflict" : ""}"><span>${label}</span><input class="inp" type="${type}" data-rv="${it.id}" data-k="${k}" value="${esc(v[k] || "")}" ${extra} autocomplete="off"></label>`;
+  const t = it.kind === "occ" && v.tid && v.tid !== "__once" ? drTask(v.tid) : null;
+  let title = "", body = "";
+  if (it.kind === "occ") {
+    title = t ? t.name : v.task || "Unknown task";
+    body = `${!t ? `<label class="field"><span>Written as “${esc(v.task)}”. Match to task</span><select class="inp" data-rv="${it.id}" data-k="tid"><option value="">— pick a task —</option><option value="__once" ${v.tid === "__once" ? "selected" : ""}>Add as a one-off for this day</option>${allTasks().filter((x) => taskStatus(x) !== "archived" && x.type !== "qty").map((x) => `<option value="${esc(x.id)}">${esc(x.name)} (${esc(x.section)})</option>`).join("")}</select></label>` : ""}
+      <div class="dates">${inp("time", "Time", "time")}${!t || ["range", "multi", "value"].includes(t.type) ? inp("end", "To", "time") : ""}</div>
+      ${t?.type === "item" || (!t && v.item) ? inp("item", "Item") : ""}${t?.type === "value" ? inp("value", `Value${t.unit ? ` (${esc(t.unit)})` : ""}`) : ""}${t?.type === "text" || v.text ? inp("text", "Text") : ""}
+      ${inp("by", "Done by", "text", 'list="dr-staff-list"')}${inp("note", "Details")}`;
+  } else if (it.kind === "feed") {
+    const plan = (planFor("feed", date)?.data?.items || []).find((x) => x.time === v.time)?.item;
+    title = `${fmtTime(v.time)} feed`;
+    body = `${inp("item", "Feed")}${plan && v.item && !same(plan, v.item) ? `<p class="small muted">Feed plan says “${esc(plan)}”. <button class="btn-link" data-act="scan-set" data-id="${it.id}" data-k="item" data-v="${esc(plan)}">Match to ${esc(plan)}</button></p>` : ""}${inp("by", "Given by", "text", 'list="dr-staff-list"')}`;
+  } else if (it.kind === "meds") {
+    title = `${slotName(v.slot)} medicines`;
+    body = `${medChoice(it, date).map((m) => `<label class="pick ${!m.inPlan ? "scan-flag" : !m.written ? "scan-miss" : ""}"><input type="checkbox" data-rmed="${it.id}" data-name="${esc(m.name)}" ${m.on ? "checked" : ""}> ${esc(m.name)}${!m.inPlan ? ` <span class="small bad-ink">Not in current plan: ${esc(m.name)} (${slotName(v.slot)})</span>` : !m.written ? ` <span class="small muted">Planned but not written</span>` : ""}</label>`).join("")}
+      ${inp("by", "S/N", "text", 'list="dr-staff-list"')}`;
+  } else if (it.kind === "vitals") {
+    title = `${slotName(v.slot)} vitals`;
+    body = `<div class="dr-vgrid">${inp("temp", "Temperature (°F)", "text", 'inputmode="decimal"')}${inp("pulse", "Pulse (/min)", "text", 'inputmode="numeric"')}${inp("spo2", "SpO2 (%)", "text", 'inputmode="numeric"')}${inp("bp", "BP (mmHg)")}${inp("sugar", "Sugar (mg/dl)", "text", 'inputmode="numeric"')}</div>${inp("by", "S/N", "text", 'list="dr-staff-list"')}`;
+  } else if (it.kind === "doc") { title = "Doctor's comment"; body = `<div class="dates">${inp("name", "Doctor", "text", 'list="dr-staff-list"')}${inp("time", "Time", "time")}</div>${inp("comment", "Comment")}`; }
+  else if (it.kind === "note") { title = (NOTE_KEYS.find(([k]) => k === v.key) || [, ""])[1]; body = inp("text", "Text"); }
+  else if (it.kind === "visit") { title = "Visitor"; body = `<div class="dates">${inp("time", "Time", "time")}${inp("name", "Name")}</div>${inp("place", "Place")}<p class="small muted">Added to Visitors, tagged “From notebook scan”.</p>`; }
+  else { title = "Written on the page"; body = `${inp("text", "Text")}<label class="field"><span>Put it in</span><select class="inp" data-rv="${it.id}" data-k="assign"><option value="">Leave out</option>${NOTE_KEYS.map(([k, l]) => `<option value="${k}" ${v.assign === k ? "selected" : ""}>${l}</option>`).join("")}<option value="__once" ${v.assign === "__once" ? "selected" : ""}>A one-off note for this day</option></select></label>`; }
+  const exText = rs.st === "conflict" || rs.st === "same" ? reviewExisting(it, rs) : "";
+  const names = reviewNames(it);
+  return `<div class="scan-item conf-${it.conf} st-${rs.st}" data-item="${it.id}" data-page="${it.page || ""}">
+    <div class="row-between"><b>${esc(title)}</b><span class="scan-pills">${it.conf !== "high" ? `<span class="pill ${it.conf === "low" ? "bad" : "warn"}">${it.conf === "low" ? "Please check" : "Check"}</span>` : ""}<span class="pill ${tone}">${lab}</span></span></div>
+    ${it.raw && it.raw !== v.task ? `<div class="small muted">Written: “${esc(it.raw)}”</div>` : ""}
+    ${body}
+    ${names.map(([k, n]) => { const near = staffList().find((x) => lev(personKey(x.name), personKey(n)) <= 2); return `<div class="note warn small scan-newname">“${esc(n)}” isn't in the staff list. <button class="btn-link" data-act="scan-add-staff" data-name="${esc(n)}">Add to list</button>
+      <label>Match to <select data-rmatch="${it.id}" data-k="${k}"><option value="">—</option>${staffList().map((x) => `<option value="${esc(x.name)}" ${near?.id === x.id ? "data-near" : ""}>${esc(x.name)}</option>`).join("")}</select></label></div>`; }).join("")}
+    ${exText}
+    ${rs.st === "conflict" ? `<div class="seg" role="group" aria-label="Which value to keep"><button data-act="scan-choice" data-id="${it.id}" data-v="keep" aria-pressed="${it.choice === "keep"}">Keep saved</button><button data-act="scan-choice" data-id="${it.id}" data-v="scan" aria-pressed="${it.choice === "scan"}">Use scan</button>${it.kind === "note" ? `<button data-act="scan-choice" data-id="${it.id}" data-v="both" aria-pressed="${it.choice === "both"}">Keep both</button>` : ""}</div>` : ""}
+    ${["new", "fill", "conflict", "needs", "text"].includes(rs.st) && it.kind !== "text" ? `<label class="pick small"><input type="checkbox" data-rinc="${it.id}" ${it.include ? "checked" : ""}> Include this</label>` : ""}
+  </div>`;
+}
+function reviewExisting(it, rs) {
+  const ex = rs.ex; if (!ex) return "";
+  const show = (o, keys) => keys.map((k) => (o[k] ? `${k === "time" || k === "end" || k === "given_at" ? fmtTime(o[k]) : o[k]}` : "")).filter(Boolean).join(" · ");
+  let txt = "";
+  if (it.kind === "occ") txt = show(ex, ["time", "end", "item", "value", "text", "by", "note"]);
+  else if (it.kind === "feed") txt = show(ex, ["item", "by", "given_at"]);
+  else if (it.kind === "meds") txt = `${(ex.list || []).filter((m, i) => ex.given?.[i] !== false).join(", ")} · ${ex.by || ""}`;
+  else if (it.kind === "vitals") txt = VITAL_TASKS.filter(([k]) => ex[k]).map(([k, n]) => `${VITAL_SHORT[n] || n} ${ex[k].value}`).join(" · ") + (Object.values(ex).find((o) => o?.by)?.by ? ` · ${Object.values(ex).find((o) => o?.by).by}` : "");
+  else if (it.kind === "doc") txt = show(ex, ["name", "time", "comment"]);
+  else if (it.kind === "note") txt = ex;
+  else if (it.kind === "visit") txt = `${fmtTime(ex.time)} · ${(ex.visitors || []).map(visitorLabel).join(", ")}`;
+  const manual = it.kind === "note" ? !dayDoc(DR.review.date).notes_src?.[it.v.key] : it.kind === "vitals" ? Object.values(ex).some((o) => o && !o.src) : !ex.src;
+  return `<div class="small scan-saved">${rs.st === "same" ? "Already saved:" : `Saved${manual ? " (entered by hand)" : " (from an earlier scan)"}:`} ${esc(txt)}</div>`;
+}
+/* --- save: put everything in place --- */
+async function saveReview() {
+  const R = DR.review; const date = R.date; const scanId = R.id; const now = nowISO();
+  const patch = { occ: {}, feed: {}, meds: {}, doctors: {}, notes: {}, notes_src: {} }; let added = 0, kept = 0, sameN = 0; const later = [];
+  const pick = (f, k, a, b, choice) => (f[k] === "fill" ? a : f[k] === "conflict" ? (choice === "scan" ? a : b) : b || a);
+  for (const it of R.items) {
+    const rs = reviewStatus(it, date); const v = it.v;
+    if (rs.st === "same") { sameN++; continue; }
+    if (it.kind === "text") { if (v.assign && v.text.trim()) later.push(it); continue; }
+    if (!it.include || rs.st === "needs") continue;
+    if (rs.st === "conflict" && it.choice === "keep" && !Object.values(rs.f || {}).includes("fill")) { kept++; continue; }
+    if (rs.st === "conflict" && it.choice === "keep") kept++;
+    if (it.kind === "occ") {
+      if (v.tid === "__once") { later.push(it); continue; }
+      const t = drTask(v.tid); const base = { task: t.id, sched: rs.sched || rs.ex?.sched || null, slot: null, deleted: false, done: true, at: now, who: S.uid };
+      if (rs.st === "new") patch.occ[drId("o")] = { ...base, time: v.time, end: v.end, by: v.by, item: v.item, value: v.value, text: v.text, note: v.note, src: scanId };
+      else { const m = {}; for (const k of OCC_KEYS) m[k] = pick(rs.f, k, scanStr(v[k]), rs.ex[k] || "", it.choice); patch.occ[rs.ex.id] = { ...m, sched: base.sched, src: it.choice === "scan" ? scanId : rs.ex.src || null }; }
+    } else if (it.kind === "feed") {
+      const ex = rs.ex || {}; const f = rs.f || { item: "fill", by: "fill" };
+      patch.feed[feedKey(v.time)] = { time: v.time, item: pick(f, "item", v.item, ex.item || "", it.choice), by: pick(f, "by", v.by, ex.by || "", it.choice), given_at: ex.given_at || v.time, note: ex.note || "", done: true, deleted: false, at: now, src: rs.st === "new" || it.choice === "scan" ? scanId : ex.src || null };
+    } else if (it.kind === "meds") {
+      const ex = rs.ex; const ch = medChoice(it, date); const useScan = rs.st === "new" || it.choice === "scan";
+      if (useScan) patch.meds[v.slot] = { list: ch.filter((m) => m.inPlan || m.on).map((m) => m.name), given: ch.filter((m) => m.inPlan || m.on).map((m) => m.on), by: v.by || ex?.by || "", time: ex?.time || "", done: true, deleted: false, at: now, src: scanId };
+      else if (rs.f.by === "fill") patch.meds[v.slot] = { by: v.by };
+    } else if (it.kind === "vitals") {
+      for (const [k, name] of VITAL_TASKS) {
+        if (!v[k] || (rs.f?.[k] === "conflict" && it.choice !== "scan") || rs.f?.[k] === "ok") continue;
+        const tid = matchTask(name); const t = tid && drTask(tid); if (!t) continue; const o = rs.ex?.[k];
+        const by = rs.f?.by === "conflict" && it.choice !== "scan" ? o?.by || v.by : v.by || o?.by || "";
+        patch.occ[o?.id || drId("o")] = { task: t.id, sched: k === "sugar" ? t.times?.[0] || null : null, slot: k === "sugar" ? null : v.slot, time: o?.time || "", end: "", value: k === "bp" ? v[k].replace(/\s+/g, "") : v[k], item: "", text: "", by, note: o?.note || "", done: true, deleted: false, at: now, who: S.uid, src: scanId };
+      }
+    } else if (it.kind === "doc") {
+      const ex = rs.ex; const key = ex ? Object.entries(dayDoc(date).doctors || {}).find(([, c]) => c === ex)?.[0] : drId("c");
+      patch.doctors[key || drId("c")] = ex ? { name: pick(rs.f, "name", v.name, ex.name, it.choice), time: pick(rs.f, "time", v.time, ex.time, it.choice), comment: pick(rs.f, "comment", v.comment, ex.comment, it.choice), src: it.choice === "scan" ? scanId : ex.src || null }
+        : { name: v.name, time: v.time, comment: v.comment, by: "", deleted: false, at: now, src: scanId };
+    } else if (it.kind === "note") {
+      const ex = scanStr(dayDoc(date).notes?.[v.key]); const text = rs.st === "new" ? v.text : it.choice === "both" ? `${ex}; ${v.text}` : it.choice === "scan" ? v.text : ex;
+      if (text !== ex) { patch.notes[v.key] = text; patch.notes_src[v.key] = scanId; }
+    } else if (it.kind === "visit") later.push(it);
+    added++;
+  }
+  for (const it of later.filter((x) => x.kind === "text")) {
+    const v = it.v; if (v.assign === "__once") continue;
+    const ex = scanStr(patch.notes[v.assign] ?? dayDoc(date).notes?.[v.assign]); patch.notes[v.assign] = ex ? `${ex}; ${v.text.trim()}` : v.text.trim(); patch.notes_src[v.assign] = scanId; added++;
+  }
+  for (const k of Object.keys(patch)) if (!Object.keys(patch[k]).length) delete patch[k];
+  try {
+    for (const it of later) {
+      if ((it.kind === "occ" && it.v.tid === "__once") || (it.kind === "text" && it.v.assign === "__once")) {
+        const isText = it.kind === "text"; const tid = drId("t");
+        await rouWrite("set", `${DR_TASKS}/${tid}`, { section: isText ? "Notes" : it.sec, name: isText ? "Note" : it.v.task || "Task", type: isText ? "text" : "check", unit: "", kind: "once", days: [], date, times: [], slots: [], target: 0, asNeeded: false, details: "", doer: "", reminder: false,
+          order: Math.max(0, ...allTasks().map((t) => t.order || 0)) + 10, from: date, pauses: [], paused_from: null, archived_from: null, created_at: now, created_by: S.uid, src: scanId });
+        (patch.occ = patch.occ || {})[drId("o")] = { task: tid, sched: null, slot: null, time: isText ? "" : it.v.time, end: isText ? "" : it.v.end, value: "", item: "", text: isText ? it.v.text : "", by: isText ? "" : it.v.by, note: isText ? "" : it.v.note, done: true, deleted: false, at: now, who: S.uid, src: scanId };
+        added++;
+      }
+    }
+    if (Object.keys(patch).length) await dayWrite(date, patch);
+    for (const it of later.filter((x) => x.kind === "visit")) {
+      const v = it.v; let p = findPerson(v.name);
+      if (!p) { const pid = drId("p"); const doc = { title: "", name: v.name, place: v.place, relation: "", phone: "", archived: false, quick: null, created_at: now, created_by: S.uid }; await rouWrite("set", `${ROU_PEOPLE}/${pid}`, doc); p = { id: pid, ...doc }; }
+      await rouWrite("set", `${ROU_VISITS}/${drId("v")}`, { date, time: v.time || "", end_time: null, type: v.type || "in_person", visitors: [{ person_id: p.id, title: p.title || "", name: p.name, place: v.place || p.place || "" }], note: "From notebook scan", review: false, src_scan: scanId, seq: Date.now(), created_at: now, created_by: S.uid });
+    }
+    const st = DR.scans.get(scanId) || {};
+    await rouWrite("update", `${DR_SCANS}/${scanId}`, { status: "saved", saved_at: now, saved_date: date, saved_counts: { added, same: sameN, kept }, saves: (st.saves || 0) + 1 });
+    if (ROU.settings.scan_ticks_update && date === todayISO()) {
+      const s = updSlots(date).find((x) => fuzzyKey(x.name) === fuzzyKey("Daily Routine") && x.state !== "done" && x.state !== "overdue");
+      if (s) await dayWrite(date, { updates: { [s.key]: { done: true, time: nowHM(), by: drMe() || "Notebook scan", at: now } } });
+    }
+    writeAudit("routine.scan_save", null, scanId, null, { date, added, same: sameN, kept });
+  } catch (e) { flash(dbErrorText(e).replace("save this bill", "save the scan")); return; }
+  (R.urls || []).forEach((u) => URL.revokeObjectURL(u));
+  DR.review = null; DR.date = date === todayISO() ? null : date; DR.view = "day";
+  flash(`Saved the scan to ${dmy(date)}: ${added} added, ${sameN} already there${kept ? `, ${kept} kept as entered` : ""}.`);
+  render(); window.scrollTo(0, 0);
+}
+/* --- scan history strip on each day --- */
+function scansStrip(d, ro) {
+  const list = scansFor(d); if (!list.length) return "";
+  return `<section class="card"><h2>Notebook scans</h2>${list.map((s) => `<div class="scan-row" data-scan="${esc(s.id)}">
+    <div><b>📷 ${s.created_at ? new Date(s.created_at).toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" }).toUpperCase() : ""}</b> <span class="small muted">${s.page_count || (s.pages || []).length} page${(s.page_count || 0) === 1 ? "" : "s"} · ${(s.source || "photos").split("+").map((x) => ({ pdf: "PDF", camera: "camera", photos: "photos" })[x] || x).join(" + ")}${s.by ? " · " + esc(s.by) : ""}${s.saved_counts ? ` · ${s.saved_counts.added} added` : ""}</span>
+      <span class="pill ${s.status === "review" ? "warn" : s.status === "failed" ? "bad" : s.status === "saved" ? "ok" : ""}">${SCAN_STATUS[s.status] || s.status}</span>${s.error ? `<div class="small bad-ink">${esc(s.error)}</div>` : ""}</div>
+    ${!ro ? `<div class="dr-mact">${s.result ? `<button class="btn-link" data-act="scan-open" data-id="${esc(s.id)}">${s.status === "review" ? "Review" : "Open"}</button>` : ""}
+      ${s.status !== "reading" ? `<button class="btn-link" data-act="scan-reread" data-id="${esc(s.id)}">${s.status === "pending" ? "Read now" : "Re-read"}</button>` : ""}
+      <button class="btn-link danger-text" data-act="scan-del" data-id="${esc(s.id)}">Delete</button></div>` : ""}
+    ${DR.confirm === "scan:" + s.id ? `<div class="note bad confirm"><span>Delete this scan?${s.status === "saved" ? " Values already saved stay unless you remove them too." : ""}</span><button class="btn btn-danger" data-act="scan-del-yes" data-id="${esc(s.id)}" data-remove="0">Delete scan</button>${s.status === "saved" ? `<button class="btn btn-danger" data-act="scan-del-yes" data-id="${esc(s.id)}" data-remove="1">Delete and remove its values</button>` : ""}<button class="btn btn-ghost" data-act="dr-confirm-no">Keep</button></div>` : ""}
+  </div>`).join("")}</section>`;
+}
+async function deleteScan(id, removeValues) {
+  const s = DR.scans.get(id); DR.confirm = null;
+  try {
+    if (removeValues) {
+      const d = s.saved_date || s.date; const day = dayDoc(d); const patch = {};
+      for (const [k, o] of Object.entries(day.occ || {})) if (o.src === id && !o.deleted) (patch.occ = patch.occ || {})[k] = { deleted: true };
+      for (const [k, r] of Object.entries(day.feed || {})) if (r.src === id && !r.deleted) (patch.feed = patch.feed || {})[k] = { deleted: true };
+      for (const [k, r] of Object.entries(day.meds || {})) if (r.src === id && !r.deleted) (patch.meds = patch.meds || {})[k] = { deleted: true };
+      for (const [k, c] of Object.entries(day.doctors || {})) if (c.src === id && !c.deleted) (patch.doctors = patch.doctors || {})[k] = { deleted: true };
+      for (const [k, src] of Object.entries(day.notes_src || {})) if (src === id) { (patch.notes = patch.notes || {})[k] = ""; (patch.notes_src = patch.notes_src || {})[k] = null; }
+      if (Object.keys(patch).length) await dayWrite(d, patch);
+      for (const [vid, v] of ROU.visits) if (v.src_scan === id) await rouWrite("delete", `${ROU_VISITS}/${vid}`);
+      for (const [tid, t] of DR.tasks) if (t.src === id) await rouWrite("delete", `${DR_TASKS}/${tid}`);
+    }
+    await rouWrite("delete", `${DR_SCANS}/${id}`); await idbScan.del(id); scanBlobs.delete(id);
+    if (S.caps.assets) for (const a of [...(s.pages || []), ...(s.pdfs || [])]) S.caps.assets.delete(a).catch(() => {});
+    writeAudit("routine.scan_delete", null, id, { date: s.saved_date || s.date }, { removed_values: !!removeValues });
+    flash(removeValues ? "Scan and its values removed." : "Scan deleted. Saved values stay.");
+  } catch (e) { flash(dbErrorText(e)); }
+  render();
+}
+/* --- settings (Manage → Scanning) --- */
+function scanSettingsView() {
+  const ed = canRouManage(); const st = ROU.settings; const lim = DR.scanLimits;
+  return `<section class="card"><h2>Scan notebook</h2>
+    <p class="small muted">Reading uses Claude through claude.ai, the same way bills are read, so there is no API key to store. Page images are sent only when someone presses Read.</p>
+    ${lim === false ? `<div class="note warn small">Reading photos with Claude isn't available in this view.</div>` : ""}
+    <label class="pick"><input type="checkbox" data-scanset="scan_enabled" ${st.scan_enabled !== false ? "checked" : ""} ${ed ? "" : "disabled"}> “Scan notebook” is on</label>
+    <label class="field"><span>Model</span><select class="inp" data-scanset="scan_model" ${ed ? "" : "disabled"}><option value="default" ${st.scan_model !== "complex" ? "selected" : ""}>Balanced (faster)</option><option value="complex" ${st.scan_model === "complex" ? "selected" : ""}>Most capable (better with hard handwriting, slower)</option></select></label>
+    <label class="pick"><input type="checkbox" data-scanset="scan_ticks_update" ${st.scan_ticks_update ? "checked" : ""} ${ed ? "" : "disabled"}> Tick “Daily Routine” in the updates checklist when a scan is saved before it is due</label>
+    ${ed ? "" : `<p class="small muted">Only the owner or an admin can change these.</p>`}
+    <p class="small muted">${scanPendingCount()} scan${scanPendingCount() === 1 ? "" : "s"} waiting to be read · ${scanReviewCount()} waiting for review.</p></section>`;
+}
+async function scanPdfAppendix(doc, d) {
+  for (const s of scansFor(d)) {
+    let blobs = []; try { blobs = await scanPageBlobs(s.id); } catch { continue; }
+    for (const [i, b] of blobs.entries()) {
+      try {
+        const url = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(b); });
+        const img = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = url; });
+        doc.addPage(); const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(); doc.setFontSize(10); doc.setTextColor(90);
+        doc.text(`Notebook scan ${s.created_at ? new Date(s.created_at).toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" }) : ""} – page ${i + 1} of ${blobs.length}`, 40, 30);
+        const k = Math.min((W - 80) / img.width, (H - 70) / img.height); doc.addImage(url, "JPEG", 40, 42, img.width * k, img.height * k);
+      } catch {}
+    }
+  }
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click", async (e) => {
+  const t = e.target.closest("[data-act]"); if (!t || !t.dataset.act.startsWith("scan-")) return;
+  const a = t.dataset.act; const sc = DR.scan; const R = DR.review; const id = t.dataset.id;
+  switch (a) {
+    case "scan-open-capture": openScan(); break;
+    case "scan-cancel": (sc?.pages || []).forEach((p) => URL.revokeObjectURL(p.url)); DR.scan = null; render(); break;
+    case "scan-cam": sc.camera = true; sc.retake = null; $("#scan-cam").click(); break;
+    case "scan-cam-done": sc.camera = false; render(); break;
+    case "scan-photos": $("#scan-photos").click(); break;
+    case "scan-pdf": $("#scan-pdf").click(); break;
+    case "scan-view": openViewer(sc.pages[Number(t.dataset.i)].url); break;
+    case "scan-move": { const i = Number(t.dataset.i), j = i + Number(t.dataset.n); [sc.pages[i], sc.pages[j]] = [sc.pages[j], sc.pages[i]]; render(); break; }
+    case "scan-del-page": { const [p] = sc.pages.splice(Number(t.dataset.i), 1); URL.revokeObjectURL(p.url); render(); break; }
+    case "scan-retake": sc.retake = Number(t.dataset.i); $("#scan-cam").click(); break;
+    case "scan-read": t.disabled = true; startScanRead(); break;
+    case "scan-open": openReview(id); break;
+    case "scan-reread": readScan(id, true); break;
+    case "scan-del": DR.confirm = "scan:" + id; render(); break;
+    case "scan-del-yes": deleteScan(id, t.dataset.remove === "1"); break;
+    case "scan-review-close": (R?.urls || []).forEach((u) => URL.revokeObjectURL(u)); DR.review = null; render(); break;
+    case "scan-zoom": openViewer(t.dataset.src); break;
+    case "scan-choice": R.items.find((x) => x.id === id).choice = t.dataset.v; render(); break;
+    case "scan-set": { const it = R.items.find((x) => x.id === id); it.v[t.dataset.k] = t.dataset.v; render(); break; }
+    case "scan-add-staff": { const n = t.dataset.name; const role = R.items.some((it) => it.kind === "doc" && it.v.name === n) ? "doctor" : "family"; await ensureStaff(n, role); flash(`${n} added to the staff list.`); render(); break; }
+    case "scan-save": t.disabled = true; saveReview(); break;
+    case "scan-discard": R.confirmDiscard = true; render(); break;
+    case "scan-discard-no": R.confirmDiscard = false; render(); break;
+    case "scan-discard-yes": { const sid = R.id; (R.urls || []).forEach((u) => URL.revokeObjectURL(u)); DR.review = null; await deleteScan(sid, false); break; }
+  }
+});
+document.addEventListener("input", (e) => {
+  const t = e.target; const R = DR.review;
+  if (R && t.dataset.rv) { const it = R.items.find((x) => x.id === t.dataset.rv); if (it) it.v[t.dataset.k] = t.value; }
+});
+document.addEventListener("focusin", (e) => {   // tapping a field shows the page it was read from
+  const item = e.target.closest?.(".scan-item"); const car = $("#scan-carousel"); if (!item || !car) return;
+  const p = Number(item.dataset.page); if (p > 0 && car.children[p - 1]) car.scrollTo({ left: car.children[p - 1].offsetLeft - car.offsetLeft, behavior: "smooth" });
+});
+document.addEventListener("change", async (e) => {
+  const t = e.target; const R = DR.review;
+  if (R && t.dataset.rv) { const it = R.items.find((x) => x.id === t.dataset.rv); if (it) { it.v[t.dataset.k] = t.value; render(); } return; }
+  if (R && t.dataset.rinc) { R.items.find((x) => x.id === t.dataset.rinc).include = t.checked; return; }
+  if (R && t.dataset.rmed) { const it = R.items.find((x) => x.id === t.dataset.rmed); it.v.ticked = { ...(it.v.ticked || {}), [t.dataset.name]: t.checked }; render(); return; }
+  if (R && t.dataset.rmatch) {
+    if (!t.value) return; const it = R.items.find((x) => x.id === t.dataset.rmatch); const raw = it.v[t.dataset.k]; it.v[t.dataset.k] = t.value;
+    for (const o of R.items) for (const k of ["by", "name"]) if (o.v[k] && personKey(o.v[k]) === personKey(raw)) o.v[k] = t.value;   // same handwriting elsewhere on the page
+    const st = staffByName(t.value); if (st && canRouEdit()) rouWrite("update", `${DR_STAFF}/${st.id}`, { aliases: [...new Set([...(st.aliases || []), raw])] }).catch(() => {});   // next scans match it automatically
+    render(); return;
+  }
+  if (R && t.id === "scan-date") { if (isISODate(t.value)) { R.date = t.value; render(); } return; }
+  if (t.dataset.scanset) {
+    const k = t.dataset.scanset; const val = t.type === "checkbox" ? t.checked : t.value;
+    try { await rouWrite("set", ROU_SETTINGS, { ...ROU.settings, [k]: val }); } catch (x) { flash(dbErrorText(x)); }
+    render(); return;
+  }
+  if (["scan-cam", "scan-photos", "scan-pdf"].includes(t.id)) {
+    const files = [...(t.files || [])]; t.value = ""; if (!files.length || !DR.scan) return;
+    const sc = DR.scan;
+    if (t.id === "scan-cam" && sc.retake != null) { try { const b = await prepPage(files[0]); const old = sc.pages[sc.retake]; URL.revokeObjectURL(old.url); sc.pages[sc.retake] = { blob: b, url: URL.createObjectURL(b), from: "photo" }; } catch (x) { sc.err = x.message; } sc.retake = null; render(); return; }
+    addScanFiles(files, t.id === "scan-pdf" ? "pdf" : t.id === "scan-cam" ? "camera" : "photos");
   }
 });
 

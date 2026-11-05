@@ -63,6 +63,7 @@
     sample: Object.assign(async () => ({ text: "x", truncated: false }), {
       limits: async () => ({ maxPromptBytes: 262144, images: { maxCount: 5, maxInputBytes: 20e6, mediaTypes: ["image/jpeg", "image/png"] } }),
       json: async (prompt, opts) => { log.push(["sample", prompt.length, opts.images.length, opts.images[0].type, opts.images[0].size]); await new Promise((r) => setTimeout(r, 300));
+        if (window.__sampleJson) return window.__sampleJson(prompt, opts);   // tests can supply their own reading
         if (window.__failSample) throw { code: "refused", message: "x" };
         return { is_bill: true, bill_no: " 4471 ", bill_date: "2026-11-02", items: [{ serial_no: 1, item_name: "Dolo 650 Tab 15's", qty: 2, rate: 30.5, total_amount: 61 }, { serial_no: 2, item_name: "Benadryl Syrup 100ml", qty: 1, rate: 118, total_amount: 118 }, { serial_no: 3, item_name: "Volini Gel 30g", qty: 2, rate: 145, total_amount: 300 }] }; },
     }),
